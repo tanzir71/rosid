@@ -55,6 +55,7 @@ dependencies:
   intl: ^0.20.2
   pdf: ^3.13.0
   uuid: ^4.6.0
+  unorm_dart: ^0.3.2
 
 dev_dependencies:
   flutter_test:
@@ -88,6 +89,7 @@ flutter:
   assets:
     - assets/tessdata/
     - assets/fixtures/
+    - assets/tessdata_config.json
 
   # To add assets to your application, add an assets section, like this:
   # assets:

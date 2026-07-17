@@ -16,6 +16,18 @@ class Scans extends Table {
   Set<Column<Object>> get primaryKey => {id};
 }
 
+class ScanPages extends Table {
+  TextColumn get id => text()();
+  TextColumn get scanId =>
+      text().references(Scans, #id, onDelete: KeyAction.cascade)();
+  TextColumn get imagePath => text()();
+  TextColumn get processedPath => text().nullable()();
+  IntColumn get pageIndex => integer()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
 class Categories extends Table {
   TextColumn get id => text()();
   TextColumn get nameEn => text()();

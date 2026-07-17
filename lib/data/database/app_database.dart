@@ -5,7 +5,16 @@ import 'package:rosid/data/database/tables.dart';
 part 'app_database.g.dart';
 
 @DriftDatabase(
-  tables: [Scans, Receipts, LineItems, Documents, Categories, Tags, ScanTags],
+  tables: [
+    Scans,
+    ScanPages,
+    Receipts,
+    LineItems,
+    Documents,
+    Categories,
+    Tags,
+    ScanTags,
+  ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(driftDatabase(name: 'rosid'));

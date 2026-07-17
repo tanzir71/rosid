@@ -622,6 +622,378 @@ class ScansCompanion extends UpdateCompanion<Scan> {
   }
 }
 
+class $ScanPagesTable extends ScanPages
+    with TableInfo<$ScanPagesTable, ScanPage> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ScanPagesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _scanIdMeta = const VerificationMeta('scanId');
+  @override
+  late final GeneratedColumn<String> scanId = GeneratedColumn<String>(
+    'scan_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES scans (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _imagePathMeta = const VerificationMeta(
+    'imagePath',
+  );
+  @override
+  late final GeneratedColumn<String> imagePath = GeneratedColumn<String>(
+    'image_path',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _processedPathMeta = const VerificationMeta(
+    'processedPath',
+  );
+  @override
+  late final GeneratedColumn<String> processedPath = GeneratedColumn<String>(
+    'processed_path',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _pageIndexMeta = const VerificationMeta(
+    'pageIndex',
+  );
+  @override
+  late final GeneratedColumn<int> pageIndex = GeneratedColumn<int>(
+    'page_index',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    scanId,
+    imagePath,
+    processedPath,
+    pageIndex,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'scan_pages';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ScanPage> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('scan_id')) {
+      context.handle(
+        _scanIdMeta,
+        scanId.isAcceptableOrUnknown(data['scan_id']!, _scanIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_scanIdMeta);
+    }
+    if (data.containsKey('image_path')) {
+      context.handle(
+        _imagePathMeta,
+        imagePath.isAcceptableOrUnknown(data['image_path']!, _imagePathMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_imagePathMeta);
+    }
+    if (data.containsKey('processed_path')) {
+      context.handle(
+        _processedPathMeta,
+        processedPath.isAcceptableOrUnknown(
+          data['processed_path']!,
+          _processedPathMeta,
+        ),
+      );
+    }
+    if (data.containsKey('page_index')) {
+      context.handle(
+        _pageIndexMeta,
+        pageIndex.isAcceptableOrUnknown(data['page_index']!, _pageIndexMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_pageIndexMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ScanPage map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ScanPage(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      scanId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}scan_id'],
+      )!,
+      imagePath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}image_path'],
+      )!,
+      processedPath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}processed_path'],
+      ),
+      pageIndex: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}page_index'],
+      )!,
+    );
+  }
+
+  @override
+  $ScanPagesTable createAlias(String alias) {
+    return $ScanPagesTable(attachedDatabase, alias);
+  }
+}
+
+class ScanPage extends DataClass implements Insertable<ScanPage> {
+  final String id;
+  final String scanId;
+  final String imagePath;
+  final String? processedPath;
+  final int pageIndex;
+  const ScanPage({
+    required this.id,
+    required this.scanId,
+    required this.imagePath,
+    this.processedPath,
+    required this.pageIndex,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['scan_id'] = Variable<String>(scanId);
+    map['image_path'] = Variable<String>(imagePath);
+    if (!nullToAbsent || processedPath != null) {
+      map['processed_path'] = Variable<String>(processedPath);
+    }
+    map['page_index'] = Variable<int>(pageIndex);
+    return map;
+  }
+
+  ScanPagesCompanion toCompanion(bool nullToAbsent) {
+    return ScanPagesCompanion(
+      id: Value(id),
+      scanId: Value(scanId),
+      imagePath: Value(imagePath),
+      processedPath: processedPath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(processedPath),
+      pageIndex: Value(pageIndex),
+    );
+  }
+
+  factory ScanPage.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ScanPage(
+      id: serializer.fromJson<String>(json['id']),
+      scanId: serializer.fromJson<String>(json['scanId']),
+      imagePath: serializer.fromJson<String>(json['imagePath']),
+      processedPath: serializer.fromJson<String?>(json['processedPath']),
+      pageIndex: serializer.fromJson<int>(json['pageIndex']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'scanId': serializer.toJson<String>(scanId),
+      'imagePath': serializer.toJson<String>(imagePath),
+      'processedPath': serializer.toJson<String?>(processedPath),
+      'pageIndex': serializer.toJson<int>(pageIndex),
+    };
+  }
+
+  ScanPage copyWith({
+    String? id,
+    String? scanId,
+    String? imagePath,
+    Value<String?> processedPath = const Value.absent(),
+    int? pageIndex,
+  }) => ScanPage(
+    id: id ?? this.id,
+    scanId: scanId ?? this.scanId,
+    imagePath: imagePath ?? this.imagePath,
+    processedPath: processedPath.present
+        ? processedPath.value
+        : this.processedPath,
+    pageIndex: pageIndex ?? this.pageIndex,
+  );
+  ScanPage copyWithCompanion(ScanPagesCompanion data) {
+    return ScanPage(
+      id: data.id.present ? data.id.value : this.id,
+      scanId: data.scanId.present ? data.scanId.value : this.scanId,
+      imagePath: data.imagePath.present ? data.imagePath.value : this.imagePath,
+      processedPath: data.processedPath.present
+          ? data.processedPath.value
+          : this.processedPath,
+      pageIndex: data.pageIndex.present ? data.pageIndex.value : this.pageIndex,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ScanPage(')
+          ..write('id: $id, ')
+          ..write('scanId: $scanId, ')
+          ..write('imagePath: $imagePath, ')
+          ..write('processedPath: $processedPath, ')
+          ..write('pageIndex: $pageIndex')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, scanId, imagePath, processedPath, pageIndex);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ScanPage &&
+          other.id == this.id &&
+          other.scanId == this.scanId &&
+          other.imagePath == this.imagePath &&
+          other.processedPath == this.processedPath &&
+          other.pageIndex == this.pageIndex);
+}
+
+class ScanPagesCompanion extends UpdateCompanion<ScanPage> {
+  final Value<String> id;
+  final Value<String> scanId;
+  final Value<String> imagePath;
+  final Value<String?> processedPath;
+  final Value<int> pageIndex;
+  final Value<int> rowid;
+  const ScanPagesCompanion({
+    this.id = const Value.absent(),
+    this.scanId = const Value.absent(),
+    this.imagePath = const Value.absent(),
+    this.processedPath = const Value.absent(),
+    this.pageIndex = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ScanPagesCompanion.insert({
+    required String id,
+    required String scanId,
+    required String imagePath,
+    this.processedPath = const Value.absent(),
+    required int pageIndex,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       scanId = Value(scanId),
+       imagePath = Value(imagePath),
+       pageIndex = Value(pageIndex);
+  static Insertable<ScanPage> custom({
+    Expression<String>? id,
+    Expression<String>? scanId,
+    Expression<String>? imagePath,
+    Expression<String>? processedPath,
+    Expression<int>? pageIndex,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (scanId != null) 'scan_id': scanId,
+      if (imagePath != null) 'image_path': imagePath,
+      if (processedPath != null) 'processed_path': processedPath,
+      if (pageIndex != null) 'page_index': pageIndex,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ScanPagesCompanion copyWith({
+    Value<String>? id,
+    Value<String>? scanId,
+    Value<String>? imagePath,
+    Value<String?>? processedPath,
+    Value<int>? pageIndex,
+    Value<int>? rowid,
+  }) {
+    return ScanPagesCompanion(
+      id: id ?? this.id,
+      scanId: scanId ?? this.scanId,
+      imagePath: imagePath ?? this.imagePath,
+      processedPath: processedPath ?? this.processedPath,
+      pageIndex: pageIndex ?? this.pageIndex,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (scanId.present) {
+      map['scan_id'] = Variable<String>(scanId.value);
+    }
+    if (imagePath.present) {
+      map['image_path'] = Variable<String>(imagePath.value);
+    }
+    if (processedPath.present) {
+      map['processed_path'] = Variable<String>(processedPath.value);
+    }
+    if (pageIndex.present) {
+      map['page_index'] = Variable<int>(pageIndex.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ScanPagesCompanion(')
+          ..write('id: $id, ')
+          ..write('scanId: $scanId, ')
+          ..write('imagePath: $imagePath, ')
+          ..write('processedPath: $processedPath, ')
+          ..write('pageIndex: $pageIndex, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $CategoriesTable extends Categories
     with TableInfo<$CategoriesTable, Category> {
   @override
@@ -2822,6 +3194,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $ScansTable scans = $ScansTable(this);
+  late final $ScanPagesTable scanPages = $ScanPagesTable(this);
   late final $CategoriesTable categories = $CategoriesTable(this);
   late final $ReceiptsTable receipts = $ReceiptsTable(this);
   late final $LineItemsTable lineItems = $LineItemsTable(this);
@@ -2834,6 +3207,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
     scans,
+    scanPages,
     categories,
     receipts,
     lineItems,
@@ -2843,6 +3217,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'scans',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('scan_pages', kind: UpdateKind.delete)],
+    ),
     WritePropagation(
       on: TableUpdateQuery.onTableName(
         'scans',
@@ -2920,6 +3301,24 @@ typedef $$ScansTableUpdateCompanionBuilder =
 final class $$ScansTableReferences
     extends BaseReferences<_$AppDatabase, $ScansTable, Scan> {
   $$ScansTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$ScanPagesTable, List<ScanPage>>
+  _scanPagesRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.scanPages,
+    aliasName: 'scans__id__scan_pages__scan_id',
+  );
+
+  $$ScanPagesTableProcessedTableManager get scanPagesRefs {
+    final manager = $$ScanPagesTableTableManager(
+      $_db,
+      $_db.scanPages,
+    ).filter((f) => f.scanId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_scanPagesRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 
   static MultiTypedResultKey<$ReceiptsTable, List<Receipt>> _receiptsRefsTable(
     _$AppDatabase db,
@@ -3035,6 +3434,31 @@ class $$ScansTableFilterComposer extends Composer<_$AppDatabase, $ScansTable> {
     column: $table.updatedAt,
     builder: (column) => ColumnFilters(column),
   );
+
+  Expression<bool> scanPagesRefs(
+    Expression<bool> Function($$ScanPagesTableFilterComposer f) f,
+  ) {
+    final $$ScanPagesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.scanPages,
+      getReferencedColumn: (t) => t.scanId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ScanPagesTableFilterComposer(
+            $db: $db,
+            $table: $db.scanPages,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 
   Expression<bool> receiptsRefs(
     Expression<bool> Function($$ReceiptsTableFilterComposer f) f,
@@ -3215,6 +3639,31 @@ class $$ScansTableAnnotationComposer
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
 
+  Expression<T> scanPagesRefs<T extends Object>(
+    Expression<T> Function($$ScanPagesTableAnnotationComposer a) f,
+  ) {
+    final $$ScanPagesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.scanPages,
+      getReferencedColumn: (t) => t.scanId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ScanPagesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.scanPages,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
   Expression<T> receiptsRefs<T extends Object>(
     Expression<T> Function($$ReceiptsTableAnnotationComposer a) f,
   ) {
@@ -3305,6 +3754,7 @@ class $$ScansTableTableManager
           (Scan, $$ScansTableReferences),
           Scan,
           PrefetchHooks Function({
+            bool scanPagesRefs,
             bool receiptsRefs,
             bool documentsRefs,
             bool scanTagsRefs,
@@ -3381,6 +3831,7 @@ class $$ScansTableTableManager
               .toList(),
           prefetchHooksCallback:
               ({
+                scanPagesRefs = false,
                 receiptsRefs = false,
                 documentsRefs = false,
                 scanTagsRefs = false,
@@ -3388,6 +3839,7 @@ class $$ScansTableTableManager
                 return PrefetchHooks(
                   db: db,
                   explicitlyWatchedTables: [
+                    if (scanPagesRefs) db.scanPages,
                     if (receiptsRefs) db.receipts,
                     if (documentsRefs) db.documents,
                     if (scanTagsRefs) db.scanTags,
@@ -3395,6 +3847,23 @@ class $$ScansTableTableManager
                   addJoins: null,
                   getPrefetchedDataCallback: (items) async {
                     return [
+                      if (scanPagesRefs)
+                        await $_getPrefetchedData<Scan, $ScansTable, ScanPage>(
+                          currentTable: table,
+                          referencedTable: $$ScansTableReferences
+                              ._scanPagesRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ScansTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).scanPagesRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.scanId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                       if (receiptsRefs)
                         await $_getPrefetchedData<Scan, $ScansTable, Receipt>(
                           currentTable: table,
@@ -3467,10 +3936,330 @@ typedef $$ScansTableProcessedTableManager =
       (Scan, $$ScansTableReferences),
       Scan,
       PrefetchHooks Function({
+        bool scanPagesRefs,
         bool receiptsRefs,
         bool documentsRefs,
         bool scanTagsRefs,
       })
+    >;
+typedef $$ScanPagesTableCreateCompanionBuilder =
+    ScanPagesCompanion Function({
+      required String id,
+      required String scanId,
+      required String imagePath,
+      Value<String?> processedPath,
+      required int pageIndex,
+      Value<int> rowid,
+    });
+typedef $$ScanPagesTableUpdateCompanionBuilder =
+    ScanPagesCompanion Function({
+      Value<String> id,
+      Value<String> scanId,
+      Value<String> imagePath,
+      Value<String?> processedPath,
+      Value<int> pageIndex,
+      Value<int> rowid,
+    });
+
+final class $$ScanPagesTableReferences
+    extends BaseReferences<_$AppDatabase, $ScanPagesTable, ScanPage> {
+  $$ScanPagesTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $ScansTable _scanIdTable(_$AppDatabase db) =>
+      db.scans.createAlias('scan_pages__scan_id__scans__id');
+
+  $$ScansTableProcessedTableManager get scanId {
+    final $_column = $_itemColumn<String>('scan_id')!;
+
+    final manager = $$ScansTableTableManager(
+      $_db,
+      $_db.scans,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_scanIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$ScanPagesTableFilterComposer
+    extends Composer<_$AppDatabase, $ScanPagesTable> {
+  $$ScanPagesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get imagePath => $composableBuilder(
+    column: $table.imagePath,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get processedPath => $composableBuilder(
+    column: $table.processedPath,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get pageIndex => $composableBuilder(
+    column: $table.pageIndex,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$ScansTableFilterComposer get scanId {
+    final $$ScansTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.scanId,
+      referencedTable: $db.scans,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ScansTableFilterComposer(
+            $db: $db,
+            $table: $db.scans,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ScanPagesTableOrderingComposer
+    extends Composer<_$AppDatabase, $ScanPagesTable> {
+  $$ScanPagesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get imagePath => $composableBuilder(
+    column: $table.imagePath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get processedPath => $composableBuilder(
+    column: $table.processedPath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get pageIndex => $composableBuilder(
+    column: $table.pageIndex,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$ScansTableOrderingComposer get scanId {
+    final $$ScansTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.scanId,
+      referencedTable: $db.scans,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ScansTableOrderingComposer(
+            $db: $db,
+            $table: $db.scans,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ScanPagesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ScanPagesTable> {
+  $$ScanPagesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get imagePath =>
+      $composableBuilder(column: $table.imagePath, builder: (column) => column);
+
+  GeneratedColumn<String> get processedPath => $composableBuilder(
+    column: $table.processedPath,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get pageIndex =>
+      $composableBuilder(column: $table.pageIndex, builder: (column) => column);
+
+  $$ScansTableAnnotationComposer get scanId {
+    final $$ScansTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.scanId,
+      referencedTable: $db.scans,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ScansTableAnnotationComposer(
+            $db: $db,
+            $table: $db.scans,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ScanPagesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ScanPagesTable,
+          ScanPage,
+          $$ScanPagesTableFilterComposer,
+          $$ScanPagesTableOrderingComposer,
+          $$ScanPagesTableAnnotationComposer,
+          $$ScanPagesTableCreateCompanionBuilder,
+          $$ScanPagesTableUpdateCompanionBuilder,
+          (ScanPage, $$ScanPagesTableReferences),
+          ScanPage,
+          PrefetchHooks Function({bool scanId})
+        > {
+  $$ScanPagesTableTableManager(_$AppDatabase db, $ScanPagesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ScanPagesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ScanPagesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ScanPagesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> scanId = const Value.absent(),
+                Value<String> imagePath = const Value.absent(),
+                Value<String?> processedPath = const Value.absent(),
+                Value<int> pageIndex = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ScanPagesCompanion(
+                id: id,
+                scanId: scanId,
+                imagePath: imagePath,
+                processedPath: processedPath,
+                pageIndex: pageIndex,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String scanId,
+                required String imagePath,
+                Value<String?> processedPath = const Value.absent(),
+                required int pageIndex,
+                Value<int> rowid = const Value.absent(),
+              }) => ScanPagesCompanion.insert(
+                id: id,
+                scanId: scanId,
+                imagePath: imagePath,
+                processedPath: processedPath,
+                pageIndex: pageIndex,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$ScanPagesTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({scanId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (scanId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.scanId,
+                                referencedTable: $$ScanPagesTableReferences
+                                    ._scanIdTable(db),
+                                referencedColumn: $$ScanPagesTableReferences
+                                    ._scanIdTable(db)
+                                    .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$ScanPagesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ScanPagesTable,
+      ScanPage,
+      $$ScanPagesTableFilterComposer,
+      $$ScanPagesTableOrderingComposer,
+      $$ScanPagesTableAnnotationComposer,
+      $$ScanPagesTableCreateCompanionBuilder,
+      $$ScanPagesTableUpdateCompanionBuilder,
+      (ScanPage, $$ScanPagesTableReferences),
+      ScanPage,
+      PrefetchHooks Function({bool scanId})
     >;
 typedef $$CategoriesTableCreateCompanionBuilder =
     CategoriesCompanion Function({
@@ -5620,6 +6409,8 @@ class $AppDatabaseManager {
   $AppDatabaseManager(this._db);
   $$ScansTableTableManager get scans =>
       $$ScansTableTableManager(_db, _db.scans);
+  $$ScanPagesTableTableManager get scanPages =>
+      $$ScanPagesTableTableManager(_db, _db.scanPages);
   $$CategoriesTableTableManager get categories =>
       $$CategoriesTableTableManager(_db, _db.categories);
   $$ReceiptsTableTableManager get receipts =>
