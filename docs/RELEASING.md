@@ -80,16 +80,17 @@ administrator-approved temporary trust configuration.
 
 ## One-time repository setup
 
-1. Push this repository to GitHub and enable Pages with **GitHub Actions** as
-   the source.
+1. The canonical public repository is
+   `https://github.com/tanzir-lameh/rosid`. Enable Pages with **GitHub Actions**
+   as the source.
 2. Before provisioning signing secrets, add an enforced repository tag ruleset
    for `v*`. Restrict creation, update, and deletion of matching tags to trusted
    release maintainers. Release tags must point to a reviewed commit on `main`;
    do not tag an unreviewed commit or a contributor branch.
-3. Create an `android-release` GitHub environment. Configure at least one
-   required reviewer, prevent self-review and administrator bypass where those
-   controls are available, and restrict deployment tags to the protected `v*`
-   pattern. The release job is intentionally gated on this environment.
+3. Create an `android-release` GitHub environment and restrict deployment tags
+   to the protected `v*` pattern. Add a required reviewer when the repository
+   has a second trusted maintainer; GitHub cannot use the sole maintainer as an
+   independent reviewer.
 4. Create a release keystore on a secure machine:
 
    ```sh
@@ -114,9 +115,9 @@ administrator-approved temporary trust configuration.
 2. Run the appropriate local check command above on a provisioned machine.
 3. A trusted release maintainer creates and pushes a protected semantic tag,
    such as `v1.0.0`, pointing at that reviewed `main` commit.
-4. The `android-release` environment reviewer verifies the tag target, version,
-   and workflow revision before approving the waiting job. Approval is what
-   makes the environment-scoped signing secrets available to the job.
+4. Verify the tag target, version, and workflow revision. If the environment has
+   a required reviewer, that reviewer approves the waiting Android job before
+   its scoped signing secrets become available.
 5. The release workflow verifies the checked-in `tessdata_best` English/Bangla
    files against their pinned SHA-256 values. It does not download OCR models.
    The workflow then runs tests, builds/signs `rosid.apk`, and audits the merged
@@ -124,18 +125,22 @@ administrator-approved temporary trust configuration.
    workflow compares its normalized signer SHA-256 with the configured release
    keystore. A missing, invalid, multi-signer, or mismatched artifact fails the
    release.
-6. After verification, the workflow publishes:
+6. In parallel, a GitHub-hosted macOS runner compiles the iOS target without
+   code signing and packages it as an explicitly unsigned IPA. After both jobs
+   succeed, the workflow publishes:
 
    - `rosid.apk`
    - APK SHA-256
    - signing certificate SHA-256
+   - `rosid-ios-unsigned.ipa` and its SHA-256
+   - an unsigned-iOS warning and machine-readable release metadata
 
    Once the GitHub Release succeeds, the same tag workflow deploys `site/` to the
    `github-pages` environment. Pages deployments share the repository's `pages`
    concurrency group so overlapping site deployments are serialized/cancelled
    consistently.
-7. Install the released asset on a clean Android 8+ device and complete
-   [MANUAL_QA.md](MANUAL_QA.md) before announcing it.
+7. Physical-device QA is owner-deferred for the initial V1 early-access
+   release. Complete [MANUAL_QA.md](MANUAL_QA.md) before removing that label.
 
 The model files are already checked in. To build manually after creating
 `android/key.properties` that points to the protected release keystore:
@@ -154,21 +159,18 @@ commit `android/key.properties`, the keystore, or passwords. Until those signing
 inputs are supplied, the unsigned build and merged-manifest audit are the
 furthest reproducible local release gates.
 
-## iOS/TestFlight
+## Unsigned iPhone package
 
-An Apple Developer account, signing team, macOS, and Xcode are prerequisites.
-This workspace has none of those, so the native iOS compile/sign and TestFlight
-steps remain externally blocked even though the profile logic and iOS project
-configuration are present.
+No paid Apple Developer Program membership is available. The release workflow
+therefore builds `Runner.app` with `--no-codesign`, verifies that it has no code
+signature, and packages `rosid-ios-unsigned.ipa`. This proves the iOS target
+compiles on the hosted macOS toolchain, but it is not a normal public install.
 
-1. Open `ios/Runner.xcworkspace` in Xcode and select the correct team/bundle ID.
-2. Verify the two checked-in traineddata files retain the hashes documented in
-   `assets/tessdata/README.md` before `flutter build ipa`.
-3. Run `flutter build ipa --release --dart-define=APP_PROFILE=ios`.
-4. Upload the archive with Xcode Organizer, complete export-compliance answers,
-   and create a public TestFlight link in App Store Connect.
-5. Replace the disabled TestFlight slot in `site/index.html` and redeploy Pages.
-6. Repeat before each TestFlight build's 90-day expiry.
+Users who already understand personal self-signing can sign the IPA with their
+own Apple Account. Free provisioning normally expires after 7 days and must be
+renewed. The landing page describes that friction before the download and links
+to [IOS_SELF_SIGNING.md](IOS_SELF_SIGNING.md).
 
-Direct public iOS sideloading is intentionally not claimed: TestFlight is the
-practical V1 distribution channel.
+Do not call this artifact an App Store, TestFlight, ad-hoc, enterprise, or
+notarized web-distribution build. All of those routes require Apple-controlled
+signing, membership, eligibility, or review that this project does not have.

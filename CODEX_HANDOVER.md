@@ -27,7 +27,7 @@ Both profiles share capture, preprocessing, OCR, search, and storage. The differ
 | Connectivity | App must work in airplane mode from first launch. CI check: no `INTERNET` permission in the Android release manifest. |
 | Stack | Flutter (latest stable), Dart 3.x |
 | Platform | **Android first** (minSdk 26, target latest), then **iOS** (iOS 15+) as a distinct profile pass (M9). All plugins must have iOS support or sit behind an abstraction. |
-| Distribution | **Outside app stores.** Android: signed APK downloaded from a GitHub Pages landing page (sideload). iOS: TestFlight link from the same landing page (see §14 for why true iOS sideloading is not viable). GitHub Releases hosts the binaries. |
+| Distribution | **Outside app stores.** Android: signed APK downloaded from the GitHub Pages landing page. iOS: an explicitly unsigned IPA for advanced user-managed self-signing; it is not presented as a normal public install. GitHub Releases hosts both artifacts and their checksums. |
 | Languages | UI in English + Bangla (l10n via `flutter_localizations` + ARB files). OCR for `en` + `bn`. |
 | Storage | All data in app-private storage. SQLite via `drift`. Images in app documents dir. |
 | Privacy | No permissions beyond CAMERA and (optional) READ_MEDIA_IMAGES for gallery import. |
@@ -179,7 +179,7 @@ Each milestone ends with: `flutter analyze` clean, all tests green, app builds (
 - **M7 — Dashboard + Export + Settings**: monthly summary, category chart, CSV export via share sheet, settings (incl. Bangla UI verified).
 - **M8 — Android hardening**: airplane-mode manual test script, manifest permission audit, large-image memory handling, DB migration test, ProGuard/R8 rules for ML Kit + Tesseract, signed release APK builds.
 - **M9 — iOS profile**: `AppProfile` wiring (should already exist from M0; here it's verified end-to-end), documents-first home layout, expense toggle behavior, multi-page batch capture, document→PDF export, iOS build config (Podfile, Info.plist permissions with usage strings, Tesseract/ML Kit iOS pods), verify both OCR engines on iOS simulator + document behaviors via `--dart-define=APP_PROFILE=ios` on Android emulator if no macOS runner is available (record this limitation in `PROGRESS.md`).
-- **M10 — Landing page + distribution** (see §15): GitHub Pages site, GitHub Releases pipeline for the signed APK, TestFlight link slot, install instructions.
+- **M10 — Landing page + distribution** (see §15): GitHub Pages site, GitHub Releases pipeline for the signed Android APK and unsigned iPhone IPA, honest install constraints, and verification instructions.
 
 ## 10. Test Fixtures (create these in M0/M4)
 
@@ -223,7 +223,7 @@ Rules:
 - Manual script passes: airplane mode ON → scan English printed receipt → correct total/date → save → search finds it → export CSV. Repeat with a Bangla printed receipt. Scan a handwritten note in Document mode → edit text → save → searchable.
 - iOS-profile manual script (simulator or profile-override on Android): home shows documents grid, no expense UI anywhere; enable expense tracking in Settings → full receipt flow appears and works; multi-page doc → single PDF via share sheet.
 - No `INTERNET` permission in the Android release manifest.
-- Landing page live on GitHub Pages, serving the latest signed APK from GitHub Releases, with install instructions and a TestFlight placeholder.
+- Landing page live on GitHub Pages, serving the latest signed Android APK and explicitly unsigned iPhone IPA from GitHub Releases, with safe-install, self-signing, and checksum instructions.
 - `PROGRESS.md` tells the complete story of the build, including deviations and known limitations (especially Bangla handwriting accuracy).
 
 ## 14. Distribution Plan (no app stores)
@@ -235,7 +235,8 @@ Rules:
 - No in-app updater (offline constraint). The landing page is the update channel; the app's About screen shows the version and tells users where to check for updates.
 
 ### iOS — be honest about the constraint
-True sideloading outside the App Store is **not generally possible on iOS**. Options, in order of practicality:
+Normal public installation outside Apple-controlled signing is **not generally
+possible on iOS**. Options, in order of practicality:
 
 | Route | Reach | Notes |
 |---|---|---|
@@ -244,12 +245,19 @@ True sideloading outside the App Store is **not generally possible on iOS**. Opt
 | Ad Hoc OTA (`itms-services`) | 100 registered devices/year | Only for the developer's own devices/close circle. |
 | EU Web Distribution | EU only | Irrelevant for a Bangladesh/global audience. |
 
-**Plan**: ship via TestFlight public link on the landing page. Codex prepares the Xcode project so `flutter build ipa` works, but actual upload/signing is a human step — leave a `docs/RELEASING.md` with the exact commands and a checklist.
+**Owner decision, 2026-07-18**: there is no paid Apple Developer Program
+membership. The GitHub workflow compiles the iOS target on a hosted macOS runner
+with code signing disabled and publishes `rosid-ios-unsigned.ipa`. The landing
+page explains that advanced users must sign it with their own Apple Account and
+that free personal provisioning normally expires after seven days. This artifact
+is never described as TestFlight, App Store, ad-hoc, enterprise, or one-tap web
+distribution. The exact limitations and verification steps live in
+`docs/IOS_SELF_SIGNING.md`.
 
 ## 15. Landing Page (GitHub Pages) — M10
 
 - **Stack**: static HTML/CSS/vanilla JS in `site/` at repo root, deployed by a GitHub Actions workflow to Pages. No frameworks, no build step beyond copying files. No trackers/analytics (brand consistency with the app's privacy stance).
-- **Content**: hero (app name + one-liner in EN/BN with a language toggle), 3–5 device screenshots (generate from emulator during M10), feature grid *per audience* — receipts/expenses pitched to Android users, notes/documents pitched to iOS users — download section (big "Download APK" button → latest release; "Join on TestFlight" button → placeholder until link exists), sideload instructions (collapsible, EN/BN), privacy statement ("100% offline — your documents never leave your phone"), APK signature fingerprint, changelog link, GitHub repo link.
+- **Content**: outcome-led EN/BN hero with language toggle; 3–5 real device screenshots; Scan → Review → Track flow; receipt and document modes; a primary signed-Android download and a clearly secondary unsigned-iPhone self-signing path; collapsible safe-install instructions; privacy proof (no Internet permission, analytics, or trackers); file and certificate hashes; release archive, changelog, source, and issue links.
 - **CI**: one workflow builds the signed APK on tag push → creates a GitHub Release → deploys `site/` to Pages. Secrets (keystore) documented in `docs/RELEASING.md`, injected via repo secrets.
 - Acceptance: Lighthouse accessibility ≥ 90, page loads with JS disabled, works on mobile (that's where sideloaders will be).
 
@@ -279,7 +287,14 @@ True sideloading outside the App Store is **not generally possible on iOS**. Opt
 
 ## 17. VERSION 2 — TFLite Bangla Handwriting Model (MANDATORY)
 
-**Gate**: V2 starts only after every item in §13 is done. Then this section becomes the active spec and Codex re-enters the build loop (§12) with a new `TASKS_V2.md`.
+**Gate (amended by owner decision, 2026-07-18)**: V2 starts after the verified
+automated/emulator V1 baseline is preserved, the signed Android V1 release and
+GitHub Pages site are live, and the unsigned iOS compile artifact is produced.
+The owner explicitly deferred broad physical-device QA and has no Apple
+distribution account; those items remain recorded as deferred limitations and
+are not silently marked passed. Create a permanent `release/v1` branch and V1
+tag/release before V2 changes begin, then re-enter the build loop (§12) with
+`TASKS_V2.md`.
 
 **Goal**: replace best-effort Tesseract handwriting with a real on-device handwritten-text-recognition (HTR) model behind the existing `TfliteBanglaHandwritingEngine` seam. Ship it in a V2 release of both profiles.
 
@@ -345,7 +360,7 @@ Model training cannot happen inside the app build loop: it needs dataset downloa
 **P5 — Acceptance + release**
 - Gates (measured on the writer-disjoint public-dataset held-out set): **CER ≤ 25% on Bangla handwriting** AND **at least 30% relative CER improvement over Tesseract-ben on the same set**. Amounts-only CER (digits + ৳) ≤ 12%, since totals matter most. If gates fail: log in `PROGRESS.md`, iterate P1–P3 (more/better synthetic data first, architecture second).
 - Regression: printed-receipt fixtures from §10 must not get worse.
-- Release V2 via the M10 pipeline; landing page gains a "reads handwritten Bangla" section + changelog; TestFlight re-upload step in `docs/RELEASING.md`.
+- Release V2 via the M10 pipeline; landing page gains a "reads handwritten Bangla" section and measured changelog. Continue publishing an unsigned iPhone IPA unless Apple distribution signing becomes available.
 
 ### 17.3 V2 Definition of Done
 - `TfliteBanglaHandwritingEngine` live and routed automatically; stub deleted.

@@ -1,4 +1,4 @@
-name: Android Release
+name: Mobile Release
 
 on:
   push:
@@ -7,28 +7,31 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
-  release:
-    permissions:
-      contents: write
+  prepare:
     runs-on: ubuntu-latest
-    environment:
-      name: android-release
     outputs:
-      certificate_sha256: ${{ steps.verify_apk.outputs.certificate_sha256 }}
+      build_name: ${{ steps.version.outputs.build_name }}
+      build_number: ${{ steps.version.outputs.build_number }}
+      pubspec_version: ${{ steps.version.outputs.pubspec_version }}
+      release_date: ${{ steps.version.outputs.release_date }}
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
       - name: Verify release tag matches pubspec version
+        id: version
+        shell: bash
         run: |
+          set -euo pipefail
           pubspec_version="$(awk '$1 == "version:" { print $2; exit }' pubspec.yaml)"
-          if [ -z "$pubspec_version" ]; then
-            echo "::error::pubspec.yaml does not declare a version."
-            exit 1
-          fi
+          test -n "$pubspec_version"
 
           build_name="${pubspec_version%%+*}"
           if [ "$build_name" = "$pubspec_version" ]; then
-            echo "::error::The pubspec version must include a numeric build number (for example, 1.0.0+1)."
+            echo "::error::pubspec.yaml must include a numeric build number."
             exit 1
           fi
           build_number="${pubspec_version##*+}"
@@ -40,21 +43,32 @@ jobs:
           tag_version="${GITHUB_REF_NAME#v}"
           tag_build_name="${tag_version%%+*}"
           if [ "$tag_build_name" != "$build_name" ]; then
-            echo "::error::Tag $GITHUB_REF_NAME does not match pubspec version name $build_name."
+            echo "::error::Tag $GITHUB_REF_NAME does not match pubspec version $build_name."
             exit 1
           fi
-          if [[ "$tag_version" == *+* ]]; then
-            tag_build_number="${tag_version##*+}"
-            if [ "$tag_build_number" != "$build_number" ]; then
-              echo "::error::Tag build metadata $tag_build_number does not match pubspec build number $build_number."
-              exit 1
-            fi
+          if [[ "$tag_version" == *+* ]] && [ "${tag_version##*+}" != "$build_number" ]; then
+            echo "::error::Tag build metadata does not match pubspec build number $build_number."
+            exit 1
           fi
 
           {
-            echo "ROSID_BUILD_NAME=$build_name"
-            echo "ROSID_BUILD_NUMBER=$build_number"
-          } >> "$GITHUB_ENV"
+            echo "build_name=$build_name"
+            echo "build_number=$build_number"
+            echo "pubspec_version=$pubspec_version"
+            echo "release_date=$(date -u +%Y-%m-%d)"
+          } >> "$GITHUB_OUTPUT"
+
+  android:
+    needs: prepare
+    runs-on: ubuntu-latest
+    environment:
+      name: android-release
+    outputs:
+      apk_sha256: ${{ steps.verify.outputs.apk_sha256 }}
+      certificate_sha256: ${{ steps.verify.outputs.certificate_sha256 }}
+      apk_size: ${{ steps.verify.outputs.apk_size }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
       - uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9 # v4.8.0
         with:
           distribution: temurin
@@ -68,11 +82,13 @@ jobs:
         env:
           ENG_TESSDATA_SHA256: 8280AED0782FE27257A68EA10FE7EF324CA0F8D85BD2FD145D1C2B560BCB66BA
           BEN_TESSDATA_SHA256: 1CD0129288D1F74F6661C35E638E487BD146A66BB732ECD9E011E48DCB0DF623
+        shell: bash
         run: |
+          set -euo pipefail
           eng_sha256="$(sha256sum assets/tessdata/eng.traineddata | cut -d' ' -f1 | tr '[:lower:]' '[:upper:]')"
           ben_sha256="$(sha256sum assets/tessdata/ben.traineddata | cut -d' ' -f1 | tr '[:lower:]' '[:upper:]')"
           if [ "$eng_sha256" != "$ENG_TESSDATA_SHA256" ] || [ "$ben_sha256" != "$BEN_TESSDATA_SHA256" ]; then
-            echo "::error::Checked-in OCR language assets do not match their pinned SHA-256 values."
+            echo "::error::Checked-in OCR assets do not match their pinned SHA-256 values."
             exit 1
           fi
       - name: Configure Android signing
@@ -81,8 +97,13 @@ jobs:
           KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
           STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
+        shell: bash
         run: |
+          set -euo pipefail
           test -n "$KEYSTORE_BASE64"
+          test -n "$KEY_ALIAS"
+          test -n "$KEY_PASSWORD"
+          test -n "$STORE_PASSWORD"
           printf '%s' "$KEYSTORE_BASE64" | base64 --decode > android/app/rosid-release.jks
           {
             echo "storeFile=rosid-release.jks"
@@ -95,80 +116,219 @@ jobs:
       - run: dart run build_runner build
       - run: flutter analyze
       - run: flutter test
-      - run: flutter build apk --release --build-name "$ROSID_BUILD_NAME" --build-number "$ROSID_BUILD_NUMBER"
-      - name: Audit, verify signer, and name artifact
-        id: verify_apk
+      - name: Build signed Android APK
+        run: >-
+          flutter build apk --release
+          --build-name "${{ needs.prepare.outputs.build_name }}"
+          --build-number "${{ needs.prepare.outputs.build_number }}"
+      - name: Audit and verify Android release
+        id: verify
         env:
           KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
+        shell: bash
         run: |
+          set -euo pipefail
           tool/audit_offline.sh --require-merged
           cp build/app/outputs/flutter-apk/app-release.apk rosid.apk
 
           android_sdk="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-}}"
-          if [ -z "$android_sdk" ]; then
-            echo "::error::ANDROID_SDK_ROOT or ANDROID_HOME must identify the Android SDK."
-            exit 1
-          fi
+          test -n "$android_sdk"
           apksigner_path="$(find "$android_sdk/build-tools" -type f -name apksigner -print | sort -V | tail -n 1)"
-          if [ -z "$apksigner_path" ] || [ ! -x "$apksigner_path" ]; then
-            echo "::error::Could not find an executable apksigner in $android_sdk/build-tools."
-            exit 1
-          fi
-
+          test -x "$apksigner_path"
           verify_output="$("$apksigner_path" verify --verbose --print-certs rosid.apk)"
           printf '%s\n' "$verify_output"
+
           signer_count="$(printf '%s\n' "$verify_output" | awk '/^Signer #[0-9]+ certificate SHA-256 digest:/{count++} END{print count+0}')"
           if [ "$signer_count" -ne 1 ]; then
             echo "::error::Expected exactly one APK signing certificate, found $signer_count."
             exit 1
           fi
-
           apk_certificate_sha256="$(
-            printf '%s\n' "$verify_output" \
-              | awk -F ': ' '/^Signer #[0-9]+ certificate SHA-256 digest:/{print $2; exit}' \
-              | tr '[:lower:]' '[:upper:]' \
-              | tr -d '[:space:]:'
+            printf '%s\n' "$verify_output" |
+              awk -F ': ' '/^Signer #[0-9]+ certificate SHA-256 digest:/{print $2; exit}' |
+              tr '[:lower:]' '[:upper:]' | tr -d '[:space:]:'
           )"
           keystore_certificate_sha256="$(
-            keytool -list -v \
-              -keystore android/app/rosid-release.jks \
-              -storepass "$STORE_PASSWORD" \
-              -alias "$KEY_ALIAS" \
-              | awk -F ': ' '/SHA256:/{print $2; exit}' \
-              | tr '[:lower:]' '[:upper:]' \
-              | tr -d '[:space:]:'
+            keytool -list -v -keystore android/app/rosid-release.jks \
+              -storepass "$STORE_PASSWORD" -alias "$KEY_ALIAS" |
+              awk -F ': ' '/SHA256:/{print $2; exit}' |
+              tr '[:lower:]' '[:upper:]' | tr -d '[:space:]:'
           )"
-          if [ -z "$apk_certificate_sha256" ] || [ -z "$keystore_certificate_sha256" ]; then
-            echo "::error::Could not extract both SHA-256 signing certificate fingerprints."
-            exit 1
-          fi
           if [ "$apk_certificate_sha256" != "$keystore_certificate_sha256" ]; then
-            echo "::error::APK signer SHA-256 does not match the configured release keystore."
-            echo "APK:      $apk_certificate_sha256"
-            echo "Keystore: $keystore_certificate_sha256"
+            echo "::error::APK signer does not match the configured release keystore."
             exit 1
           fi
 
-          sha256sum rosid.apk > rosid.apk.sha256
+          apk_sha256_lower="$(sha256sum rosid.apk | cut -d' ' -f1)"
+          apk_sha256="$(printf '%s' "$apk_sha256_lower" | tr '[:lower:]' '[:upper:]')"
+          apk_size="$(python3 -c 'import os; n=os.path.getsize("rosid.apk"); print(f"{n / 1024 / 1024:.1f} MB")')"
+          printf '%s  rosid.apk\n' "$apk_sha256_lower" > rosid.apk.sha256
           printf '%s\n' "$apk_certificate_sha256" > certificate-sha256.txt
-          printf 'certificate_sha256=%s\n' "$apk_certificate_sha256" >> "$GITHUB_OUTPUT"
+          {
+            echo "apk_sha256=$apk_sha256"
+            echo "certificate_sha256=$apk_certificate_sha256"
+            echo "apk_size=$apk_size"
+          } >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: android-release
+          path: |
+            rosid.apk
+            rosid.apk.sha256
+            certificate-sha256.txt
+          if-no-files-found: error
+          retention-days: 7
+
+  ios:
+    needs: prepare
+    runs-on: macos-latest
+    outputs:
+      ios_sha256: ${{ steps.package.outputs.ios_sha256 }}
+      ios_size: ${{ steps.package.outputs.ios_size }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: 3.44.6
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: flutter gen-l10n
+      - run: dart run build_runner build
+      - name: Verify committed CocoaPods resolution
+        working-directory: ios
+        run: |
+          test -f Podfile.lock
+          pod install
+          git diff --exit-code -- Podfile.lock
+          test -z "$(git status --porcelain -- Podfile.lock)"
+      - name: Compile unsigned iPhone app
+        run: >-
+          flutter build ios --release --no-codesign
+          --build-name "${{ needs.prepare.outputs.build_name }}"
+          --build-number "${{ needs.prepare.outputs.build_number }}"
+      - name: Package unsigned IPA
+        id: package
+        shell: bash
+        run: |
+          set -euo pipefail
+          app_path="build/ios/iphoneos/Runner.app"
+          test -d "$app_path"
+          if [ -d "$app_path/_CodeSignature" ]; then
+            echo "::error::The no-codesign build unexpectedly contains a code signature."
+            exit 1
+          fi
+          mkdir Payload
+          cp -R "$app_path" Payload/Runner.app
+          ditto -c -k --sequesterRsrc --keepParent Payload rosid-ios-unsigned.ipa
+
+          ios_sha256_lower="$(shasum -a 256 rosid-ios-unsigned.ipa | cut -d' ' -f1)"
+          ios_sha256="$(printf '%s' "$ios_sha256_lower" | tr '[:lower:]' '[:upper:]')"
+          ios_size="$(python3 -c 'import os; n=os.path.getsize("rosid-ios-unsigned.ipa"); print(f"{n / 1024 / 1024:.1f} MB")')"
+          printf '%s  rosid-ios-unsigned.ipa\n' "$ios_sha256_lower" > rosid-ios-unsigned.ipa.sha256
+          cat > IOS-UNSIGNED-README.txt <<'EOF'
+          This IPA is unsigned and cannot be installed by tapping it on an iPhone.
+          It must be signed by the user with their own Apple Account. Free personal
+          provisioning normally expires after 7 days. See docs/IOS_SELF_SIGNING.md.
+          EOF
+          {
+            echo "ios_sha256=$ios_sha256"
+            echo "ios_size=$ios_size"
+          } >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ios-release
+          path: |
+            rosid-ios-unsigned.ipa
+            rosid-ios-unsigned.ipa.sha256
+            IOS-UNSIGNED-README.txt
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    needs: [prepare, android, ios]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          path: release-assets
+          merge-multiple: true
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
+          APK_SHA256: ${{ needs.android.outputs.apk_sha256 }}
+          CERTIFICATE_SHA256: ${{ needs.android.outputs.certificate_sha256 }}
+          IOS_SHA256: ${{ needs.ios.outputs.ios_sha256 }}
+          APK_SIZE: ${{ needs.android.outputs.apk_size }}
+          IOS_SIZE: ${{ needs.ios.outputs.ios_size }}
+          PUBSPEC_VERSION: ${{ needs.prepare.outputs.pubspec_version }}
+          RELEASE_DATE: ${{ needs.prepare.outputs.release_date }}
+        shell: bash
         run: |
-          {
-            echo "## Rosid ${GITHUB_REF_NAME}"
-            echo
-            echo "Fully offline Android APK with bundled English and Bangla OCR data."
-            echo
-            echo "APK SHA-256: \`$(cut -d' ' -f1 rosid.apk.sha256)\`"
-            echo "Signing certificate SHA-256: \`$(cat certificate-sha256.txt)\`"
-          } > release-notes.md
-          gh release create "$GITHUB_REF_NAME" rosid.apk rosid.apk.sha256 certificate-sha256.txt --title "Rosid ${GITHUB_REF_NAME}" --notes-file release-notes.md
+          set -euo pipefail
+          cat > release-notes.md <<EOF
+          ## Rosid ${GITHUB_REF_NAME}
+
+          Private, fully offline Bangla and English receipt/document scanning.
+
+          ### Android
+
+          - Signed APK: \`rosid.apk\`
+          - APK SHA-256: \`$APK_SHA256\`
+          - Signing certificate SHA-256: \`$CERTIFICATE_SHA256\`
+
+          ### iPhone (advanced, self-signing only)
+
+          - Unsigned package: \`rosid-ios-unsigned.ipa\`
+          - IPA SHA-256: \`$IOS_SHA256\`
+          - This is not a one-tap install, App Store build, or TestFlight build. It
+            must be signed by the user with their own Apple Account. Free personal
+            provisioning normally expires after 7 days.
+
+          ### V1 status
+
+          Automated tests, release-manifest audits, reproducible Android builds,
+          and emulator OCR checks passed. Broad physical-device QA is owner-deferred.
+          Printed Bangla and English are the supported OCR focus; handwriting is
+          best effort and should be reviewed before saving.
+          EOF
+          jq -n \
+            --arg version "$PUBSPEC_VERSION" \
+            --arg tag_name "$GITHUB_REF_NAME" \
+            --arg release_date "$RELEASE_DATE" \
+            --arg apk_size "$APK_SIZE" \
+            --arg apk_sha256 "$APK_SHA256" \
+            --arg certificate_sha256 "$CERTIFICATE_SHA256" \
+            --arg ios_size "$IOS_SIZE" \
+            --arg ios_sha256 "$IOS_SHA256" \
+            '{
+              version: $version,
+              tag_name: $tag_name,
+              release_date: $release_date,
+              apk_size: $apk_size,
+              apk_sha256: $apk_sha256,
+              certificate_sha256: $certificate_sha256,
+              ios_size: $ios_size,
+              ios_sha256: $ios_sha256
+            }' > release-metadata.json
+          gh release create "$GITHUB_REF_NAME" \
+            release-assets/rosid.apk \
+            release-assets/rosid.apk.sha256 \
+            release-assets/certificate-sha256.txt \
+            release-assets/rosid-ios-unsigned.ipa \
+            release-assets/rosid-ios-unsigned.ipa.sha256 \
+            release-assets/IOS-UNSIGNED-README.txt \
+            release-metadata.json \
+            --verify-tag \
+            --title "Rosid ${GITHUB_REF_NAME}" \
+            --notes-file release-notes.md
 
   deploy-pages:
-    needs: release
+    needs: [prepare, android, ios, publish]
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       pages: write
@@ -179,29 +339,21 @@ jobs:
     concurrency:
       group: pages
       cancel-in-progress: true
-    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
       - name: Prepare release-specific site
-        env:
-          CERTIFICATE_SHA256: ${{ needs.release.outputs.certificate_sha256 }}
-        run: |
-          if [[ ! "$CERTIFICATE_SHA256" =~ ^[0-9A-F]{64}$ ]]; then
-            echo "::error::Release signing certificate SHA-256 is missing or malformed."
-            exit 1
-          fi
-          cp -R site site-dist
-          pubspec_version="$(awk '$1 == "version:" { print $2; exit }' pubspec.yaml)"
-          test -n "$pubspec_version"
-          grep -q 'ROSID_CERTIFICATE_SHA256_PLACEHOLDER' site-dist/index.html
-          grep -q 'ROSID_VERSION_PLACEHOLDER' site-dist/index.html
-          sed -i "s#OWNER/REPO#${GITHUB_REPOSITORY}#g" site-dist/index.html
-          sed -i "s#ROSID_CERTIFICATE_SHA256_PLACEHOLDER#${CERTIFICATE_SHA256}#g" site-dist/index.html
-          sed -i "s#ROSID_VERSION_PLACEHOLDER#${pubspec_version}#g" site-dist/index.html
-          if grep -qE 'OWNER/REPO|ROSID_(CERTIFICATE_SHA256|VERSION)_PLACEHOLDER' site-dist/index.html; then
-            echo "::error::Site deployment still contains an unresolved release placeholder."
-            exit 1
-          fi
+        run: >-
+          python3 tool/prepare_site.py
+          --output site-dist
+          --repository "$GITHUB_REPOSITORY"
+          --version "${{ needs.prepare.outputs.pubspec_version }}"
+          --release-date "${{ needs.prepare.outputs.release_date }}"
+          --release-tag "$GITHUB_REF_NAME"
+          --apk-size "${{ needs.android.outputs.apk_size }}"
+          --apk-sha256 "${{ needs.android.outputs.apk_sha256 }}"
+          --certificate-sha256 "${{ needs.android.outputs.certificate_sha256 }}"
+          --ios-size "${{ needs.ios.outputs.ios_size }}"
+          --ios-sha256 "${{ needs.ios.outputs.ios_sha256 }}"
       - uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5.0.0
       - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3.0.1
         with:

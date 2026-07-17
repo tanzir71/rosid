@@ -83,12 +83,14 @@ handover gate, not a pass.
 ## M10 - Landing page and distribution
 
 - [x] M10.1 Build the accessible static EN/BN landing page with mobile layout and no-JavaScript fallback
-- [x] M10.2 Add Pages and signed-release workflows with repository-specific links and a TestFlight placeholder
-- [x] M10.3 Document release signing, GitHub secrets, install, TestFlight, and manual verification steps
+- [x] M10.2 Add Pages and multi-platform release workflows with repository-specific links and immutable metadata
+- [x] M10.3 Document Android signing, iPhone self-signing constraints, install, and manual verification steps
 - [x] M10.4 Replace landing-page mockups with four real emulator screenshots (five captures retained)
 - [x] M10.5 Verify the local mobile page in a Chromium browser and reach Lighthouse accessibility 100
-- [BLOCKED: requires repository configuration, signing secrets, and publishing authority] M10.6 Publish Pages and a signed GitHub Release
-- [BLOCKED: requires Apple account/signing and a macOS runner] M10.7 Publish TestFlight build and replace the placeholder link
+- [ ] M10.6 Publish Pages and a signed Android GitHub Release
+- [DEFERRED: owner has no paid Apple distribution membership] M10.7 Publish an App Store/TestFlight build
+- [ ] M10.8 Compile and publish the explicitly unsigned iPhone IPA for advanced self-signing
+- [x] M10.9 Research direct-download competitors and rebuild the landing page around outcome, trust, and release integrity
 
 ## Final V1 audit
 
@@ -98,10 +100,11 @@ handover gate, not a pass.
 - [x] Confirm the source Android manifest has no `INTERNET` or `ACCESS_NETWORK_STATE` permission
 - [x] Build debug and unsigned R8 release APKs
 - [x] Audit the merged Android release manifest (only `CAMERA` and AndroidX's app-scoped signature permission)
-- [BLOCKED: requires release keystore/secrets] Build and verify a signed release APK
+- [ ] Build and verify a signed release APK
 - [x] Pass the Android-emulator airplane-mode native OCR fixture subset (3/3)
-- [BLOCKED: requires a physical Android device] Pass the full section 13 camera/gallery/search/export/PDF/share manual script
-- [BLOCKED: no macOS/Xcode/Apple signing credentials] Compile, sign, and validate the native iOS target
-- [BLOCKED: requires publishing authority and signing secrets] Publish live Pages, a signed GitHub Release, and TestFlight
+- [DEFERRED BY OWNER: to be completed later] Pass the full section 13 camera/gallery/search/export/PDF/share physical-device script
+- [ ] Compile the unsigned native iOS target on a hosted macOS runner
+- [DEFERRED: no Apple distribution membership] Sign and publish through App Store/TestFlight
+- [ ] Publish live Pages, the signed Android APK, and the unsigned iPhone IPA
 - [x] Run local mobile Lighthouse and reach accessibility score 100
-- [BLOCKED: section 13 is not fully green] Generate `TASKS_V2.md` and begin section 17
+- [ ] Preserve the released V1 commit on `release/v1` and generate `TASKS_V2.md` under the owner-amended section 17 gate

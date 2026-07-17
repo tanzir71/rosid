@@ -5,6 +5,12 @@ documents. Android defaults to receipt scanning and expense tracking; iOS
 defaults to a documents-first experience. `AppProfile` keeps those variants in
 one codebase.
 
+Download the signed Android APK or the advanced unsigned iPhone package from
+the [Rosid landing page](https://tanzir-lameh.github.io/rosid/). GitHub Releases
+hosts every version, checksum, and Android signing-certificate fingerprint.
+The iPhone package requires user-managed self-signing; it is not an App Store or
+TestFlight build.
+
 ## Local development
 
 ```sh
@@ -32,5 +38,6 @@ Release builds must include `eng.traineddata` and `ben.traineddata` in
 `assets/tessdata/`; the tag workflow verifies the checked-in files against their
 pinned SHA-256 values before building.
 
-See [PROGRESS.md](PROGRESS.md), [TASKS.md](TASKS.md), and
-[docs/RELEASING.md](docs/RELEASING.md).
+See [PROGRESS.md](PROGRESS.md), [TASKS.md](TASKS.md),
+[docs/RELEASING.md](docs/RELEASING.md), and the recorded
+[landing-page research](docs/WEBSITE_RESEARCH.md).

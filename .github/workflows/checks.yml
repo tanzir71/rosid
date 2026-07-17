@@ -29,6 +29,20 @@ jobs:
       - run: dart format --output=none --set-exit-if-changed lib test integration_test tool
       - run: flutter analyze
       - run: flutter test
+      - name: Validate static release site
+        run: |
+          python3 -m py_compile tool/prepare_site.py
+          python3 tool/prepare_site.py \
+            --output "$RUNNER_TEMP/rosid-site" \
+            --repository "$GITHUB_REPOSITORY" \
+            --version "1.0.0+1" \
+            --release-date "2026-07-18" \
+            --release-tag "v1.0.0" \
+            --apk-size "143.1 MB" \
+            --apk-sha256 "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" \
+            --certificate-sha256 "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB" \
+            --ios-size "92.4 MB" \
+            --ios-sha256 "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"
       - run: flutter build apk --debug
       # Debug builds add INTERNET for the Flutter VM service. The release job
       # performs the strict merged-manifest audit on the distributable variant.

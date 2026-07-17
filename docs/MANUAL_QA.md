@@ -50,7 +50,7 @@ verifies that a larger document is rejected before any page file is read.
 
 1. Open Settings and confirm About shows the installed version and build number.
 2. Confirm the displayed update location is
-   `https://github.com/tanzir71/rosid/releases/latest` in both UI languages.
+   `https://github.com/tanzir-lameh/rosid/releases/latest` in both UI languages.
 3. Repeat in airplane mode; Settings must render without a network request.
 
 ## iOS profile flow
@@ -72,10 +72,13 @@ verifies that a larger document is rejected before any page file is read.
 
 ## Remaining distribution checks
 
-1. Install and verify the signed GitHub Release asset once signing secrets are
-   available.
-2. Verify the published Pages download and TestFlight links once repository and
-   Apple publishing authority are available.
-3. Smoke-test the public Pages URL on mobile after deployment and confirm the
+1. Install and verify the signed Android GitHub Release asset. This is
+   owner-deferred for the initial early-access publication.
+2. Verify that Pages links to `rosid.apk` and the explicitly unsigned
+   `rosid-ios-unsigned.ipa`, and that the displayed file hashes match the latest
+   GitHub Release metadata.
+3. If testing iPhone self-signing, follow `IOS_SELF_SIGNING.md` and verify that
+   the 7-day free-provisioning limitation is shown before download.
+4. Smoke-test the public Pages URL on mobile after deployment and confirm the
    published page matches the locally audited build (local Lighthouse
    accessibility: 100).
