@@ -1,8 +1,16 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rosid/core/settings/app_settings.dart';
+import 'package:rosid/features/capture/capture_screen.dart';
+import 'package:rosid/features/crop/crop_enhance_screen.dart';
+import 'package:rosid/features/detail/detail_screen.dart';
+import 'package:rosid/features/export/export_screen.dart';
+import 'package:rosid/features/history/history_screen.dart';
+import 'package:rosid/features/home/home_screen.dart';
+import 'package:rosid/features/review/document_review_screen.dart';
+import 'package:rosid/features/review/receipt_review_screen.dart';
+import 'package:rosid/features/settings/settings_screen.dart';
 import 'package:rosid/features/shared/app_shell.dart';
-import 'package:rosid/features/shared/placeholder_screen.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final expenseEnabled = ref.watch(expenseTrackingEnabledProvider);
@@ -20,53 +28,41 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state, child) =>
             AppShell(location: state.uri.path, child: child),
         routes: [
-          GoRoute(
-            path: '/',
-            builder: (context, state) => const PlaceholderScreen(
-              title: 'Home',
-              message: 'Rosid keeps every scan on this device.',
-            ),
-          ),
+          GoRoute(path: '/', builder: (context, state) => const HomeScreen()),
           GoRoute(
             path: '/history',
-            builder: (context, state) =>
-                const PlaceholderScreen(title: 'History'),
+            builder: (context, state) => const HistoryScreen(),
           ),
           GoRoute(
             path: '/settings',
-            builder: (context, state) =>
-                const PlaceholderScreen(title: 'Settings'),
+            builder: (context, state) => const SettingsScreen(),
           ),
         ],
       ),
       GoRoute(
         path: '/capture',
-        builder: (context, state) => const PlaceholderScreen(title: 'Capture'),
+        builder: (context, state) => const CaptureScreen(),
       ),
       GoRoute(
         path: '/crop',
-        builder: (context, state) =>
-            const PlaceholderScreen(title: 'Crop & enhance'),
+        builder: (context, state) => const CropEnhanceScreen(),
       ),
       GoRoute(
         path: '/review/receipt',
-        builder: (context, state) =>
-            const PlaceholderScreen(title: 'Review receipt'),
+        builder: (context, state) => const ReceiptReviewScreen(),
       ),
       GoRoute(
         path: '/review/document',
-        builder: (context, state) =>
-            const PlaceholderScreen(title: 'Review document'),
+        builder: (context, state) => const DocumentReviewScreen(),
       ),
       GoRoute(
         path: '/detail/:id',
         builder: (context, state) =>
-            PlaceholderScreen(title: 'Scan ${state.pathParameters['id']}'),
+            DetailScreen(scanId: state.pathParameters['id']!),
       ),
       GoRoute(
         path: '/export',
-        builder: (context, state) =>
-            const PlaceholderScreen(title: 'Export expenses'),
+        builder: (context, state) => const ExportScreen(),
       ),
     ],
   );
