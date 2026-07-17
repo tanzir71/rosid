@@ -1,0 +1,7 @@
+Student Stationery
+2026-07-09
+Notebook 500.00
+Pens 300.00
+Subtotal 800.00
+Discount -80.00
+Net Total Tk 720.00

@@ -1,0 +1,5 @@
+Corner Grocery
+Banani, Dhaka
+Tea 250.00
+Biscuits 150.00
+TOTAL 400.00

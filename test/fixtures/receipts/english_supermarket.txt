@@ -1,0 +1,9 @@
+SHWAPNO SUPERMARKET
+House 12, Dhaka
+Date: 15/07/2026
+Rice 2 x 350.00 700.00
+Milk 2 x 120.00 240.00
+Vegetables 500.00
+VAT 150.50
+Grand Total Tk. 1,590.50
+Payment: VISA CARD
