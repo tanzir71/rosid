@@ -1,9 +1,12 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rosid/core/settings/app_settings.dart';
+import 'package:rosid/data/repositories/history_repository.dart';
 import 'package:rosid/features/capture/capture_screen.dart';
 import 'package:rosid/features/crop/crop_enhance_screen.dart';
 import 'package:rosid/features/detail/detail_screen.dart';
+import 'package:rosid/features/detail/detail_edit_screen.dart';
 import 'package:rosid/features/export/export_screen.dart';
 import 'package:rosid/features/history/history_screen.dart';
 import 'package:rosid/features/home/home_screen.dart';
@@ -12,15 +15,40 @@ import 'package:rosid/features/review/receipt_review_screen.dart';
 import 'package:rosid/features/settings/settings_screen.dart';
 import 'package:rosid/features/shared/app_shell.dart';
 
+class _RouterRefresh extends ChangeNotifier {
+  void refresh() => notifyListeners();
+}
+
+final _routerRefreshProvider = Provider<_RouterRefresh>((ref) {
+  final refresh = _RouterRefresh();
+  ref
+    ..listen(expenseTrackingEnabledProvider, (previous, next) {
+      if (previous != next) refresh.refresh();
+    })
+    ..onDispose(refresh.dispose);
+  return refresh;
+});
+
 final appRouterProvider = Provider<GoRouter>((ref) {
-  final expenseEnabled = ref.watch(expenseTrackingEnabledProvider);
-  return GoRouter(
+  final refresh = ref.watch(_routerRefreshProvider);
+  final router = GoRouter(
     initialLocation: '/',
-    redirect: (context, state) {
+    refreshListenable: refresh,
+    redirect: (context, state) async {
+      final expenseEnabled = ref.read(expenseTrackingEnabledProvider);
       final receiptOnly =
           state.matchedLocation == '/export' ||
           state.matchedLocation == '/review/receipt';
       if (!expenseEnabled && receiptOnly) return '/';
+      if (!expenseEnabled && state.matchedLocation.startsWith('/detail/')) {
+        final scanId = state.pathParameters['id'];
+        if (scanId != null) {
+          final detail = await ref
+              .read(historyRepositoryProvider)
+              .detail(scanId);
+          if (detail?.entry.isReceipt ?? false) return '/';
+        }
+      }
       return null;
     },
     routes: [
@@ -61,9 +89,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             DetailScreen(scanId: state.pathParameters['id']!),
       ),
       GoRoute(
+        path: '/detail/:id/edit',
+        builder: (context, state) =>
+            DetailEditScreen(scanId: state.pathParameters['id']!),
+      ),
+      GoRoute(
         path: '/export',
         builder: (context, state) => const ExportScreen(),
       ),
     ],
   );
+  ref.onDispose(router.dispose);
+  return router;
 });

@@ -3,18 +3,18 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Rosid is a private offline Bangla and English receipt and document scanner.">
-    <title>Rosid — Offline Bangla &amp; English scanner</title>
+    <meta name="description" content="Rosid is a private offline Bangla and English receipt and document scanner." data-content-en="Rosid is a private offline Bangla and English receipt and document scanner." data-content-bn="রসিদ একটি ব্যক্তিগত, অফলাইন বাংলা ও ইংরেজি রসিদ ও ডকুমেন্ট স্ক্যানার।">
+    <title data-title-en="Rosid — Offline Bangla &amp; English scanner" data-title-bn="রসিদ — অফলাইন বাংলা ও ইংরেজি স্ক্যানার">Rosid — Offline Bangla &amp; English scanner</title>
     <link rel="stylesheet" href="styles.css">
     <script>document.documentElement.classList.add('js')</script>
   </head>
   <body>
-    <a class="skip" href="#main">Skip to content</a>
+    <a class="skip" href="#main"><span data-lang="en">Skip to content</span><span lang="bn" data-lang="bn">মূল অংশে যান</span></a>
     <header class="nav wrap">
-      <a class="brand" href="#">রসিদ <span>Rosid</span></a>
-      <div class="languages" role="group" aria-label="Language">
+      <a class="brand" href="#"><span lang="bn">রসিদ</span> <span>Rosid</span></a>
+      <div class="languages" role="group" aria-label="Language" data-aria-en="Language" data-aria-bn="ভাষা">
         <button type="button" data-set-lang="en" aria-pressed="true">English</button>
-        <button type="button" data-set-lang="bn" aria-pressed="false">বাংলা</button>
+        <button type="button" lang="bn" data-set-lang="bn" aria-pressed="false">বাংলা</button>
       </div>
     </header>
 
@@ -22,108 +22,89 @@
       <section class="hero wrap">
         <div>
           <p class="eyebrow" data-lang="en">Private by design · No account · No quota</p>
-          <p class="eyebrow" data-lang="bn">গোপনীয়তাই মূল কথা · অ্যাকাউন্ট নেই · সীমা নেই</p>
+          <p class="eyebrow" lang="bn" data-lang="bn">গোপনীয়তাই মূল কথা · অ্যাকাউন্ট নেই · সীমা নেই</p>
           <h1 data-lang="en">Scan receipts and documents. Keep everything to yourself.</h1>
-          <h1 data-lang="bn">রসিদ ও ডকুমেন্ট স্ক্যান করুন। সবকিছু নিজের কাছেই রাখুন।</h1>
+          <h1 lang="bn" data-lang="bn">রসিদ ও ডকুমেন্ট স্ক্যান করুন। সবকিছু নিজের কাছেই রাখুন।</h1>
           <p class="lead" data-lang="en">Bangla and English OCR, expense tracking, searchable notes, and PDF export—processed entirely on your phone.</p>
-          <p class="lead" data-lang="bn">বাংলা ও ইংরেজি OCR, খরচের হিসাব, খোঁজা যায় এমন নোট এবং PDF—সব প্রক্রিয়া আপনার ফোনেই।</p>
+          <p class="lead" lang="bn" data-lang="bn">বাংলা ও ইংরেজি OCR, খরচের হিসাব, খোঁজা যায় এমন নোট এবং PDF—সব প্রক্রিয়া আপনার ফোনেই।</p>
           <div class="actions">
             <a class="button primary" href="https://github.com/OWNER/REPO/releases/latest/download/rosid.apk" data-download>
-              <span data-lang="en">Download APK</span><span data-lang="bn">APK ডাউনলোড</span>
+              <span data-lang="en">Download APK</span><span lang="bn" data-lang="bn">APK ডাউনলোড</span>
             </a>
-            <span class="button disabled" aria-disabled="true">
-              <span data-lang="en">TestFlight coming soon</span><span data-lang="bn">TestFlight শিগগিরই</span>
-            </span>
+            <button class="button disabled" type="button" disabled>
+              <span data-lang="en">TestFlight coming soon</span><span lang="bn" data-lang="bn">TestFlight শিগগিরই</span>
+            </button>
           </div>
-          <p class="meta">Android 8+ · iOS 15+ · Version 1.0.0</p>
+          <p class="meta"><span data-lang="en">Android 8+ · iOS 15.5+ · Version ROSID_VERSION_PLACEHOLDER</span><span lang="bn" data-lang="bn">Android 8+ · iOS 15.5+ · সংস্করণ ROSID_VERSION_PLACEHOLDER</span></p>
         </div>
-        <div class="phone hero-art" aria-label="Rosid expense dashboard preview">
-          <div class="phone-screen dashboard-mock">
-            <div class="mock-brand">রসিদ <small>Rosid</small></div>
-            <div class="mock-total"><small>THIS MONTH</small><strong>৳ 18,420</strong></div>
-            <h3>Spend by category</h3>
-            <div class="mock-row"><span>Groceries</span><b>৳8,200</b></div><div class="bar"><i style="width:84%"></i></div>
-            <div class="mock-row"><span>Food</span><b>৳5,120</b></div><div class="bar"><i style="width:54%"></i></div>
-            <div class="mock-row"><span>Transport</span><b>৳3,100</b></div><div class="bar"><i style="width:34%"></i></div>
-            <h3>Recent receipts</h3>
-            <div class="mock-list"><span class="mock-icon">▤</span><span><b>Meena Bazar</b><small>12 July 2026</small></span><strong>৳720</strong></div>
-          </div>
+        <div class="phone hero-art" role="img" aria-label="Rosid expense dashboard preview" data-aria-en="Rosid expense dashboard preview" data-aria-bn="রসিদের খরচের ড্যাশবোর্ডের নমুনা">
+          <img class="app-shot" src="screenshots/dashboard.png" width="1080" height="2400" alt="" decoding="async" fetchpriority="high">
         </div>
       </section>
 
       <section class="privacy-band">
         <div class="wrap">
           <strong data-lang="en">100% offline.</strong>
-          <strong data-lang="bn">১০০% অফলাইন।</strong>
+          <strong lang="bn" data-lang="bn">১০০% অফলাইন।</strong>
           <span data-lang="en"> Your documents never leave your phone.</span>
-          <span data-lang="bn"> আপনার ডকুমেন্ট কখনো ফোনের বাইরে যায় না।</span>
+          <span lang="bn" data-lang="bn"> আপনার ডকুমেন্ট কখনো ফোনের বাইরে যায় না।</span>
         </div>
       </section>
 
       <section class="section wrap" aria-labelledby="features-title">
         <p class="eyebrow" data-lang="en">One app, two focused experiences</p>
-        <p class="eyebrow" data-lang="bn">এক অ্যাপ, দুই ধরনের অভিজ্ঞতা</p>
+        <p class="eyebrow" lang="bn" data-lang="bn">এক অ্যাপ, দুই ধরনের অভিজ্ঞতা</p>
         <h2 id="features-title" data-lang="en">Built for real work in Bangladesh</h2>
-        <h2 data-lang="bn">বাংলাদেশের বাস্তব কাজের জন্য তৈরি</h2>
+        <h2 lang="bn" data-lang="bn">বাংলাদেশের বাস্তব কাজের জন্য তৈরি</h2>
         <div class="features">
-          <article><span>৳</span><h3 data-lang="en">Android expenses</h3><h3 data-lang="bn">Android খরচ</h3><p data-lang="en">Parse merchant, date, total, VAT, category, and items. Correct anything before saving.</p><p data-lang="bn">দোকান, তারিখ, মোট, ভ্যাট, বিভাগ ও পণ্য শনাক্ত করুন। সংরক্ষণের আগে সব সম্পাদনাযোগ্য।</p></article>
-          <article><span>▤</span><h3 data-lang="en">iPhone documents</h3><h3 data-lang="bn">iPhone ডকুমেন্ট</h3><p data-lang="en">Batch-scan notes, handouts, whiteboards, and contracts into searchable documents and PDFs.</p><p data-lang="bn">নোট, হ্যান্ডআউট, হোয়াইটবোর্ড ও চুক্তি একসাথে স্ক্যান করে খোঁজযোগ্য ডকুমেন্ট ও PDF বানান।</p></article>
-          <article><span>অA</span><h3 data-lang="en">Bangla + English</h3><h3 data-lang="bn">বাংলা + English</h3><p data-lang="en">Printed Bangla and English OCR with mixed-script receipt handling and Bangla numerals.</p><p data-lang="bn">বাংলা ও ইংরেজি মুদ্রিত লেখা, মিশ্র ভাষার রসিদ ও বাংলা সংখ্যা শনাক্ত করে।</p></article>
-          <article><span>⌕</span><h3 data-lang="en">Local search</h3><h3 data-lang="bn">লোকাল সার্চ</h3><p data-lang="en">Find saved records by title, merchant, corrected text, or raw OCR—without a server.</p><p data-lang="bn">শিরোনাম, দোকান, সম্পাদিত লেখা বা OCR দিয়ে সার্ভার ছাড়াই খুঁজুন।</p></article>
+          <article><span>৳</span><h3 data-lang="en">Android expenses</h3><h3 lang="bn" data-lang="bn">Android খরচ</h3><p data-lang="en">Parse merchant, date, total, VAT, category, and items. Correct anything before saving.</p><p lang="bn" data-lang="bn">দোকান, তারিখ, মোট, ভ্যাট, বিভাগ ও পণ্য শনাক্ত করুন। সংরক্ষণের আগে সব সম্পাদনাযোগ্য।</p></article>
+          <article><span>▤</span><h3 data-lang="en">iPhone documents</h3><h3 lang="bn" data-lang="bn">iPhone ডকুমেন্ট</h3><p data-lang="en">Batch-scan notes, handouts, whiteboards, and contracts into searchable documents and PDFs.</p><p lang="bn" data-lang="bn">নোট, হ্যান্ডআউট, হোয়াইটবোর্ড ও চুক্তি একসাথে স্ক্যান করে খোঁজযোগ্য ডকুমেন্ট ও PDF বানান।</p></article>
+          <article><span><span lang="bn">অ</span>A</span><h3 data-lang="en">Bangla + English</h3><h3 lang="bn" data-lang="bn">বাংলা + English</h3><p data-lang="en">Printed Bangla and English OCR with mixed-script receipt handling and Bangla numerals.</p><p lang="bn" data-lang="bn">বাংলা ও ইংরেজি মুদ্রিত লেখা, মিশ্র ভাষার রসিদ ও বাংলা সংখ্যা শনাক্ত করে।</p></article>
+          <article><span>⌕</span><h3 data-lang="en">Local search</h3><h3 lang="bn" data-lang="bn">লোকাল সার্চ</h3><p data-lang="en">Find saved records by title, merchant, corrected text, or raw OCR—without a server.</p><p lang="bn" data-lang="bn">শিরোনাম, দোকান, সম্পাদিত লেখা বা OCR দিয়ে সার্ভার ছাড়াই খুঁজুন।</p></article>
         </div>
       </section>
 
-      <section class="section gallery wrap" aria-label="Product previews">
-        <div class="phone" aria-label="Editable low-confidence receipt review">
-          <div class="phone-screen review-mock">
-            <h3>Review receipt</h3><div class="warning">⚠ Verify highlighted fields</div>
-            <div class="paper-lines"><i></i><i></i><i></i><i></i></div>
-            <label>MERCHANT</label><div class="field">Meena Bazar মীনা বাজার</div>
-            <div class="field-pair"><span><label>DATE</label><div class="field">2026-07-12</div></span><span><label>TOTAL</label><div class="field low">৳ 720.00 !</div></span></div>
-            <label>CATEGORY</label><div class="field">Groceries</div><button type="button" tabindex="-1">Save on this device</button>
-          </div>
+      <section class="section gallery wrap" aria-label="Product previews" data-aria-en="Product previews" data-aria-bn="পণ্যের নমুনা">
+        <div class="phone" role="img" aria-label="Editable low-confidence receipt review" data-aria-en="Editable low-confidence receipt review" data-aria-bn="কম নির্ভরযোগ্য ফলাফল সম্পাদনাযোগ্য রসিদ যাচাই">
+          <img class="app-shot" src="screenshots/receipt-review.png" width="1080" height="2400" alt="" loading="lazy" decoding="async">
         </div>
-        <div class="phone" aria-label="Pinned and recent document grid">
-          <div class="phone-screen documents-mock">
-            <div class="mock-brand">রসিদ <small>Documents</small></div><div class="mock-search">⌕ Search documents</div><h3>Pinned documents</h3>
-            <div class="doc-grid"><article><div class="doc-paper">⌖<i></i><i></i><i></i></div><b>Economics notes</b></article><article><div class="doc-paper"><i></i><i></i><i></i></div><b>Client contract</b></article><article><div class="doc-paper image-paper">○</div><b>Whiteboard</b></article><article><div class="doc-paper"><i></i><i></i><i></i></div><b>Lecture handout</b></article></div>
-          </div>
+        <div class="phone" role="img" aria-label="Automatic receipt crop and enhancement" data-aria-en="Automatic receipt crop and enhancement" data-aria-bn="স্বয়ংক্রিয় রসিদ ক্রপ ও উন্নতকরণ">
+          <img class="app-shot" src="screenshots/crop-enhance.png" width="1080" height="2400" alt="" loading="lazy" decoding="async">
         </div>
-        <div class="phone" aria-label="Bangla and English OCR review">
-          <div class="phone-screen ocr-mock">
-            <div class="mock-brand">অA <small>Mixed OCR</small></div><div class="scan-frame"><span>মীনা বাজার</span><span>Chicken মুরগি 500.00</span><span>ভ্যাট VAT 60.00</span><strong>মোট BDT 720.00</strong></div><div class="offline-pill">✓ Processed offline</div><h3>Editable text</h3><div class="field multiline">Meena Bazar মীনা বাজার<br>Chicken মুরগি 500.00<br>মোট BDT 720.00</div>
-          </div>
+        <div class="phone" role="img" aria-label="Private offline settings" data-aria-en="Private offline settings" data-aria-bn="ব্যক্তিগত অফলাইন সেটিংস">
+          <img class="app-shot" src="screenshots/settings.png" width="1080" height="2400" alt="" loading="lazy" decoding="async">
         </div>
       </section>
 
       <section class="section install wrap" id="install">
         <div>
           <p class="eyebrow">Android</p>
-          <h2 data-lang="en">Install the APK</h2><h2 data-lang="bn">APK ইনস্টল করুন</h2>
+          <h2 data-lang="en">Install the APK</h2><h2 lang="bn" data-lang="bn">APK ইনস্টল করুন</h2>
           <details>
-            <summary><span data-lang="en">Show sideload instructions</span><span data-lang="bn">ইনস্টলের নির্দেশনা দেখুন</span></summary>
-            <ol data-lang="en"><li>Download the APK above.</li><li>Open it from your browser's downloads.</li><li>If prompted, allow installs from that browser only.</li><li>Verify the certificate fingerprint shown in the release notes.</li></ol>
-            <ol data-lang="bn"><li>উপরের APK ডাউনলোড করুন।</li><li>ব্রাউজারের ডাউনলোড থেকে খুলুন।</li><li>প্রয়োজন হলে শুধু ওই ব্রাউজারকে ইনস্টলের অনুমতি দিন।</li><li>রিলিজ নোটের সার্টিফিকেট ফিঙ্গারপ্রিন্ট মিলিয়ে নিন।</li></ol>
+            <summary><span data-lang="en">Show sideload instructions</span><span lang="bn" data-lang="bn">ইনস্টলের নির্দেশনা দেখুন</span></summary>
+            <ol data-lang="en"><li>Download the APK above.</li><li>Open it from your browser's downloads.</li><li>If prompted, allow installs from that browser only.</li><li>Verify the certificate fingerprint shown below.</li></ol>
+            <ol lang="bn" data-lang="bn"><li>উপরের APK ডাউনলোড করুন।</li><li>ব্রাউজারের ডাউনলোড থেকে খুলুন।</li><li>প্রয়োজন হলে শুধু ওই ব্রাউজারকে ইনস্টলের অনুমতি দিন।</li><li>নিচে দেখানো সার্টিফিকেট ফিঙ্গারপ্রিন্ট মিলিয়ে নিন।</li></ol>
           </details>
         </div>
         <div>
           <p class="eyebrow">iPhone</p>
-          <h2 data-lang="en">Join through TestFlight</h2><h2 data-lang="bn">TestFlight দিয়ে যোগ দিন</h2>
+          <h2 data-lang="en">Join through TestFlight</h2><h2 lang="bn" data-lang="bn">TestFlight দিয়ে যোগ দিন</h2>
           <p data-lang="en">Apple does not generally allow direct iPhone sideloading. A public TestFlight link will appear here after the first signed build.</p>
-          <p data-lang="bn">Apple সাধারণত iPhone-এ সরাসরি সাইডলোড অনুমতি দেয় না। প্রথম স্বাক্ষরিত বিল্ডের পর এখানে TestFlight লিংক আসবে।</p>
+          <p lang="bn" data-lang="bn">Apple সাধারণত iPhone-এ সরাসরি সাইডলোড অনুমতি দেয় না। প্রথম স্বাক্ষরিত বিল্ডের পর এখানে TestFlight লিংক আসবে।</p>
         </div>
       </section>
 
       <section class="section wrap signature">
-        <h2 data-lang="en">Verify your download</h2><h2 data-lang="bn">ডাউনলোড যাচাই করুন</h2>
-        <p data-lang="en">The signed APK certificate SHA-256 is published in every GitHub Release. Compare it before installing.</p>
-        <p data-lang="bn">প্রতিটি GitHub Release-এ স্বাক্ষরিত APK সার্টিফিকেটের SHA-256 দেওয়া থাকে। ইনস্টলের আগে মিলিয়ে নিন।</p>
-        <code>Certificate SHA-256: see latest release notes</code>
+        <h2 data-lang="en">Verify your download</h2><h2 lang="bn" data-lang="bn">ডাউনলোড যাচাই করুন</h2>
+        <p data-lang="en">Compare this signed APK certificate SHA-256 with the value reported by Android before installing.</p>
+        <p lang="bn" data-lang="bn">ইনস্টলের আগে এই স্বাক্ষরিত APK সার্টিফিকেটের SHA-256 Android-এ দেখানো মানের সঙ্গে মিলিয়ে নিন।</p>
+        <code><span data-lang="en">Certificate SHA-256:</span><span lang="bn" data-lang="bn">সার্টিফিকেট SHA-256:</span> <span data-certificate-sha256>ROSID_CERTIFICATE_SHA256_PLACEHOLDER</span></code>
       </section>
     </main>
 
     <footer class="wrap">
-      <p>Rosid · Offline by design · <a href="https://github.com/OWNER/REPO" data-repo>Source &amp; changelog</a></p>
+      <p data-lang="en">Rosid · Offline by design · <a href="https://github.com/OWNER/REPO/releases/latest" data-changelog>Latest release &amp; changelog</a> · <a href="https://github.com/OWNER/REPO" data-repo>Source code</a></p>
+      <p lang="bn" data-lang="bn">রসিদ · অফলাইনের জন্য তৈরি · <a href="https://github.com/OWNER/REPO/releases/latest" data-changelog>সর্বশেষ রিলিজ ও পরিবর্তন</a> · <a href="https://github.com/OWNER/REPO" data-repo>সোর্স কোড</a></p>
     </footer>
     <script src="app.js"></script>
   </body>

@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:rosid/core/l10n/app_localizations.dart';
 import 'package:rosid/data/repositories/record_repository.dart';
 import 'package:rosid/features/capture/capture_session.dart';
 import 'package:rosid/features/crop/preprocess_controller.dart';
@@ -7,6 +8,7 @@ import 'package:rosid/features/review/ocr_controller.dart';
 class DocumentReviewState {
   const DocumentReviewState({
     this.scanId,
+    this.preprocessGeneration,
     this.title = '',
     this.body = '',
     this.tags = '',
@@ -17,6 +19,7 @@ class DocumentReviewState {
   });
 
   final String? scanId;
+  final int? preprocessGeneration;
   final String title;
   final String body;
   final String tags;
@@ -27,6 +30,7 @@ class DocumentReviewState {
 
   DocumentReviewState copyWith({
     String? scanId,
+    int? preprocessGeneration,
     String? title,
     String? body,
     String? tags,
@@ -36,6 +40,7 @@ class DocumentReviewState {
     String? errorMessage,
   }) => DocumentReviewState(
     scanId: scanId ?? this.scanId,
+    preprocessGeneration: preprocessGeneration ?? this.preprocessGeneration,
     title: title ?? this.title,
     body: body ?? this.body,
     tags: tags ?? this.tags,
@@ -47,22 +52,38 @@ class DocumentReviewState {
 }
 
 class DocumentReviewController extends Notifier<DocumentReviewState> {
+  var _requestToken = 0;
+
   @override
   DocumentReviewState build() => const DocumentReviewState();
 
   Future<void> initialize({
     required CaptureSession session,
     required List<PreprocessedAsset> assets,
+    required AppLocalizations localizations,
   }) async {
-    if (session.scanId == null || state.scanId == session.scanId) return;
-    state = DocumentReviewState(scanId: session.scanId, isLoading: true);
+    final generation = assets.isEmpty ? null : assets.first.generation;
+    if (session.scanId == null || generation == null) return;
+    if (state.scanId == session.scanId &&
+        state.preprocessGeneration == generation &&
+        state.errorMessage == null) {
+      return;
+    }
+    final token = ++_requestToken;
+    final scanId = session.scanId!;
+    state = DocumentReviewState(
+      scanId: scanId,
+      preprocessGeneration: generation,
+      isLoading: true,
+    );
     final ocr = await ref
         .read(ocrControllerProvider.notifier)
         .recognize(session: session, assets: assets);
+    if (!_isCurrent(token, scanId, generation)) return;
     if (ocr == null) {
       state = state.copyWith(
         isLoading: false,
-        errorMessage: ref.read(ocrControllerProvider).errorMessage,
+        errorMessage: localizations.processingFailed,
       );
       return;
     }
@@ -72,8 +93,9 @@ class DocumentReviewController extends Notifier<DocumentReviewState> {
         .where((line) => line.isNotEmpty)
         .toList();
     state = DocumentReviewState(
-      scanId: session.scanId,
-      title: lines.isEmpty ? 'Untitled document' : lines.first,
+      scanId: scanId,
+      preprocessGeneration: generation,
+      title: lines.isEmpty ? localizations.untitledDocument : lines.first,
       body: ocr.text,
       confidence: ocr.meanConfidence,
     );
@@ -83,10 +105,20 @@ class DocumentReviewController extends Notifier<DocumentReviewState> {
   void setBody(String value) => state = state.copyWith(body: value);
   void setTags(String value) => state = state.copyWith(tags: value);
 
-  Future<bool> save() async {
+  bool _isCurrent(int token, String scanId, int generation) =>
+      token == _requestToken &&
+      state.scanId == scanId &&
+      state.preprocessGeneration == generation;
+
+  void reset() {
+    _requestToken++;
+    state = const DocumentReviewState();
+  }
+
+  Future<bool> save({required AppLocalizations localizations}) async {
     final scanId = state.scanId;
     if (scanId == null || state.title.trim().isEmpty) {
-      state = state.copyWith(errorMessage: 'A document title is required.');
+      state = state.copyWith(errorMessage: localizations.documentTitleRequired);
       return false;
     }
     state = state.copyWith(isSaving: true);
@@ -101,8 +133,11 @@ class DocumentReviewController extends Notifier<DocumentReviewState> {
           );
       state = state.copyWith(isSaving: false);
       return true;
-    } on Object catch (error) {
-      state = state.copyWith(isSaving: false, errorMessage: error.toString());
+    } on Object {
+      state = state.copyWith(
+        isSaving: false,
+        errorMessage: localizations.saveFailed,
+      );
       return false;
     }
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rosid/core/extensions/l10n_extension.dart';
 
 class ConfidenceField extends StatelessWidget {
   const ConfidenceField({
@@ -22,7 +23,6 @@ class ConfidenceField extends StatelessWidget {
   Widget build(BuildContext context) {
     final low = confidence < 0.6;
     return TextFormField(
-      key: ValueKey('$label-$initialValue'),
       initialValue: initialValue,
       onChanged: onChanged,
       keyboardType: keyboardType,
@@ -30,9 +30,12 @@ class ConfidenceField extends StatelessWidget {
       decoration: InputDecoration(
         labelText: label,
         suffixIcon: low
-            ? const Tooltip(
-                message: 'Low OCR confidence',
-                child: Icon(Icons.warning_amber_rounded, color: Colors.amber),
+            ? Tooltip(
+                message: context.l10n.lowOcrConfidence,
+                child: const Icon(
+                  Icons.warning_amber_rounded,
+                  color: Colors.amber,
+                ),
               )
             : null,
         enabledBorder: low

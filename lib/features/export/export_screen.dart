@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:rosid/core/extensions/l10n_extension.dart';
+import 'package:rosid/core/utils/share_origin.dart';
+import 'package:rosid/data/files/private_file_store.dart';
 import 'package:rosid/features/export/export_service.dart';
+import 'package:rosid/features/export/temporary_export.dart';
 import 'package:share_plus/share_plus.dart';
 
 class ExportScreen extends ConsumerStatefulWidget {
@@ -41,17 +44,23 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
   }
 
   Future<void> _export() async {
+    final shareOrigin = shareOriginFor(context);
     setState(() => _busy = true);
     try {
-      final path = await ref
-          .read(exportServiceProvider)
-          .createExpenseCsv(_start, _end);
-      if (!mounted) return;
-      await SharePlus.instance.share(
-        ShareParams(
-          files: [XFile(path, mimeType: 'text/csv')],
-          subject: 'Rosid expense export',
-        ),
+      await withTemporaryExport<void>(
+        fileStore: ref.read(privateFileStoreProvider),
+        create: () =>
+            ref.read(exportServiceProvider).createExpenseCsv(_start, _end),
+        use: (path) async {
+          if (!mounted) return;
+          await SharePlus.instance.share(
+            ShareParams(
+              files: [XFile(path, mimeType: 'text/csv')],
+              subject: 'Rosid expense export',
+              sharePositionOrigin: shareOrigin,
+            ),
+          );
+        },
       );
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -70,7 +79,7 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
               onTap: _pickRange,
               leading: const Icon(Icons.date_range),
               title: Text(
-                '${DateFormat.yMMMd().format(_start)} – ${DateFormat.yMMMd().format(_end)}',
+                '${DateFormat.yMMMd(Localizations.localeOf(context).toLanguageTag()).format(_start)} – ${DateFormat.yMMMd(Localizations.localeOf(context).toLanguageTag()).format(_end)}',
               ),
               subtitle: Text(context.l10n.filter),
               trailing: const Icon(Icons.chevron_right),

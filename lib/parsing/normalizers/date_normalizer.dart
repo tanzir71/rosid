@@ -64,7 +64,10 @@ abstract final class DateNormalizer {
         int.parse(ymd.group(3)!),
       );
       if (date != null) {
-        return NormalizedDateMatch(value: date, rawText: ymd.group(0)!);
+        return NormalizedDateMatch(
+          value: date,
+          rawText: original.substring(ymd.start, ymd.end),
+        );
       }
     }
 
@@ -79,7 +82,10 @@ abstract final class DateNormalizer {
         int.parse(dmy.group(1)!),
       );
       if (date != null) {
-        return NormalizedDateMatch(value: date, rawText: dmy.group(0)!);
+        return NormalizedDateMatch(
+          value: date,
+          rawText: original.substring(dmy.start, dmy.end),
+        );
       }
     }
 
@@ -98,7 +104,10 @@ abstract final class DateNormalizer {
               int.parse(named.group(1)!),
             );
       if (date != null) {
-        return NormalizedDateMatch(value: date, rawText: named.group(0)!);
+        return NormalizedDateMatch(
+          value: date,
+          rawText: original.substring(named.start, named.end),
+        );
       }
     }
     return null;

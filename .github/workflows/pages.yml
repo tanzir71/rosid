@@ -24,14 +24,42 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Prepare repository-specific links
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - name: Prepare repository and release metadata
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           cp -R site site-dist
+          certificate_sha256='Pending first signed release'
+          if gh release view --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            release_metadata_dir="$(mktemp -d)"
+            gh release download \
+              --repo "$GITHUB_REPOSITORY" \
+              --pattern certificate-sha256.txt \
+              --dir "$release_metadata_dir"
+            certificate_sha256="$(
+              tr '[:lower:]' '[:upper:]' < "$release_metadata_dir/certificate-sha256.txt" \
+                | tr -d '[:space:]:'
+            )"
+            if [[ ! "$certificate_sha256" =~ ^[0-9A-F]{64}$ ]]; then
+              echo "::error::Latest release signing certificate SHA-256 is malformed."
+              exit 1
+            fi
+          fi
+          pubspec_version="$(awk '$1 == "version:" { print $2; exit }' pubspec.yaml)"
+          test -n "$pubspec_version"
+          grep -q 'ROSID_CERTIFICATE_SHA256_PLACEHOLDER' site-dist/index.html
+          grep -q 'ROSID_VERSION_PLACEHOLDER' site-dist/index.html
           sed -i "s#OWNER/REPO#${GITHUB_REPOSITORY}#g" site-dist/index.html
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+          sed -i "s#ROSID_CERTIFICATE_SHA256_PLACEHOLDER#${certificate_sha256}#g" site-dist/index.html
+          sed -i "s#ROSID_VERSION_PLACEHOLDER#${pubspec_version}#g" site-dist/index.html
+          if grep -qE 'OWNER/REPO|ROSID_(CERTIFICATE_SHA256|VERSION)_PLACEHOLDER' site-dist/index.html; then
+            echo "::error::Site deployment still contains an unresolved placeholder."
+            exit 1
+          fi
+      - uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5.0.0
+      - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3.0.1
         with:
           path: site-dist
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5

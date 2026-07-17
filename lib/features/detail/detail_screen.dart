@@ -5,10 +5,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:rosid/core/extensions/l10n_extension.dart';
+import 'package:rosid/core/settings/app_settings.dart';
+import 'package:rosid/core/utils/money.dart';
+import 'package:rosid/core/utils/share_origin.dart';
 import 'package:rosid/data/files/private_file_store.dart';
 import 'package:rosid/data/repositories/history_repository.dart';
-import 'package:rosid/features/history/history_state.dart';
+import 'package:rosid/features/history/record_view_cache.dart';
 import 'package:rosid/features/export/document_pdf_service.dart';
+import 'package:rosid/features/export/temporary_export.dart';
 import 'package:share_plus/share_plus.dart';
 
 class DetailScreen extends ConsumerStatefulWidget {
@@ -22,6 +26,7 @@ class DetailScreen extends ConsumerStatefulWidget {
 
 class _DetailScreenState extends ConsumerState<DetailScreen> {
   late Future<ScanDetail?> _detail;
+  bool _deleteBusy = false;
 
   @override
   void initState() {
@@ -41,21 +46,33 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
       ShareParams(
         files: paths.map(XFile.new).toList(),
         subject: detail.entry.title,
+        sharePositionOrigin: shareOriginFor(context),
       ),
     );
   }
 
   Future<void> _sharePdf(ScanDetail detail) async {
-    final path = await ref.read(documentPdfServiceProvider).create(detail);
-    await SharePlus.instance.share(
-      ShareParams(
-        files: [XFile(path, mimeType: 'application/pdf')],
-        subject: detail.entry.title,
-      ),
+    final shareOrigin = shareOriginFor(context);
+    await withTemporaryExport<void>(
+      fileStore: ref.read(privateFileStoreProvider),
+      create: () => ref.read(documentPdfServiceProvider).create(detail),
+      use: (path) async {
+        if (!mounted) return;
+        await SharePlus.instance.share(
+          ShareParams(
+            files: [XFile(path, mimeType: 'application/pdf')],
+            subject: detail.entry.title,
+            sharePositionOrigin: shareOrigin,
+          ),
+        );
+      },
     );
   }
 
   Future<void> _delete(ScanDetail detail) async {
+    if (_deleteBusy) return;
+    final historyRepository = ref.read(historyRepositoryProvider);
+    final fileStore = ref.read(privateFileStoreProvider);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -74,103 +91,87 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
       ),
     );
     if (confirmed != true) return;
-    final paths = await ref
-        .read(historyRepositoryProvider)
-        .delete(widget.scanId);
-    for (final path in paths) {
-      await ref.read(privateFileStoreProvider).deleteIfPresent(path);
-      await ref
-          .read(privateFileStoreProvider)
-          .deleteIfPresent(path.replaceFirst('_color.jpg', '_bw.jpg'));
+    if (mounted) setState(() => _deleteBusy = true);
+    try {
+      final paths = await historyRepository.delete(widget.scanId);
+      await fileStore.deleteRecordArtifacts(
+        scanId: widget.scanId,
+        knownPaths: paths,
+      );
+      if (!mounted) return;
+      invalidateRecordViews(ref);
+      setState(() => _deleteBusy = false);
+      context.pop();
+    } on Object {
+      if (mounted) setState(() => _deleteBusy = false);
+      rethrow;
     }
-    ref.invalidate(historyResultsProvider);
-    if (mounted) context.pop();
   }
 
-  Future<void> _rename(ScanDetail detail) async {
-    final controller = TextEditingController(text: detail.entry.title);
-    final value = await showDialog<String>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(context.l10n.edit),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          decoration: InputDecoration(
-            labelText: detail.entry.isReceipt
-                ? context.l10n.merchant
-                : context.l10n.title,
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(context.l10n.cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, controller.text.trim()),
-            child: Text(context.l10n.save),
-          ),
-        ],
-      ),
-    );
-    controller.dispose();
-    if (value == null || value.isEmpty) return;
-    await ref.read(historyRepositoryProvider).rename(widget.scanId, value);
-    ref.invalidate(historyResultsProvider);
-    setState(_reload);
+  Future<void> _edit() async {
+    final changed = await context.push<bool>('/detail/${widget.scanId}/edit');
+    if (changed == true && mounted) setState(_reload);
   }
 
   @override
   Widget build(BuildContext context) {
+    final expenseEnabled = ref.watch(expenseTrackingEnabledProvider);
     return FutureBuilder<ScanDetail?>(
       future: _detail,
       builder: (context, snapshot) {
-        final detail = snapshot.data;
-        return Scaffold(
-          appBar: AppBar(
-            title: Text(detail?.entry.title ?? context.l10n.document),
-            actions: [
-              if (detail != null) ...[
-                IconButton(
-                  onPressed: () => _rename(detail),
-                  icon: const Icon(Icons.edit_outlined),
-                ),
-                IconButton(
-                  onPressed: () => _share(detail),
-                  icon: const Icon(Icons.share_outlined),
-                ),
-                if (detail.entry.document != null)
+        final loadedDetail = snapshot.data;
+        final detail =
+            !expenseEnabled && (loadedDetail?.entry.isReceipt ?? false)
+            ? null
+            : loadedDetail;
+        return PopScope(
+          canPop: !_deleteBusy,
+          child: Scaffold(
+            appBar: AppBar(
+              title: Text(detail?.entry.title ?? context.l10n.document),
+              actions: [
+                if (detail != null) ...[
                   IconButton(
-                    onPressed: () => _sharePdf(detail),
-                    tooltip: context.l10n.exportPdf,
-                    icon: const Icon(Icons.picture_as_pdf_outlined),
+                    onPressed: _deleteBusy ? null : _edit,
+                    icon: const Icon(Icons.edit_outlined),
                   ),
-                IconButton(
-                  onPressed: () => _delete(detail),
-                  icon: const Icon(Icons.delete_outline),
-                ),
+                  IconButton(
+                    onPressed: _deleteBusy ? null : () => _share(detail),
+                    icon: const Icon(Icons.share_outlined),
+                  ),
+                  if (detail.entry.document != null)
+                    IconButton(
+                      onPressed: _deleteBusy ? null : () => _sharePdf(detail),
+                      tooltip: context.l10n.exportPdf,
+                      icon: const Icon(Icons.picture_as_pdf_outlined),
+                    ),
+                  IconButton(
+                    onPressed: _deleteBusy ? null : () => _delete(detail),
+                    icon: const Icon(Icons.delete_outline),
+                  ),
+                ],
               ],
-            ],
+            ),
+            body: snapshot.connectionState != ConnectionState.done
+                ? const Center(child: CircularProgressIndicator())
+                : detail == null
+                ? Center(child: Text(context.l10n.noResults))
+                : _DetailBody(
+                    detail: detail,
+                    onPin: detail.entry.document == null
+                        ? null
+                        : () async {
+                            await ref
+                                .read(historyRepositoryProvider)
+                                .setPinned(
+                                  widget.scanId,
+                                  !detail.entry.document!.pinned,
+                                );
+                            invalidateRecordViews(ref);
+                            setState(_reload);
+                          },
+                  ),
           ),
-          body: snapshot.connectionState != ConnectionState.done
-              ? const Center(child: CircularProgressIndicator())
-              : detail == null
-              ? Center(child: Text(context.l10n.noResults))
-              : _DetailBody(
-                  detail: detail,
-                  onPin: detail.entry.document == null
-                      ? null
-                      : () async {
-                          await ref
-                              .read(historyRepositoryProvider)
-                              .setPinned(
-                                widget.scanId,
-                                !detail.entry.document!.pinned,
-                              );
-                          setState(_reload);
-                        },
-                ),
         );
       },
     );
@@ -212,21 +213,23 @@ class _DetailBody extends StatelessWidget {
           _ValueRow(label: context.l10n.merchant, value: receipt.merchant),
           _ValueRow(
             label: context.l10n.purchaseDate,
-            value: DateFormat.yMMMd().format(receipt.dateOfPurchase),
+            value: DateFormat.yMMMd(
+              Localizations.localeOf(context).toLanguageTag(),
+            ).format(receipt.dateOfPurchase),
           ),
           _ValueRow(
             label: context.l10n.total,
-            value: '৳${receipt.total.toStringAsFixed(2)}',
+            value: formatMoney(receipt.total, receipt.currency),
           ),
           if (receipt.tax != null)
             _ValueRow(
               label: context.l10n.tax,
-              value: '৳${receipt.tax!.toStringAsFixed(2)}',
+              value: formatMoney(receipt.tax!, receipt.currency),
             ),
           for (final item in detail.lineItems)
             _ValueRow(
               label: '${item.name} × ${item.qty}',
-              value: '৳${item.amount.toStringAsFixed(2)}',
+              value: formatMoney(item.amount, receipt.currency),
             ),
         ],
         if (document != null) ...[

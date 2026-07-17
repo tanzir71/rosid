@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:rosid/core/profile/app_profile.dart';
 import 'package:rosid/data/database/app_database.dart';
 import 'package:rosid/data/repositories/history_repository.dart';
+import 'package:rosid/data/repositories/dashboard_repository.dart';
 import 'package:rosid/data/repositories/record_repository.dart';
 import 'package:rosid/data/repositories/scan_repository.dart';
 import 'package:rosid/data/repositories/settings_repository.dart';
@@ -92,6 +93,60 @@ void main() {
     expect(await database.searchScanIds('supply'), ['document-1']);
   });
 
+  test('deduplicates repeated document tags', () async {
+    await createScan('document-1', ScanMode.document);
+    await records.saveDocument(
+      scanId: 'document-1',
+      title: 'Economics notes',
+      body: 'Demand and supply',
+      tags: const ['study', 'study', ' study '],
+    );
+
+    expect(await database.select(database.tags).get(), hasLength(1));
+    expect(await database.select(database.scanTags).get(), hasLength(1));
+  });
+
+  test(
+    'editing document tags removes private tag text no longer in use',
+    () async {
+      await createScan('document-1', ScanMode.document);
+      await records.saveDocument(
+        scanId: 'document-1',
+        title: 'Notes',
+        body: '',
+        tags: const ['private-old-tag'],
+      );
+
+      await records.saveDocument(
+        scanId: 'document-1',
+        title: 'Notes',
+        body: '',
+        tags: const ['current-tag'],
+      );
+
+      expect(
+        (await database.select(database.tags).get()).map((tag) => tag.name),
+        ['current-tag'],
+      );
+    },
+  );
+
+  test('rename preserves body and tags in the search index', () async {
+    await createScan('document-1', ScanMode.document);
+    await records.saveDocument(
+      scanId: 'document-1',
+      title: 'Old title',
+      body: 'elasticity chapter',
+      tags: const ['exam'],
+    );
+
+    await history.rename('document-1', 'New title');
+
+    expect(await database.searchScanIds('elasticity'), ['document-1']);
+    expect(await database.searchScanIds('exam'), ['document-1']);
+    expect(await database.searchScanIds('New'), ['document-1']);
+  });
+
   test('history filters receipts by category', () async {
     await createScan('receipt-1', ScanMode.receipt);
     await records.saveReceipt(
@@ -111,15 +166,99 @@ void main() {
     expect(values.single.title, 'Cafe');
   });
 
+  test('history date filter uses purchase date for receipts', () async {
+    await createScan('receipt-1', ScanMode.receipt);
+    await records.saveReceipt(
+      scanId: 'receipt-1',
+      merchant: 'Cafe',
+      date: DateTime(2026, 6, 30),
+      total: 250,
+      currency: 'BDT',
+      categoryId: 'food',
+      items: const [],
+      fieldConfidence: const {},
+    );
+
+    final july = await history.list(
+      HistoryQuery(start: DateTime(2026, 7, 1), end: DateTime(2026, 7, 31)),
+    );
+    final june = await history.list(
+      HistoryQuery(start: DateTime(2026, 6, 1), end: DateTime(2026, 6, 30)),
+    );
+
+    expect(july, isEmpty);
+    expect(june.single.title, 'Cafe');
+  });
+
+  test('dashboard never adds different currencies together', () async {
+    for (final value in [('bdt', 'BDT', 100.0), ('usd', 'USD', 20.0)]) {
+      await createScan(value.$1, ScanMode.receipt);
+      await records.saveReceipt(
+        scanId: value.$1,
+        merchant: value.$1,
+        date: DateTime(2026, 7, 15),
+        total: value.$3,
+        currency: value.$2,
+        categoryId: 'other',
+        items: const [],
+        fieldConfidence: const {},
+      );
+    }
+
+    final summary = await DashboardRepository(
+      database,
+      history,
+    ).monthly(DateTime(2026, 7), currency: 'BDT', languageCode: 'en');
+
+    expect(summary.total, 100);
+    expect(summary.currency, 'BDT');
+    expect(summary.recent.single.receipt!.currency, 'BDT');
+  });
+
   test(
     'delete all returns private paths and keeps default categories',
     () async {
       await createScan('document-1', ScanMode.document);
+      await scans.setThumbnailPath(
+        scanId: 'document-1',
+        path: '/private/document-1-thumb.jpg',
+      );
       final paths = await SettingsRepository(database).deleteAllData();
 
       expect(paths, contains('/private/document-1.jpg'));
+      expect(paths, contains('/private/document-1-thumb.jpg'));
       expect(await database.select(database.scans).get(), isEmpty);
       expect(await database.select(database.categories).get(), hasLength(7));
     },
   );
+
+  test('record delete returns its thumbnail for file cleanup', () async {
+    await createScan('document-1', ScanMode.document);
+    await scans.setThumbnailPath(
+      scanId: 'document-1',
+      path: '/private/document-1-thumb.jpg',
+    );
+
+    final paths = await history.delete('document-1');
+
+    expect(
+      paths,
+      containsAll(['/private/document-1.jpg', '/private/document-1-thumb.jpg']),
+    );
+    expect(await database.select(database.scans).get(), isEmpty);
+  });
+
+  test('record delete removes tag text that is no longer referenced', () async {
+    await createScan('document-1', ScanMode.document);
+    await records.saveDocument(
+      scanId: 'document-1',
+      title: 'Private notes',
+      body: '',
+      tags: const ['private-delete-tag'],
+    );
+
+    await history.delete('document-1');
+
+    expect(await database.select(database.tags).get(), isEmpty);
+  });
 }

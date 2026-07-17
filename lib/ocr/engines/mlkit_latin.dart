@@ -3,6 +3,9 @@ import 'package:rosid/ocr/engines/ocr_engine.dart';
 import 'package:rosid/ocr/models/ocr_models.dart';
 import 'package:rosid/ocr/script_detect.dart';
 
+double mlKitConfidenceOrFallback(double? confidence) =>
+    (confidence ?? 0.55).clamp(0, 1).toDouble();
+
 class MlKitLatinEngine implements OcrEngine {
   MlKitLatinEngine()
     : _recognizer = TextRecognizer(script: TextRecognitionScript.latin);
@@ -27,26 +30,39 @@ class MlKitLatinEngine implements OcrEngine {
     final recognized = await _recognizer.processImage(
       InputImage.fromFilePath(image.colorCorrectedPath),
     );
-    final blocks = recognized.blocks.map((block) {
-      final lineConfidences = block.lines
-          .map((line) => line.confidence)
-          .whereType<double>()
-          .toList();
-      final confidence = lineConfidences.isEmpty
-          ? 0.78
-          : lineConfidences.reduce((a, b) => a + b) / lineConfidences.length;
-      return OcrBlock(
-        text: block.text,
-        boundingBox: OcrRect(
-          left: block.boundingBox.left,
-          top: block.boundingBox.top,
-          right: block.boundingBox.right,
-          bottom: block.boundingBox.bottom,
+    final blocks = recognized.blocks.expand((block) {
+      final lines = block.lines;
+      if (lines.isEmpty) {
+        return [
+          OcrBlock(
+            text: block.text,
+            boundingBox: OcrRect(
+              left: block.boundingBox.left,
+              top: block.boundingBox.top,
+              right: block.boundingBox.right,
+              bottom: block.boundingBox.bottom,
+            ),
+            confidence: mlKitConfidenceOrFallback(null),
+            script: ScriptDetector.classify(block.text),
+            engineId: id,
+            pageIndex: image.pageIndex,
+          ),
+        ];
+      }
+      return lines.map(
+        (line) => OcrBlock(
+          text: line.text,
+          boundingBox: OcrRect(
+            left: line.boundingBox.left,
+            top: line.boundingBox.top,
+            right: line.boundingBox.right,
+            bottom: line.boundingBox.bottom,
+          ),
+          confidence: mlKitConfidenceOrFallback(line.confidence),
+          script: ScriptDetector.classify(line.text),
+          engineId: id,
+          pageIndex: image.pageIndex,
         ),
-        confidence: confidence.clamp(0, 1),
-        script: ScriptDetector.classify(block.text),
-        engineId: id,
-        pageIndex: image.pageIndex,
       );
     }).toList();
     return OcrResult(blocks: blocks, engineIds: {id});

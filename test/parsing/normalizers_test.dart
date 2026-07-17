@@ -81,6 +81,13 @@ void main() {
     test('rejects an out-of-range year', () {
       expect(DateNormalizer.find('15/07/1999'), isNull);
     });
+
+    test('keeps Bangla numerals in date raw text', () {
+      final match = DateNormalizer.find('তারিখ: ১৫/০৭/২০২৬');
+
+      expect(match?.value, DateTime(2026, 7, 15));
+      expect(match?.rawText, '১৫/০৭/২০২৬');
+    });
   });
 
   group('Text normalization', () {

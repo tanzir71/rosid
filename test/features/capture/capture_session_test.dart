@@ -17,6 +17,7 @@ void main() {
 
   setUpAll(() {
     registerFallbackValue(ScanMode.receipt);
+    registerFallbackValue(<String>[]);
   });
 
   setUp(() {
@@ -90,5 +91,78 @@ void main() {
         createdAt: any(named: 'createdAt'),
       ),
     ).called(1);
+  });
+
+  test('discard deletes the database row and every scan artifact', () async {
+    when(
+      () => files.persistCapture(
+        sourcePath: any(named: 'sourcePath'),
+        scanId: any(named: 'scanId'),
+        pageIndex: any(named: 'pageIndex'),
+      ),
+    ).thenAnswer((_) async => '/private/page-0.jpg');
+    when(
+      () => scans.createScan(
+        id: any(named: 'id'),
+        mode: any(named: 'mode'),
+        imagePath: any(named: 'imagePath'),
+        langHint: any(named: 'langHint'),
+        createdAt: any(named: 'createdAt'),
+      ),
+    ).thenAnswer((_) async {});
+    when(() => scans.deleteScan(any())).thenAnswer((_) async {});
+    when(
+      () => files.deleteScanArtifacts(
+        scanId: any(named: 'scanId'),
+        knownPaths: any(named: 'knownPaths'),
+      ),
+    ).thenAnswer((_) async {});
+    final value = container();
+    final controller = value.read(captureSessionProvider.notifier);
+    await controller.addSourcePath('/tmp/a.jpg');
+    final scanId = value.read(captureSessionProvider).scanId!;
+
+    await controller.discard();
+
+    verify(() => scans.deleteScan(scanId)).called(1);
+    verify(
+      () => files.deleteScanArtifacts(
+        scanId: scanId,
+        knownPaths: any(named: 'knownPaths'),
+      ),
+    ).called(1);
+    expect(value.read(captureSessionProvider).scanId, isNull);
+    expect(value.read(captureSessionProvider).pagePaths, isEmpty);
+  });
+
+  test('database failure removes the newly copied private image', () async {
+    when(
+      () => files.persistCapture(
+        sourcePath: any(named: 'sourcePath'),
+        scanId: any(named: 'scanId'),
+        pageIndex: any(named: 'pageIndex'),
+      ),
+    ).thenAnswer((_) async => '/private/page-0.jpg');
+    when(
+      () => scans.createScan(
+        id: any(named: 'id'),
+        mode: any(named: 'mode'),
+        imagePath: any(named: 'imagePath'),
+        langHint: any(named: 'langHint'),
+        createdAt: any(named: 'createdAt'),
+      ),
+    ).thenThrow(StateError('database unavailable'));
+    when(() => files.deleteIfPresent(any())).thenAnswer((_) async {});
+    final value = container();
+
+    expect(
+      await value
+          .read(captureSessionProvider.notifier)
+          .addSourcePath('/tmp/a.jpg'),
+      isFalse,
+    );
+
+    verify(() => files.deleteIfPresent('/private/page-0.jpg')).called(1);
+    expect(value.read(captureSessionProvider).pagePaths, isEmpty);
   });
 }

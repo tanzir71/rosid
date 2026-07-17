@@ -88,8 +88,16 @@ class RecordRepository {
       )..where((row) => row.id.equals(scanId))).getSingle();
       await database.indexScan(
         scanId: scanId,
-        text: [scan.ocrRawText, merchant, note],
+        text: [
+          scan.ocrRawText,
+          merchant,
+          note,
+          items.map((item) => item.name).join(' '),
+        ],
       );
+      await (database.update(database.scans)
+            ..where((row) => row.id.equals(scanId)))
+          .write(ScansCompanion(updatedAt: Value(DateTime.now())));
     });
   }
 
@@ -132,8 +140,11 @@ class RecordRepository {
       await (database.delete(
         database.scanTags,
       )..where((row) => row.scanId.equals(scanId))).go();
-      for (final tagName
-          in tags.map((tag) => tag.trim()).where((tag) => tag.isNotEmpty)) {
+      final uniqueTags = tags
+          .map((tag) => tag.trim())
+          .where((tag) => tag.isNotEmpty)
+          .toSet();
+      for (final tagName in uniqueTags) {
         final existingTag = await (database.select(
           database.tags,
         )..where((row) => row.name.equals(tagName))).getSingleOrNull();
@@ -147,13 +158,22 @@ class RecordRepository {
             .into(database.scanTags)
             .insert(ScanTagsCompanion.insert(scanId: scanId, tagId: tagId));
       }
+      await database.customStatement('''
+        DELETE FROM tags
+        WHERE NOT EXISTS (
+          SELECT 1 FROM scan_tags WHERE scan_tags.tag_id = tags.id
+        )
+      ''');
       final scan = await (database.select(
         database.scans,
       )..where((row) => row.id.equals(scanId))).getSingle();
       await database.indexScan(
         scanId: scanId,
-        text: [scan.ocrRawText, title, body, tags.join(' ')],
+        text: [scan.ocrRawText, title, body, uniqueTags.join(' ')],
       );
+      await (database.update(database.scans)
+            ..where((row) => row.id.equals(scanId)))
+          .write(ScansCompanion(updatedAt: Value(DateTime.now())));
     });
   }
 

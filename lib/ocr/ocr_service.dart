@@ -1,11 +1,28 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rosid/ocr/engines/mlkit_latin.dart';
+import 'package:rosid/ocr/engines/ocr_engine.dart';
 import 'package:rosid/ocr/engines/tesseract_bn.dart';
 import 'package:rosid/ocr/engines/tflite_bn_stub.dart';
 import 'package:rosid/ocr/merge.dart';
 import 'package:rosid/ocr/models/ocr_models.dart';
 import 'package:rosid/ocr/script_detect.dart';
 import 'package:rosid/ocr/tessdata_installer.dart';
+
+class BanglaOcrUnavailableException implements Exception {
+  BanglaOcrUnavailableException(Iterable<String> missingFiles)
+    : missingFiles = List.unmodifiable(missingFiles);
+
+  final List<String> missingFiles;
+
+  @override
+  String toString() {
+    final files = missingFiles.isEmpty
+        ? 'unknown files'
+        : missingFiles.join(', ');
+    return 'Bangla OCR language data is unavailable ($files). '
+        'Reinstall or update Rosid to restore its bundled offline OCR data.';
+  }
+}
 
 class OcrService {
   const OcrService({
@@ -15,9 +32,9 @@ class OcrService {
     required this.tessdataInstaller,
   });
 
-  final MlKitLatinEngine latinEngine;
-  final TesseractBanglaEngine banglaEngine;
-  final TfliteBanglaHandwritingEngine handwritingEngine;
+  final OcrEngine latinEngine;
+  final OcrEngine banglaEngine;
+  final OcrEngine handwritingEngine;
   final TessdataInstaller tessdataInstaller;
 
   Future<OcrResult> recognize(
@@ -32,10 +49,11 @@ class OcrService {
       var pageResult = latin;
       if (ScriptDetector.shouldRunBanglaEngine(latin, hint: hint)) {
         tessdata ??= await tessdataInstaller.install();
-        if (tessdata.isComplete) {
-          final bangla = await banglaEngine.recognize(page, hint: hint);
-          pageResult = OcrMerger.merge(latin, bangla);
+        if (!tessdata.isComplete) {
+          throw BanglaOcrUnavailableException(tessdata.missing);
         }
+        final bangla = await banglaEngine.recognize(page, hint: hint);
+        pageResult = OcrMerger.merge(latin, bangla);
       }
       blocks.addAll(pageResult.blocks);
       engines.addAll(pageResult.engineIds);

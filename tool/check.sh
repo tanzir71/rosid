@@ -10,13 +10,15 @@ cd "$PROJECT_DIR"
 
 "$FLUTTER_BIN" --no-version-check gen-l10n
 "$DART_BIN" run build_runner build
-"$DART_BIN" format --output=none --set-exit-if-changed lib test
+"$DART_BIN" run tool/generate_ocr_fixture_bundle.dart
+"$DART_BIN" format --output=none --set-exit-if-changed lib test integration_test tool
 "$FLUTTER_BIN" --no-version-check analyze
 "$FLUTTER_BIN" --no-version-check test
 "$PROJECT_DIR/tool/audit_offline.sh"
 
 if [[ "${ROSID_RUN_BUILD:-0}" == "1" ]]; then
   "$FLUTTER_BIN" --no-version-check build apk --debug
+  "$PROJECT_DIR/tool/audit_offline.sh"
 else
   echo "Skipping APK build (set ROSID_RUN_BUILD=1 on a provisioned machine)."
 fi

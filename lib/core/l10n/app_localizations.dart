@@ -506,6 +506,18 @@ abstract class AppLocalizations {
   /// **'Version'**
   String get version;
 
+  /// No description provided for @versionUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Version unavailable'**
+  String get versionUnavailable;
+
+  /// No description provided for @releasesAndUpdates.
+  ///
+  /// In en, this message translates to:
+  /// **'Releases and updates'**
+  String get releasesAndUpdates;
+
   /// No description provided for @cameraUnavailable.
   ///
   /// In en, this message translates to:
@@ -601,6 +613,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Spend by category'**
   String get spendByCategory;
+
+  /// No description provided for @untitledDocument.
+  ///
+  /// In en, this message translates to:
+  /// **'Untitled document'**
+  String get untitledDocument;
+
+  /// No description provided for @documentTitleRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'A document title is required.'**
+  String get documentTitleRequired;
+
+  /// No description provided for @receiptFieldsRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Merchant, date, and total are required.'**
+  String get receiptFieldsRequired;
+
+  /// No description provided for @validTotalAndTaxRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter valid non-negative total and tax amounts.'**
+  String get validTotalAndTaxRequired;
+
+  /// No description provided for @validTaxRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid tax amount.'**
+  String get validTaxRequired;
+
+  /// No description provided for @validLineItemRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Each line item needs a valid name, quantity, and amount.'**
+  String get validLineItemRequired;
+
+  /// No description provided for @quantity.
+  ///
+  /// In en, this message translates to:
+  /// **'Quantity'**
+  String get quantity;
+
+  /// No description provided for @unitPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Unit price'**
+  String get unitPrice;
+
+  /// No description provided for @lowOcrConfidence.
+  ///
+  /// In en, this message translates to:
+  /// **'Low OCR confidence'**
+  String get lowOcrConfidence;
+
+  /// No description provided for @loadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load your saved data. Please try again.'**
+  String get loadFailed;
+
+  /// No description provided for @saveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save your changes. Please try again.'**
+  String get saveFailed;
+
+  /// No description provided for @processingFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not process this scan. Please try again.'**
+  String get processingFailed;
+
+  /// No description provided for @offline.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline'**
+  String get offline;
 }
 
 class _AppLocalizationsDelegate

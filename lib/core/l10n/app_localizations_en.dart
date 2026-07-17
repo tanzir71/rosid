@@ -218,6 +218,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get version => 'Version';
 
   @override
+  String get versionUnavailable => 'Version unavailable';
+
+  @override
+  String get releasesAndUpdates => 'Releases and updates';
+
+  @override
   String get cameraUnavailable =>
       'Camera is unavailable. You can import an image from the gallery.';
 
@@ -274,4 +280,46 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get spendByCategory => 'Spend by category';
+
+  @override
+  String get untitledDocument => 'Untitled document';
+
+  @override
+  String get documentTitleRequired => 'A document title is required.';
+
+  @override
+  String get receiptFieldsRequired => 'Merchant, date, and total are required.';
+
+  @override
+  String get validTotalAndTaxRequired =>
+      'Enter valid non-negative total and tax amounts.';
+
+  @override
+  String get validTaxRequired => 'Enter a valid tax amount.';
+
+  @override
+  String get validLineItemRequired =>
+      'Each line item needs a valid name, quantity, and amount.';
+
+  @override
+  String get quantity => 'Quantity';
+
+  @override
+  String get unitPrice => 'Unit price';
+
+  @override
+  String get lowOcrConfidence => 'Low OCR confidence';
+
+  @override
+  String get loadFailed => 'Could not load your saved data. Please try again.';
+
+  @override
+  String get saveFailed => 'Could not save your changes. Please try again.';
+
+  @override
+  String get processingFailed =>
+      'Could not process this scan. Please try again.';
+
+  @override
+  String get offline => 'Offline';
 }

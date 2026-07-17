@@ -68,6 +68,8 @@
   "privacyDescription": "Your documents never leave your phone. Rosid has no account, analytics, or network access.",
   "about": "About",
   "version": "Version",
+  "versionUnavailable": "Version unavailable",
+  "releasesAndUpdates": "Releases and updates",
   "cameraUnavailable": "Camera is unavailable. You can import an image from the gallery.",
   "cameraPermission": "Camera access is needed to scan.",
   "processing": "Processing on your device…",
@@ -84,5 +86,18 @@
   "mixedBanglaEnglish": "Bangla + English",
   "confidence": "Confidence",
   "monthlySpend": "Monthly spend",
-  "spendByCategory": "Spend by category"
+  "spendByCategory": "Spend by category",
+  "untitledDocument": "Untitled document",
+  "documentTitleRequired": "A document title is required.",
+  "receiptFieldsRequired": "Merchant, date, and total are required.",
+  "validTotalAndTaxRequired": "Enter valid non-negative total and tax amounts.",
+  "validTaxRequired": "Enter a valid tax amount.",
+  "validLineItemRequired": "Each line item needs a valid name, quantity, and amount.",
+  "quantity": "Quantity",
+  "unitPrice": "Unit price",
+  "lowOcrConfidence": "Low OCR confidence",
+  "loadFailed": "Could not load your saved data. Please try again.",
+  "saveFailed": "Could not save your changes. Please try again.",
+  "processingFailed": "Could not process this scan. Please try again.",
+  "offline": "Offline"
 }

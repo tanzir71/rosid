@@ -61,11 +61,20 @@ class ScanRepository {
 
   Future<void> setProcessedPagePath({
     required String pageId,
-    required String path,
+    required String? path,
   }) {
     return (database.update(database.scanPages)
           ..where((row) => row.id.equals(pageId)))
         .write(ScanPagesCompanion(processedPath: Value(path)));
+  }
+
+  Future<void> setThumbnailPath({
+    required String scanId,
+    required String? path,
+  }) {
+    return (database.update(database.scans)
+          ..where((row) => row.id.equals(scanId)))
+        .write(ScansCompanion(thumbPath: Value(path)));
   }
 
   Stream<List<Scan>> watchScans() {
@@ -93,27 +102,31 @@ class ScanRepository {
     required String engine,
     required double meanConfidence,
   }) async {
-    await (database.update(
-      database.scans,
-    )..where((row) => row.id.equals(scanId))).write(
-      ScansCompanion(
-        ocrRawText: Value(rawText),
-        ocrEngine: Value(engine),
-        ocrMeanConfidence: Value(meanConfidence),
-        updatedAt: Value(DateTime.now()),
-      ),
-    );
-    await database.indexScan(scanId: scanId, text: [rawText]);
+    await database.transaction(() async {
+      await (database.update(
+        database.scans,
+      )..where((row) => row.id.equals(scanId))).write(
+        ScansCompanion(
+          ocrRawText: Value(rawText),
+          ocrEngine: Value(engine),
+          ocrMeanConfidence: Value(meanConfidence),
+          updatedAt: Value(DateTime.now()),
+        ),
+      );
+      await database.indexScan(scanId: scanId, text: [rawText]);
+    });
   }
 
   Future<void> deleteScan(String scanId) async {
-    await (database.delete(
-      database.scans,
-    )..where((row) => row.id.equals(scanId))).go();
-    await database.customStatement(
-      'DELETE FROM scan_search WHERE scan_id = ?',
-      [scanId],
-    );
+    await database.transaction(() async {
+      await (database.delete(
+        database.scans,
+      )..where((row) => row.id.equals(scanId))).go();
+      await database.customStatement(
+        'DELETE FROM scan_search WHERE scan_id = ?',
+        [scanId],
+      );
+    });
   }
 }
 

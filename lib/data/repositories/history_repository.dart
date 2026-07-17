@@ -99,6 +99,9 @@ class HistoryRepository {
         database.categories.id.equalsExp(database.receipts.categoryId),
       ),
     ]);
+    query.where(
+      database.receipts.id.isNotNull() | database.documents.id.isNotNull(),
+    );
     if (searchIds != null) query.where(database.scans.id.isIn(searchIds));
     if (filter.type != HistoryTypeFilter.all) {
       query.where(database.scans.type.equals(filter.type.name));
@@ -106,19 +109,9 @@ class HistoryRepository {
     if (filter.categoryId != null) {
       query.where(database.receipts.categoryId.equals(filter.categoryId!));
     }
-    if (filter.start != null) {
-      query.where(database.scans.createdAt.isBiggerOrEqualValue(filter.start!));
-    }
-    if (filter.end != null) {
-      query.where(
-        database.scans.createdAt.isSmallerThanValue(
-          filter.end!.add(const Duration(days: 1)),
-        ),
-      );
-    }
     query.orderBy([OrderingTerm.desc(database.scans.updatedAt)]);
     final rows = await query.get();
-    return rows
+    final entries = rows
         .map(
           (row) => HistoryEntry(
             scan: row.readTable(database.scans),
@@ -128,6 +121,18 @@ class HistoryRepository {
           ),
         )
         .toList();
+    if (filter.start == null && filter.end == null) return entries;
+    final exclusiveEnd = filter.end?.add(const Duration(days: 1));
+    return entries.where((entry) {
+      final recordDate = entry.receipt?.dateOfPurchase ?? entry.scan.createdAt;
+      if (filter.start != null && recordDate.isBefore(filter.start!)) {
+        return false;
+      }
+      if (exclusiveEnd != null && !recordDate.isBefore(exclusiveEnd)) {
+        return false;
+      }
+      return true;
+    }).toList();
   }
 
   Future<ScanDetail?> detail(String scanId) async {
@@ -158,6 +163,9 @@ class HistoryRepository {
   }
 
   Future<List<String>> delete(String scanId) async {
+    final scan = await (database.select(
+      database.scans,
+    )..where((row) => row.id.equals(scanId))).getSingleOrNull();
     final pages = await (database.select(
       database.scanPages,
     )..where((row) => row.scanId.equals(scanId))).get();
@@ -169,19 +177,31 @@ class HistoryRepository {
         'DELETE FROM scan_search WHERE scan_id = ?',
         [scanId],
       );
+      await database.customStatement('''
+        DELETE FROM tags
+        WHERE NOT EXISTS (
+          SELECT 1 FROM scan_tags WHERE scan_tags.tag_id = tags.id
+        )
+      ''');
     });
     return [
       for (final page in pages) ...[
         page.imagePath,
         if (page.processedPath != null) page.processedPath!,
       ],
+      if (scan?.thumbPath != null) scan!.thumbPath!,
     ];
   }
 
   Future<void> setPinned(String scanId, bool pinned) {
-    return (database.update(database.documents)
-          ..where((row) => row.scanId.equals(scanId)))
-        .write(DocumentsCompanion(pinned: Value(pinned)));
+    return database.transaction(() async {
+      await (database.update(database.documents)
+            ..where((row) => row.scanId.equals(scanId)))
+          .write(DocumentsCompanion(pinned: Value(pinned)));
+      await (database.update(database.scans)
+            ..where((row) => row.id.equals(scanId)))
+          .write(ScansCompanion(updatedAt: Value(DateTime.now())));
+    });
   }
 
   Future<void> rename(String scanId, String value) async {
@@ -197,10 +217,23 @@ class HistoryRepository {
             ..where((row) => row.scanId.equals(scanId)))
           .write(DocumentsCompanion(title: Value(value)));
     }
-    final scan = await (database.select(
-      database.scans,
-    )..where((row) => row.id.equals(scanId))).getSingle();
-    await database.indexScan(scanId: scanId, text: [scan.ocrRawText, value]);
+    await (database.update(database.scans)
+          ..where((row) => row.id.equals(scanId)))
+        .write(ScansCompanion(updatedAt: Value(DateTime.now())));
+    final updated = await detail(scanId);
+    if (updated == null) return;
+    await database.indexScan(
+      scanId: scanId,
+      text: [
+        updated.entry.scan.ocrRawText,
+        updated.entry.receipt?.merchant,
+        updated.entry.receipt?.note,
+        updated.entry.document?.title,
+        updated.entry.document?.body,
+        updated.tags.map((tag) => tag.name).join(' '),
+        updated.lineItems.map((item) => item.name).join(' '),
+      ],
+    );
   }
 }
 

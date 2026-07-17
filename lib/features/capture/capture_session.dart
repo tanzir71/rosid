@@ -80,11 +80,12 @@ class CaptureSessionController extends Notifier<CaptureSession> {
   Future<bool> addSourcePath(String sourcePath) async {
     if (state.isBusy) return false;
     state = state.copyWith(isBusy: true, clearError: true);
+    String? persistedPath;
     try {
       const uuid = Uuid();
       final scanId = state.scanId ?? uuid.v7();
       final pageIndex = state.pagePaths.length;
-      final persistedPath = await ref
+      persistedPath = await ref
           .read(privateFileStoreProvider)
           .persistCapture(
             sourcePath: sourcePath,
@@ -116,6 +117,15 @@ class CaptureSessionController extends Notifier<CaptureSession> {
       );
       return true;
     } on Object catch (error) {
+      if (persistedPath != null) {
+        try {
+          await ref
+              .read(privateFileStoreProvider)
+              .deleteIfPresent(persistedPath);
+        } on Object {
+          // Preserve the original persistence/database error for the user.
+        }
+      }
       state = state.copyWith(isBusy: false, errorMessage: error.toString());
       return false;
     }
@@ -123,16 +133,31 @@ class CaptureSessionController extends Notifier<CaptureSession> {
 
   Future<void> discard() async {
     final current = state;
-    if (current.scanId != null) {
-      await ref.read(scanRepositoryProvider).deleteScan(current.scanId!);
+    if (current.isBusy) {
+      throw StateError('Please wait for the current capture to finish.');
     }
-    for (final page in current.pagePaths) {
-      await ref.read(privateFileStoreProvider).deleteIfPresent(page);
+    state = current.copyWith(isBusy: true, clearError: true);
+    try {
+      final fileStore = ref.read(privateFileStoreProvider);
+      if (current.scanId != null) {
+        await ref.read(scanRepositoryProvider).deleteScan(current.scanId!);
+        await fileStore.deleteScanArtifacts(
+          scanId: current.scanId!,
+          knownPaths: current.pagePaths,
+        );
+      } else {
+        for (final page in current.pagePaths) {
+          await fileStore.deleteIfPresent(page);
+        }
+      }
+      state = CaptureSession(
+        mode: current.mode,
+        languageHint: current.languageHint,
+      );
+    } on Object catch (error) {
+      state = current.copyWith(isBusy: false, errorMessage: error.toString());
+      rethrow;
     }
-    state = CaptureSession(
-      mode: current.mode,
-      languageHint: current.languageHint,
-    );
   }
 
   void clearAfterSave() {

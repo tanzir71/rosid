@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:rosid/core/settings/app_settings.dart';
 import 'package:rosid/data/repositories/history_repository.dart';
 
 class HistoryFilterController extends Notifier<HistoryQuery> {
@@ -22,5 +23,9 @@ final historyFilterProvider =
 
 final historyResultsProvider = FutureProvider<List<HistoryEntry>>((ref) {
   final filter = ref.watch(historyFilterProvider);
-  return ref.watch(historyRepositoryProvider).list(filter);
+  final expenseEnabled = ref.watch(expenseTrackingEnabledProvider);
+  final effectiveFilter = expenseEnabled
+      ? filter
+      : filter.copyWith(type: HistoryTypeFilter.document, clearCategory: true);
+  return ref.watch(historyRepositoryProvider).list(effectiveFilter);
 });

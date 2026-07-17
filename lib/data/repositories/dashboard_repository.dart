@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:rosid/core/settings/app_settings.dart';
 import 'package:rosid/data/database/app_database.dart';
 import 'package:rosid/data/database/database_provider.dart';
 import 'package:rosid/data/repositories/history_repository.dart';
@@ -7,11 +8,13 @@ import 'package:rosid/data/repositories/history_repository.dart';
 class DashboardSummary {
   const DashboardSummary({
     required this.total,
+    required this.currency,
     required this.byCategory,
     required this.recent,
   });
 
   final double total;
+  final String currency;
   final Map<String, double> byCategory;
   final List<HistoryEntry> recent;
 }
@@ -22,7 +25,11 @@ class DashboardRepository {
   final AppDatabase database;
   final HistoryRepository historyRepository;
 
-  Future<DashboardSummary> monthly(DateTime month) async {
+  Future<DashboardSummary> monthly(
+    DateTime month, {
+    required String currency,
+    required String languageCode,
+  }) async {
     final start = DateTime(month.year, month.month);
     final end = DateTime(month.year, month.month + 1);
     final query =
@@ -33,7 +40,8 @@ class DashboardRepository {
             ),
           ])
           ..where(database.receipts.dateOfPurchase.isBiggerOrEqualValue(start))
-          ..where(database.receipts.dateOfPurchase.isSmallerThanValue(end));
+          ..where(database.receipts.dateOfPurchase.isSmallerThanValue(end))
+          ..where(database.receipts.currency.equals(currency));
     final rows = await query.get();
     final byCategory = <String, double>{};
     var total = 0.0;
@@ -41,7 +49,11 @@ class DashboardRepository {
       final receipt = row.readTable(database.receipts);
       final category = row.readTableOrNull(database.categories);
       total += receipt.total;
-      final name = category?.nameEn ?? 'Other';
+      final name = category == null
+          ? 'Other'
+          : languageCode == 'bn'
+          ? category.nameBn
+          : category.nameEn;
       byCategory[name] = (byCategory[name] ?? 0) + receipt.total;
     }
     final recent = await historyRepository.list(
@@ -49,8 +61,12 @@ class DashboardRepository {
     );
     return DashboardSummary(
       total: total,
+      currency: currency,
       byCategory: byCategory,
-      recent: recent.take(5).toList(),
+      recent: recent
+          .where((entry) => entry.receipt?.currency == currency)
+          .take(5)
+          .toList(),
     );
   }
 }
@@ -63,7 +79,13 @@ final dashboardRepositoryProvider = Provider<DashboardRepository>(
 );
 
 final dashboardSummaryProvider = FutureProvider<DashboardSummary>(
-  (ref) => ref.watch(dashboardRepositoryProvider).monthly(DateTime.now()),
+  (ref) => ref
+      .watch(dashboardRepositoryProvider)
+      .monthly(
+        DateTime.now(),
+        currency: ref.watch(appSettingsProvider).currency,
+        languageCode: ref.watch(appSettingsProvider).languageCode,
+      ),
 );
 
 final homeDocumentsProvider = FutureProvider<List<HistoryEntry>>((ref) async {

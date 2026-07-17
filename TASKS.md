@@ -1,85 +1,107 @@
 # Rosid build tasks
 
-Tasks are ordered by milestone. Each checked task has passed the lightweight
-`tool/check.sh` gate (analyze + tests). Disk-heavy builds and signed artifacts
-are explicitly deferred at the user's request and remain visible below.
+Tasks are ordered by milestone. `[x]` means the implementation and applicable
+automated tests are complete. A `[BLOCKED: ...]` item is an explicit unmet
+handover gate, not a pass.
 
-## M0 — Scaffold
+## M0 - Scaffold
 
-- [x] M0.1 Initialize Flutter project, dependencies, task log, and check script
-- [x] M0.2 Add platform profile, Riverpod settings state, routing shell, theme, and EN/BN l10n
-- [x] M0.3 Add Drift schema, seed categories, search index, repositories, and migration tests
-- [x] M0.4 Add parser/OCR fixture corpus scaffolding and navigation widget tests
+- [x] M0.1 Initialize Flutter project, dependencies, progress ledger, and Bash/PowerShell check scripts
+- [x] M0.2 Add platform profile, Riverpod settings state, stable routing shell, theme, and EN/BN localization
+- [x] M0.3 Add Drift schema, seeded categories, normalized FTS index, repositories, and migration tests
+- [x] M0.4 Add parser/OCR fixture corpus scaffolding and navigation/profile widget tests
 
-## M1 — Capture
+## M1 - Capture
 
-- [x] M1.1 Implement camera/gallery capture and private image persistence
+- [x] M1.1 Implement camera/gallery capture and app-private raw-image persistence
 - [x] M1.2 Add receipt/document mode, language hint, flash, and document batch capture state
-- [x] M1.3 Create scan rows and cover capture controller with tests
+- [x] M1.3 Create scan rows, thumbnails, guarded discard cleanup, and capture tests
 
-## M2 — Preprocess
+## M2 - Preprocess
 
-- [x] M2.1 Implement pure-Dart grayscale, contrast, threshold, upscaling, and rotation pipeline
-- [x] M2.2 Implement quad model, perspective/deskew seam, crop-and-enhance review UI
-- [x] M2.3 Add preprocessing fixture/unit tests and large-image safeguards
+- [x] M2.1 Implement bounded grayscale, contrast, threshold, upscaling, rotation, and deskew pipeline
+- [x] M2.2 Implement automatic document-quad detection, perspective correction, draggable crop UI, and two-stage enhancement preview
+- [x] M2.3 Add preprocessing and crop-controller tests, coordinate-transform coverage, and large-image safeguards
 
-## M3 — OCR core
+## M3 - OCR core
 
-- [x] M3.1 Define OCR contracts, script detection, merge strategy, and TFLite handwriting stub
+- [x] M3.1 Define OCR contracts, script detection, merge strategy, and disabled TFLite handwriting stub
 - [x] M3.2 Implement ML Kit and Tesseract adapters behind the common interface
-- [x] M3.3 Implement first-launch tessdata installer and routed OCR service
-- [x] M3.4 Add OCR routing/merge unit tests
-- [SKIPPED: disk constraint] M3.5 Bundle `ben.traineddata` and `eng.traineddata` binaries and run device integration fixtures
+- [x] M3.3 Parse Tesseract hOCR geometry/confidence and preserve repeated blocks/pages
+- [x] M3.4 Implement atomic first-launch tessdata installation and routed OCR service
+- [x] M3.5 Bundle and pin `ben.traineddata` and `eng.traineddata` with hash verification
+- [x] M3.6 Add engine-routing, merge, hOCR, and tessdata-installer automated tests
+- [x] M3.7 Add real English, mixed Bangla, and handwritten fixture PNGs plus a native OCR integration harness
+- [x] M3.8 Pass the Android-emulator airplane-mode OCR fixture run (3/3: English ML Kit, mixed ML Kit + Tesseract/Bangla, and editable handwriting)
 
-## M4 — Normalization + parser
+## M4 - Normalization and parser
 
-- [x] M4.1 Implement Bangla numeral, currency, Unicode, and date normalization
+- [x] M4.1 Implement Bangla numeral, currency, Unicode, and date normalization while preserving original raw text
 - [x] M4.2 Implement pure-Dart structured receipt parser with confidence/source metadata
-- [x] M4.3 Add receipt fixture corpus and at least 40 parser/normalizer tests
-- [x] M4.4 Record total/date accuracy gate results
+- [x] M4.3 Add eight receipt fixtures and at least 40 parser/normalizer tests
+- [x] M4.4 Record total/date gate results (100%/100% on applicable fixtures)
 
-## M5 — Review and save
+## M5 - Review and save
 
-- [x] M5.1 Implement receipt review with editable fields, line items, raw OCR, and confidence flags
+- [x] M5.1 Implement receipt review with editable fields/items, raw OCR, validation, and confidence flags
 - [x] M5.2 Implement document review with editable title/body/tags and handwriting warning
-- [x] M5.3 Persist reviewed receipts/documents and cover mapping with tests
+- [x] M5.3 Persist reviewed receipts/documents, tags, items, thumbnails, and search text transactionally
+- [x] M5.4 Clean abandoned raw/processed/thumbnail files and cover review behavior with tests
 
-## M6 — History, search, detail
+## M6 - History, search, and detail
 
-- [x] M6.1 Implement combined history, filters, and FTS-backed search
-- [x] M6.2 Implement receipt/document detail, edit, delete, pin, and local image share
-- [x] M6.3 Add repository/search/detail tests
+- [x] M6.1 Implement combined reviewed-record history, normalized FTS search, and type/category/date filters
+- [x] M6.2 Implement full receipt/document detail edit, rename, delete, pin, and local image share
+- [x] M6.3 Invalidate record caches after mutation and clean every associated private file
+- [x] M6.4 Add migration, search (>100 results), repository, cache, and detail/profile tests
 
-## M7 — Dashboard, export, settings
+## M7 - Dashboard, export, and settings
 
-- [x] M7.1 Implement monthly dashboard and category visualization
+- [x] M7.1 Implement per-currency monthly dashboard and localized category visualization
 - [x] M7.2 Implement date-range expense CSV export
-- [x] M7.3 Implement language/profile/currency/category/privacy settings
-- [x] M7.4 Verify Bangla UI and profile-gated receipt surfaces in widget tests
+- [x] M7.3 Implement language/profile/currency/category/privacy settings and installed About metadata
+- [x] M7.4 Verify Bangla UI and expense-off receipt/category/currency/export route gating in tests
 
-## M8 — Android hardening
+## M8 - Android hardening
 
-- [x] M8.1 Audit manifest permissions, minSdk 26, offline policy, and large-image handling
-- [x] M8.2 Add migration/offline/manual QA scripts and R8 configuration notes
-- [SKIPPED: user requested no disk-heavy validation] M8.3 Build/sign/install release APK and run airplane-mode device script
+- [x] M8.1 Enforce minSdk 26, strict source permission allowlist, backup/data-transfer exclusion, and bounded image handling
+- [x] M8.2 Add release merged-manifest audit, database migration tests, manual QA script, and R8 rules
+- [x] M8.3 Add a release workflow that verifies model hashes, the emitted APK signer, and keystore fingerprint before publishing
+- [x] M8.4 Build the debug APK and inspect native plugin packaging
+- [x] M8.5a Build the unsigned R8 release APK and pass the strict merged release-manifest audit
+- [BLOCKED: release keystore/secrets are unavailable] M8.5b Build and verify the signed release APK
+- [BLOCKED: requires a physical Android device] M8.6 Run the full airplane-mode English/Bangla receipt and handwritten-document script
 
-## M9 — iOS profile
+## M9 - iOS profile
 
-- [x] M9.1 Verify documents-first home, expense toggle, and route gating through profile override tests
-- [x] M9.2 Implement multi-page document persistence and local PDF export
-- [x] M9.3 Add iOS permission strings and deployment target 15 configuration
-- [SKIPPED: user requested no disk-heavy validation] M9.4 Run Pod install, iOS compile, simulator OCR, and physical share-sheet checks
+- [x] M9.1 Verify documents-first home, expense toggle, stable navigation, and route/surface gating via profile tests
+- [x] M9.2 Implement multi-page document persistence, pinned documents, and bounded local PDF export
+- [x] M9.3 Add iOS usage strings, tessdata bundle resources, backup exclusion, and iOS 15.5 configuration
+- [BLOCKED: no macOS/Xcode/Apple signing credentials] M9.4 Run Pod installation and compile/sign the iOS target
+- [BLOCKED: no iOS simulator/device] M9.5 Verify native OCR, profile flow, multi-page PDF, and share sheet end to end
 
-## M10 — Landing page and distribution
+## M10 - Landing page and distribution
 
-- [x] M10.1 Build accessible static EN/BN landing page with no-JS fallback
-- [x] M10.2 Add Pages/release workflows without running artifact builds locally
-- [x] M10.3 Write release/signing/TestFlight instructions and manual verification checklist
-- [SKIPPED: requires repository/secrets/signing authority] M10.4 Publish Pages, GitHub Release, APK, and TestFlight build
+- [x] M10.1 Build the accessible static EN/BN landing page with mobile layout and no-JavaScript fallback
+- [x] M10.2 Add Pages and signed-release workflows with repository-specific links and a TestFlight placeholder
+- [x] M10.3 Document release signing, GitHub secrets, install, TestFlight, and manual verification steps
+- [x] M10.4 Replace landing-page mockups with four real emulator screenshots (five captures retained)
+- [x] M10.5 Verify the local mobile page in a Chromium browser and reach Lighthouse accessibility 100
+- [BLOCKED: requires repository configuration, signing secrets, and publishing authority] M10.6 Publish Pages and a signed GitHub Release
+- [BLOCKED: requires Apple account/signing and a macOS runner] M10.7 Publish TestFlight build and replace the placeholder link
 
 ## Final V1 audit
 
-- [x] Run analyze + full automated tests
-- [x] Confirm Android manifest contains no `INTERNET` permission
-- [x] Record every skipped device/build/signing/publishing gate in `PROGRESS.md`
-- [BLOCKED: full §13 device/artifact/publishing gate was explicitly skipped] Generate `TASKS_V2.md`
+- [x] Run code generation, formatting check, analyze, all 183 automated tests, and the source offline audit
+- [x] Audit and fix capture/save/delete lifecycle races, atomic FTS cleanup, formula-safe temporary exports, and desktop picker ownership
+- [x] Pin workflow actions and gate signing behind protected tags plus a reviewer-protected release environment
+- [x] Confirm the source Android manifest has no `INTERNET` or `ACCESS_NETWORK_STATE` permission
+- [x] Build debug and unsigned R8 release APKs
+- [x] Audit the merged Android release manifest (only `CAMERA` and AndroidX's app-scoped signature permission)
+- [BLOCKED: requires release keystore/secrets] Build and verify a signed release APK
+- [x] Pass the Android-emulator airplane-mode native OCR fixture subset (3/3)
+- [BLOCKED: requires a physical Android device] Pass the full section 13 camera/gallery/search/export/PDF/share manual script
+- [BLOCKED: no macOS/Xcode/Apple signing credentials] Compile, sign, and validate the native iOS target
+- [BLOCKED: requires publishing authority and signing secrets] Publish live Pages, a signed GitHub Release, and TestFlight
+- [x] Run local mobile Lighthouse and reach accessibility score 100
+- [BLOCKED: section 13 is not fully green] Generate `TASKS_V2.md` and begin section 17

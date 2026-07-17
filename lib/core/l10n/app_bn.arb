@@ -68,6 +68,8 @@
   "privacyDescription": "আপনার ডকুমেন্ট কখনো ফোনের বাইরে যায় না। রসিদে অ্যাকাউন্ট, অ্যানালিটিক্স বা নেটওয়ার্ক নেই।",
   "about": "সম্পর্কে",
   "version": "সংস্করণ",
+  "versionUnavailable": "সংস্করণ পাওয়া যায়নি",
+  "releasesAndUpdates": "রিলিজ ও আপডেট",
   "cameraUnavailable": "ক্যামেরা পাওয়া যাচ্ছে না। গ্যালারি থেকে ছবি নিতে পারেন।",
   "cameraPermission": "স্ক্যান করতে ক্যামেরার অনুমতি দরকার।",
   "processing": "আপনার ডিভাইসে প্রক্রিয়াকরণ হচ্ছে…",
@@ -84,5 +86,18 @@
   "mixedBanglaEnglish": "বাংলা + English",
   "confidence": "নির্ভরযোগ্যতা",
   "monthlySpend": "মাসিক খরচ",
-  "spendByCategory": "বিভাগ অনুযায়ী খরচ"
+  "spendByCategory": "বিভাগ অনুযায়ী খরচ",
+  "untitledDocument": "শিরোনামহীন ডকুমেন্ট",
+  "documentTitleRequired": "ডকুমেন্টের শিরোনাম দিতে হবে।",
+  "receiptFieldsRequired": "দোকান, তারিখ ও মোট পরিমাণ দিতে হবে।",
+  "validTotalAndTaxRequired": "মোট ও করের বৈধ ঋণাত্মক নয় এমন পরিমাণ লিখুন।",
+  "validTaxRequired": "করের বৈধ পরিমাণ লিখুন।",
+  "validLineItemRequired": "প্রতিটি পণ্যের বৈধ নাম, পরিমাণ ও মোট মূল্য লিখুন।",
+  "quantity": "পরিমাণ",
+  "unitPrice": "একক মূল্য",
+  "lowOcrConfidence": "OCR ফলাফলের নির্ভরযোগ্যতা কম",
+  "loadFailed": "সংরক্ষিত তথ্য লোড করা যায়নি। আবার চেষ্টা করুন।",
+  "saveFailed": "পরিবর্তন সংরক্ষণ করা যায়নি। আবার চেষ্টা করুন।",
+  "processingFailed": "এই স্ক্যান প্রক্রিয়া করা যায়নি। আবার চেষ্টা করুন।",
+  "offline": "অফলাইন"
 }

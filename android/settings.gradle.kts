@@ -19,7 +19,10 @@ pluginManagement {
 
 plugins {
     id("dev.flutter.flutter-plugin-loader") version "1.0.0"
-    id("com.android.application") version "9.0.1" apply false
+    // Keep Gradle 8 compatibility while flutter_tesseract_ocr still uses the
+    // deprecated RepositoryHandler.jcenter() API removed by Gradle 9.
+    // AGP 8.13.2 supports API 36.1 and Kotlin 2.3.
+    id("com.android.application") version "8.13.2" apply false
     id("org.jetbrains.kotlin.android") version "2.3.20" apply false
 }
 

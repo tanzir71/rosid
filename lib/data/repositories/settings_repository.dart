@@ -44,6 +44,7 @@ class SettingsRepository {
   }
 
   Future<List<String>> deleteAllData() async {
+    final scans = await database.select(database.scans).get();
     final pages = await database.select(database.scanPages).get();
     await database.transaction(() async {
       await database.delete(database.scans).go();
@@ -58,6 +59,8 @@ class SettingsRepository {
         page.imagePath,
         if (page.processedPath != null) page.processedPath!,
       ],
+      for (final scan in scans)
+        if (scan.thumbPath != null) scan.thumbPath!,
     ];
   }
 }

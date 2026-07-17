@@ -218,6 +218,12 @@ class AppLocalizationsBn extends AppLocalizations {
   String get version => 'সংস্করণ';
 
   @override
+  String get versionUnavailable => 'সংস্করণ পাওয়া যায়নি';
+
+  @override
+  String get releasesAndUpdates => 'রিলিজ ও আপডেট';
+
+  @override
   String get cameraUnavailable =>
       'ক্যামেরা পাওয়া যাচ্ছে না। গ্যালারি থেকে ছবি নিতে পারেন।';
 
@@ -274,4 +280,46 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get spendByCategory => 'বিভাগ অনুযায়ী খরচ';
+
+  @override
+  String get untitledDocument => 'শিরোনামহীন ডকুমেন্ট';
+
+  @override
+  String get documentTitleRequired => 'ডকুমেন্টের শিরোনাম দিতে হবে।';
+
+  @override
+  String get receiptFieldsRequired => 'দোকান, তারিখ ও মোট পরিমাণ দিতে হবে।';
+
+  @override
+  String get validTotalAndTaxRequired =>
+      'মোট ও করের বৈধ ঋণাত্মক নয় এমন পরিমাণ লিখুন।';
+
+  @override
+  String get validTaxRequired => 'করের বৈধ পরিমাণ লিখুন।';
+
+  @override
+  String get validLineItemRequired =>
+      'প্রতিটি পণ্যের বৈধ নাম, পরিমাণ ও মোট মূল্য লিখুন।';
+
+  @override
+  String get quantity => 'পরিমাণ';
+
+  @override
+  String get unitPrice => 'একক মূল্য';
+
+  @override
+  String get lowOcrConfidence => 'OCR ফলাফলের নির্ভরযোগ্যতা কম';
+
+  @override
+  String get loadFailed => 'সংরক্ষিত তথ্য লোড করা যায়নি। আবার চেষ্টা করুন।';
+
+  @override
+  String get saveFailed => 'পরিবর্তন সংরক্ষণ করা যায়নি। আবার চেষ্টা করুন।';
+
+  @override
+  String get processingFailed =>
+      'এই স্ক্যান প্রক্রিয়া করা যায়নি। আবার চেষ্টা করুন।';
+
+  @override
+  String get offline => 'অফলাইন';
 }

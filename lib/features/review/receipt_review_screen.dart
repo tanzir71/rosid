@@ -22,23 +22,35 @@ class ReceiptReviewScreen extends ConsumerStatefulWidget {
 
 class _ReceiptReviewScreenState extends ConsumerState<ReceiptReviewScreen> {
   late final Future<List<Category>> _categories;
+  var _initialized = false;
 
   @override
   void initState() {
     super.initState();
     _categories = ref.read(recordRepositoryProvider).categories();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_initialized) return;
+    _initialized = true;
+    final localizations = context.l10n;
     Future.microtask(() {
       ref
           .read(receiptReviewProvider.notifier)
           .initialize(
             session: ref.read(captureSessionProvider),
             assets: ref.read(preprocessProvider).assets,
+            localizations: localizations,
           );
     });
   }
 
   Future<void> _save() async {
-    final saved = await ref.read(receiptReviewProvider.notifier).save();
+    final saved = await ref
+        .read(receiptReviewProvider.notifier)
+        .save(localizations: context.l10n);
     if (!mounted || !saved) return;
     clearCompletedReview(ref);
     context.go('/');
@@ -51,90 +63,93 @@ class _ReceiptReviewScreenState extends ConsumerState<ReceiptReviewScreen> {
   Widget build(BuildContext context) {
     final state = ref.watch(receiptReviewProvider);
     final assets = ref.watch(preprocessProvider).assets;
-    return Scaffold(
-      appBar: AppBar(title: Text(context.l10n.reviewReceipt)),
-      body: state.isLoading
-          ? Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const CircularProgressIndicator(),
-                  const SizedBox(height: 16),
-                  Text(context.l10n.processing),
-                ],
-              ),
-            )
-          : ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
-                if (state.confidence.values.any((value) => value < 0.6))
-                  Card(
-                    color: Colors.amber.shade50,
-                    child: ListTile(
-                      leading: const Icon(
-                        Icons.warning_amber,
-                        color: Colors.amber,
-                      ),
-                      title: Text(context.l10n.verifyLowConfidence),
-                    ),
-                  ),
-                LayoutBuilder(
-                  builder: (context, constraints) {
-                    final image = _ReceiptImage(
-                      path: assets.isEmpty ? null : assets.first.colorPath,
-                    );
-                    final form = _ReceiptForm(
-                      state: state,
-                      categories: _categories,
-                    );
-                    if (constraints.maxWidth > 760) {
-                      return Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(child: image),
-                          const SizedBox(width: 20),
-                          Expanded(child: form),
-                        ],
-                      );
-                    }
-                    return Column(
-                      children: [image, const SizedBox(height: 16), form],
-                    );
-                  },
-                ),
-                const SizedBox(height: 12),
-                ExpansionTile(
-                  title: Text(context.l10n.rawOcrText),
+    return PopScope<void>(
+      canPop: !state.isLoading && !state.isSaving,
+      child: Scaffold(
+        appBar: AppBar(title: Text(context.l10n.reviewReceipt)),
+        body: state.isLoading
+            ? Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: SelectableText(state.rawText),
-                    ),
+                    const CircularProgressIndicator(),
+                    const SizedBox(height: 16),
+                    Text(context.l10n.processing),
                   ],
                 ),
-                if (state.errorMessage != null)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    child: Text(
-                      state.errorMessage!,
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.error,
+              )
+            : ListView(
+                padding: const EdgeInsets.all(16),
+                children: [
+                  if (state.confidence.values.any((value) => value < 0.6))
+                    Card(
+                      color: Colors.amber.shade50,
+                      child: ListTile(
+                        leading: const Icon(
+                          Icons.warning_amber,
+                          color: Colors.amber,
+                        ),
+                        title: Text(context.l10n.verifyLowConfidence),
                       ),
                     ),
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final image = _ReceiptImage(
+                        path: assets.isEmpty ? null : assets.first.colorPath,
+                      );
+                      final form = _ReceiptForm(
+                        state: state,
+                        categories: _categories,
+                      );
+                      if (constraints.maxWidth > 760) {
+                        return Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(child: image),
+                            const SizedBox(width: 20),
+                            Expanded(child: form),
+                          ],
+                        );
+                      }
+                      return Column(
+                        children: [image, const SizedBox(height: 16), form],
+                      );
+                    },
                   ),
-                const SizedBox(height: 12),
-                FilledButton.icon(
-                  onPressed: state.isSaving ? null : _save,
-                  icon: state.isSaving
-                      ? const SizedBox.square(
-                          dimension: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.save_outlined),
-                  label: Text(context.l10n.save),
-                ),
-              ],
-            ),
+                  const SizedBox(height: 12),
+                  ExpansionTile(
+                    title: Text(context.l10n.rawOcrText),
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: SelectableText(state.rawText),
+                      ),
+                    ],
+                  ),
+                  if (state.errorMessage != null)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Text(
+                        state.errorMessage!,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                      ),
+                    ),
+                  const SizedBox(height: 12),
+                  FilledButton.icon(
+                    onPressed: state.isSaving ? null : _save,
+                    icon: state.isSaving
+                        ? const SizedBox.square(
+                            dimension: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.save_outlined),
+                    label: Text(context.l10n.save),
+                  ),
+                ],
+              ),
+      ),
     );
   }
 }
@@ -234,6 +249,7 @@ class _ReceiptForm extends ConsumerWidget {
           future: categories,
           builder: (context, snapshot) {
             final values = snapshot.data ?? const <Category>[];
+            final bangla = Localizations.localeOf(context).languageCode == 'bn';
             final selected =
                 values.any((category) => category.id == state.categoryId)
                 ? state.categoryId
@@ -245,7 +261,7 @@ class _ReceiptForm extends ConsumerWidget {
                   .map(
                     (category) => DropdownMenuItem(
                       value: category.id,
-                      child: Text(category.nameEn),
+                      child: Text(bangla ? category.nameBn : category.nameEn),
                     ),
                   )
                   .toList(),
@@ -278,56 +294,91 @@ class _ReceiptForm extends ConsumerWidget {
           ],
         ),
         for (var index = 0; index < state.items.length; index++)
-          _LineItemEditor(index: index, item: state.items[index]),
+          ReceiptLineItemEditor(
+            key: ValueKey(state.items[index].id),
+            item: state.items[index],
+            onChanged: (item) => controller.setItem(index, item),
+            onRemove: () => controller.removeItem(index),
+          ),
       ],
     );
   }
 }
 
-class _LineItemEditor extends ConsumerWidget {
-  const _LineItemEditor({required this.index, required this.item});
+class ReceiptLineItemEditor extends StatelessWidget {
+  const ReceiptLineItemEditor({
+    required this.item,
+    required this.onChanged,
+    required this.onRemove,
+    super.key,
+  });
 
-  final int index;
   final EditableLineItem item;
+  final ValueChanged<EditableLineItem> onChanged;
+  final VoidCallback onRemove;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final controller = ref.read(receiptReviewProvider.notifier);
+  Widget build(BuildContext context) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
           children: [
             TextFormField(
+              key: ValueKey('line-item-name-${item.id}'),
               initialValue: item.name,
               decoration: InputDecoration(labelText: context.l10n.title),
-              onChanged: (value) =>
-                  controller.setItem(index, item.copyWith(name: value)),
+              onChanged: (value) => onChanged(item.copyWith(name: value)),
             ),
             const SizedBox(height: 8),
             Row(
               children: [
                 Expanded(
                   child: TextFormField(
+                    key: ValueKey('line-item-quantity-${item.id}'),
                     initialValue: item.quantity,
-                    decoration: const InputDecoration(labelText: 'Qty'),
-                    onChanged: (value) => controller.setItem(
-                      index,
-                      item.copyWith(quantity: value),
+                    decoration: InputDecoration(
+                      labelText: context.l10n.quantity,
                     ),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    onChanged: (value) =>
+                        onChanged(item.copyWith(quantity: value)),
                   ),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: TextFormField(
+                    key: ValueKey('line-item-unit-price-${item.id}'),
+                    initialValue: item.unitPrice,
+                    decoration: InputDecoration(
+                      labelText: context.l10n.unitPrice,
+                    ),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    onChanged: (value) =>
+                        onChanged(item.copyWith(unitPrice: value)),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: TextFormField(
+                    key: ValueKey('line-item-amount-${item.id}'),
                     initialValue: item.amount,
                     decoration: InputDecoration(labelText: context.l10n.total),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
                     onChanged: (value) =>
-                        controller.setItem(index, item.copyWith(amount: value)),
+                        onChanged(item.copyWith(amount: value)),
                   ),
                 ),
                 IconButton(
-                  onPressed: () => controller.removeItem(index),
+                  key: ValueKey('line-item-delete-${item.id}'),
+                  tooltip: context.l10n.delete,
+                  onPressed: onRemove,
                   icon: const Icon(Icons.delete_outline),
                 ),
               ],

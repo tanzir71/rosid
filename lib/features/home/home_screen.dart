@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:rosid/core/extensions/l10n_extension.dart';
 import 'package:rosid/core/settings/app_settings.dart';
 import 'package:rosid/core/theme/app_theme.dart';
+import 'package:rosid/core/utils/money.dart';
 import 'package:rosid/data/repositories/dashboard_repository.dart';
 import 'package:rosid/data/repositories/history_repository.dart';
 
@@ -29,11 +30,11 @@ class HomeScreen extends ConsumerWidget {
           ],
         ),
         actions: [
-          const Padding(
-            padding: EdgeInsets.only(right: 16),
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
             child: Tooltip(
-              message: 'Offline',
-              child: Icon(Icons.shield_outlined, color: AppTheme.leaf),
+              message: context.l10n.offline,
+              child: const Icon(Icons.shield_outlined, color: AppTheme.leaf),
             ),
           ),
         ],
@@ -56,7 +57,7 @@ class _DashboardHome extends ConsumerWidget {
     final summary = ref.watch(dashboardSummaryProvider);
     return summary.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, stack) => Center(child: Text(error.toString())),
+      error: (error, stack) => Center(child: Text(context.l10n.loadFailed)),
       data: (value) => RefreshIndicator(
         onRefresh: () => ref.refresh(dashboardSummaryProvider.future),
         child: ListView(
@@ -75,7 +76,7 @@ class _DashboardHome extends ConsumerWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      '৳${value.total.toStringAsFixed(2)}',
+                      formatMoney(value.total, value.currency),
                       style: Theme.of(context).textTheme.headlineLarge
                           ?.copyWith(
                             color: Colors.white,
@@ -109,6 +110,7 @@ class _DashboardHome extends ConsumerWidget {
                 _CategoryBar(
                   name: entry.key,
                   amount: entry.value,
+                  currency: value.currency,
                   maximum: value.byCategory.values.reduce(
                     (current, next) => current > next ? current : next,
                   ),
@@ -134,11 +136,13 @@ class _CategoryBar extends StatelessWidget {
   const _CategoryBar({
     required this.name,
     required this.amount,
+    required this.currency,
     required this.maximum,
   });
 
   final String name;
   final double amount;
+  final String currency;
   final double maximum;
 
   @override
@@ -150,7 +154,7 @@ class _CategoryBar extends StatelessWidget {
           Row(
             children: [
               Expanded(child: Text(name)),
-              Text('৳${amount.toStringAsFixed(0)}'),
+              Text(formatMoney(amount, currency)),
             ],
           ),
           const SizedBox(height: 4),
@@ -178,9 +182,13 @@ class _RecentTile extends StatelessWidget {
         leading: const CircleAvatar(child: Icon(Icons.receipt_long)),
         title: Text(entry.title),
         subtitle: Text(
-          DateFormat.yMMMd().format(entry.receipt!.dateOfPurchase),
+          DateFormat.yMMMd(
+            Localizations.localeOf(context).toLanguageTag(),
+          ).format(entry.receipt!.dateOfPurchase),
         ),
-        trailing: Text('৳${entry.receipt!.total.toStringAsFixed(2)}'),
+        trailing: Text(
+          formatMoney(entry.receipt!.total, entry.receipt!.currency),
+        ),
       ),
     );
   }
@@ -194,73 +202,111 @@ class _DocumentsHome extends ConsumerWidget {
     final documents = ref.watch(homeDocumentsProvider);
     return documents.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, stack) => Center(child: Text(error.toString())),
-      data: (entries) => CustomScrollView(
-        slivers: [
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 14),
-              child: TextField(
-                readOnly: true,
-                onTap: () => context.go('/history'),
-                decoration: InputDecoration(
-                  hintText: context.l10n.search,
-                  prefixIcon: const Icon(Icons.search),
-                ),
-              ),
-            ),
-          ),
-          if (entries.isEmpty)
-            SliverFillRemaining(
-              hasScrollBody: false,
-              child: Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(32),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.description_outlined, size: 72),
-                      const SizedBox(height: 16),
-                      Text(
-                        context.l10n.noDocuments,
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
-                      Text(
-                        context.l10n.scanFirstDocument,
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
+      error: (error, stack) => Center(child: Text(context.l10n.loadFailed)),
+      data: (entries) {
+        final pinned = entries
+            .where((entry) => entry.document?.pinned ?? false)
+            .toList();
+        final recent = entries
+            .where((entry) => !(entry.document?.pinned ?? false))
+            .toList();
+        return CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 14),
+                child: TextField(
+                  readOnly: true,
+                  onTap: () => context.go('/history'),
+                  decoration: InputDecoration(
+                    hintText: context.l10n.search,
+                    prefixIcon: const Icon(Icons.search),
                   ),
                 ),
               ),
-            )
-          else ...[
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Text(
-                  context.l10n.recentDocuments,
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-              ),
             ),
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(12, 8, 12, 100),
-              sliver: SliverGrid.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  childAspectRatio: 0.78,
-                  mainAxisSpacing: 10,
-                  crossAxisSpacing: 10,
+            if (entries.isEmpty)
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(32),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.description_outlined, size: 72),
+                        const SizedBox(height: 16),
+                        Text(
+                          context.l10n.noDocuments,
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                        Text(
+                          context.l10n.scanFirstDocument,
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-                itemCount: entries.length,
-                itemBuilder: (context, index) =>
-                    _DocumentCard(entry: entries[index]),
-              ),
-            ),
+              )
+            else ...[
+              if (pinned.isNotEmpty) ...[
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Text(
+                      context.l10n.pinnedDocuments,
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child: SizedBox(
+                    height: 220,
+                    child: ListView.separated(
+                      padding: const EdgeInsets.fromLTRB(12, 8, 12, 16),
+                      scrollDirection: Axis.horizontal,
+                      itemCount: pinned.length,
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(width: 10),
+                      itemBuilder: (context, index) => SizedBox(
+                        width: 160,
+                        child: _DocumentCard(entry: pinned[index]),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+              if (recent.isNotEmpty) ...[
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Text(
+                      context.l10n.recentDocuments,
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                  ),
+                ),
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(12, 8, 12, 100),
+                  sliver: SliverGrid.builder(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          childAspectRatio: 0.78,
+                          mainAxisSpacing: 10,
+                          crossAxisSpacing: 10,
+                        ),
+                    itemCount: recent.length,
+                    itemBuilder: (context, index) =>
+                        _DocumentCard(entry: recent[index]),
+                  ),
+                ),
+              ],
+            ],
           ],
-        ],
-      ),
+        );
+      },
     );
   }
 }

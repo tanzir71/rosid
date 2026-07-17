@@ -3,6 +3,7 @@ import 'package:rosid/ocr/models/ocr_models.dart';
 abstract final class ScriptDetector {
   static final RegExp _bangla = RegExp(r'[\u0980-\u09FF]');
   static final RegExp _latin = RegExp(r'[A-Za-z]');
+  static final RegExp _digit = RegExp(r'[0-9\u09E6-\u09EF]');
   static final RegExp _wordLike = RegExp(
     r'[A-Za-z0-9\u0980-\u09FF\s.,:/()\-৳%]',
   );
@@ -44,9 +45,18 @@ abstract final class ScriptDetector {
         hint == ScriptHint.banglaHandwriting) {
       return true;
     }
-    if (latinResult.text.trim().isEmpty || latinResult.meanConfidence < 0.52) {
-      return true;
+    if (latinResult.text.trim().isEmpty) return true;
+    for (final block in latinResult.blocks) {
+      final text = block.text.trim();
+      if (text.isEmpty || _isDigitOnly(text)) continue;
+      if (block.confidence < 0.52 || nonWordRatio(text) > 0.28) return true;
     }
-    return nonWordRatio(latinResult.text) > 0.28;
+    return false;
   }
+
+  static bool _isDigitOnly(String text) =>
+      _digit.hasMatch(text) &&
+      !_latin.hasMatch(text) &&
+      !_bangla.hasMatch(text) &&
+      nonWordRatio(text) <= 0.28;
 }

@@ -12,12 +12,25 @@ flutter pub get
 FLUTTER_BIN="$(command -v flutter)" tool/check.sh
 ```
 
+On Windows PowerShell, use the equivalent native entrypoint:
+
+```powershell
+flutter pub get
+.\tool\check.ps1
+```
+
 The lightweight check runs localization/code generation, formatting, analysis,
-tests, and the offline audit. Set `ROSID_RUN_BUILD=1` to include a debug APK on
-a machine with Android tooling and sufficient disk.
+tests, and the offline audit. Set `ROSID_RUN_BUILD=1` (or pass `-RunBuild` to the
+PowerShell script) to include a debug APK on a machine with Android tooling and
+sufficient disk.
+
+After producing a release APK, run `tool/audit_offline.sh --require-merged` or
+`.\tool\audit_offline.ps1 -RequireMerged`; release/tag audits fail if the merged
+manifest cannot be located or contains a permission outside the privacy policy.
 
 Release builds must include `eng.traineddata` and `ben.traineddata` in
-`assets/tessdata/`; the tag workflow downloads the pinned assets automatically.
+`assets/tessdata/`; the tag workflow verifies the checked-in files against their
+pinned SHA-256 values before building.
 
 See [PROGRESS.md](PROGRESS.md), [TASKS.md](TASKS.md), and
 [docs/RELEASING.md](docs/RELEASING.md).
