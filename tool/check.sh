@@ -13,6 +13,7 @@ cd "$PROJECT_DIR"
 "$DART_BIN" format --output=none --set-exit-if-changed lib test
 "$FLUTTER_BIN" --no-version-check analyze
 "$FLUTTER_BIN" --no-version-check test
+"$PROJECT_DIR/tool/audit_offline.sh"
 
 if [[ "${ROSID_RUN_BUILD:-0}" == "1" ]]; then
   "$FLUTTER_BIN" --no-version-check build apk --debug
