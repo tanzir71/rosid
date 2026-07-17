@@ -1,17 +1,23 @@
-# rosid
+# Rosid (রসিদ)
 
-A new Flutter project.
+Rosid is a fully offline Flutter scanner for Bangla and English receipts and
+documents. Android defaults to receipt scanning and expense tracking; iOS
+defaults to a documents-first experience. `AppProfile` keeps those variants in
+one codebase.
 
-## Getting Started
+## Local development
 
-This project is a starting point for a Flutter application.
+```sh
+flutter pub get
+FLUTTER_BIN="$(command -v flutter)" tool/check.sh
+```
 
-A few resources to get you started if this is your first Flutter project:
+The lightweight check runs localization/code generation, formatting, analysis,
+tests, and the offline audit. Set `ROSID_RUN_BUILD=1` to include a debug APK on
+a machine with Android tooling and sufficient disk.
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+Release builds must include `eng.traineddata` and `ben.traineddata` in
+`assets/tessdata/`; the tag workflow downloads the pinned assets automatically.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+See [PROGRESS.md](PROGRESS.md), [TASKS.md](TASKS.md), and
+[docs/RELEASING.md](docs/RELEASING.md).
