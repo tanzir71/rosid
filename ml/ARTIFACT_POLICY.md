@@ -364,6 +364,17 @@ until its manifest proves:
 6. app and Python preprocessing match cross-language golden input/output byte
    hashes. A version string alone is insufficient.
 
+The tracked `test/fixtures/v2_preprocessing/app_reference_v1.json` and its
+digest are a non-qualifying app-side precursor to item 6. Recomputing that
+manifest in Dart, checking its canonical form in Python, and binding the public
+fixture sources prove only app-reference stability and manifest integrity.
+Item 6 remains unmet until an independently implemented, approved Python path
+recomputes matching source and result plane hashes. Before any synthetic corpus
+or trained artifact becomes production-eligible, lineage verification must
+also require the exact golden-manifest SHA plus both app and Python
+implementation/config commitments; the current lineage schema does not yet
+enforce that preprocessing-golden parent.
+
 These gates are evaluated on validation partitions. The sealed final test is
 not opened to tune synthesis. A generator-probe run may consume a not-yet-
 accepted corpus solely to produce gate evidence; its checkpoint is ineligible

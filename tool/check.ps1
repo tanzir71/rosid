@@ -45,6 +45,7 @@ try {
     Invoke-CheckedCommand $flutterBin @('--no-version-check', 'gen-l10n')
     Invoke-CheckedCommand $dartBin @('run', 'build_runner', 'build')
     Invoke-CheckedCommand $dartBin @('run', 'tool/generate_ocr_fixture_bundle.dart')
+    Invoke-CheckedCommand $dartBin @('run', 'tool/generate_v2_preprocess_goldens.dart', '--check')
     Invoke-CheckedCommand $dartBin @('format', '--output=none', '--set-exit-if-changed', 'lib', 'test', 'integration_test', 'tool')
     Invoke-CheckedCommand $flutterBin @('--no-version-check', 'analyze')
     Invoke-CheckedCommand $flutterBin @('--no-version-check', 'test')

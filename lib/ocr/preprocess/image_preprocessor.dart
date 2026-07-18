@@ -38,6 +38,29 @@ class PreprocessResult {
   final double deskewAngle;
 }
 
+/// Canonical raw planes from the same preprocessing path used by [process].
+///
+/// The color plane is row-major R8G8B8A8. The grayscale and binarized planes
+/// are row-major Y8. These bytes deliberately exclude JPEG container and codec
+/// behavior so training tools can compare exact pixels across implementations.
+class PreprocessPlanes {
+  const PreprocessPlanes({
+    required this.colorCorrectedRgba,
+    required this.grayscaleY8,
+    required this.binarizedY8,
+    required this.width,
+    required this.height,
+    required this.deskewAngle,
+  });
+
+  final Uint8List colorCorrectedRgba;
+  final Uint8List grayscaleY8;
+  final Uint8List binarizedY8;
+  final int width;
+  final int height;
+  final double deskewAngle;
+}
+
 class ImagePreprocessor {
   const ImagePreprocessor();
 
@@ -314,6 +337,55 @@ class ImagePreprocessor {
     DocumentQuad quad = const DocumentQuad.inset(),
     PreprocessOptions options = const PreprocessOptions(),
   }) {
+    final processed = _processImages(encoded, quad: quad, options: options);
+    return PreprocessResult(
+      colorCorrectedJpeg: Uint8List.fromList(
+        image.encodeJpg(processed.colorCorrected, quality: 92),
+      ),
+      binarizedJpeg: Uint8List.fromList(
+        image.encodeJpg(processed.binarized, quality: 95),
+      ),
+      width: processed.colorCorrected.width,
+      height: processed.colorCorrected.height,
+      deskewAngle: processed.deskewAngle,
+    );
+  }
+
+  /// Runs the production preprocessing path and exposes its canonical pixels.
+  ///
+  /// This is the app-side reference boundary for V2 preprocessing goldens. It
+  /// does not by itself prove that a Python implementation matches the app.
+  PreprocessPlanes processPlanes(
+    Uint8List encoded, {
+    DocumentQuad quad = const DocumentQuad.inset(),
+    PreprocessOptions options = const PreprocessOptions(),
+  }) {
+    final processed = _processImages(
+      encoded,
+      quad: quad,
+      options: options,
+      retainGrayscale: true,
+    );
+    final grayscale = processed.grayscale;
+    if (grayscale == null) {
+      throw StateError('Raw preprocessing requested without a grayscale plane');
+    }
+    return PreprocessPlanes(
+      colorCorrectedRgba: _rgbaBytes(processed.colorCorrected),
+      grayscaleY8: _lumaBytes(grayscale),
+      binarizedY8: _lumaBytes(processed.binarized, requireBinary: true),
+      width: processed.colorCorrected.width,
+      height: processed.colorCorrected.height,
+      deskewAngle: processed.deskewAngle,
+    );
+  }
+
+  _PreprocessedImages _processImages(
+    Uint8List encoded, {
+    required DocumentQuad quad,
+    required PreprocessOptions options,
+    bool retainGrayscale = false,
+  }) {
     if (options.minimumDimension < 1) {
       throw ArgumentError.value(
         options.minimumDimension,
@@ -381,15 +453,48 @@ class ImagePreprocessor {
       }
     }
 
-    return PreprocessResult(
-      colorCorrectedJpeg: Uint8List.fromList(
-        image.encodeJpg(corrected, quality: 92),
-      ),
-      binarizedJpeg: Uint8List.fromList(image.encodeJpg(binary, quality: 95)),
-      width: corrected.width,
-      height: corrected.height,
+    return _PreprocessedImages(
+      colorCorrected: corrected,
+      grayscale: retainGrayscale ? gray : null,
+      binarized: binary,
       deskewAngle: angle,
     );
+  }
+
+  Uint8List _rgbaBytes(image.Image source) {
+    final bytes = Uint8List(source.width * source.height * 4);
+    var offset = 0;
+    for (var y = 0; y < source.height; y++) {
+      for (var x = 0; x < source.width; x++) {
+        final pixel = source.getPixel(x, y);
+        bytes[offset++] = pixel.r.toInt();
+        bytes[offset++] = pixel.g.toInt();
+        bytes[offset++] = pixel.b.toInt();
+        bytes[offset++] = pixel.a.toInt();
+      }
+    }
+    return bytes;
+  }
+
+  Uint8List _lumaBytes(image.Image source, {bool requireBinary = false}) {
+    final bytes = Uint8List(source.width * source.height);
+    var offset = 0;
+    for (var y = 0; y < source.height; y++) {
+      for (var x = 0; x < source.width; x++) {
+        final pixel = source.getPixel(x, y);
+        final value = pixel.r.toInt();
+        if (pixel.g.toInt() != value ||
+            pixel.b.toInt() != value ||
+            pixel.a.toInt() != 255) {
+          throw StateError('Y8 source must contain opaque grayscale pixels');
+        }
+        if (requireBinary && value != 0 && value != 255) {
+          throw StateError('Binarized Y8 source must contain only 0 or 255');
+        }
+        bytes[offset++] = value;
+      }
+    }
+    return bytes;
   }
 
   image.Image _capSize(image.Image source, int maximum) {
@@ -613,6 +718,20 @@ class ImagePreprocessor {
 
   int _luminance(num red, num green, num blue) =>
       (0.299 * red + 0.587 * green + 0.114 * blue).round().clamp(0, 255);
+}
+
+class _PreprocessedImages {
+  const _PreprocessedImages({
+    required this.colorCorrected,
+    required this.grayscale,
+    required this.binarized,
+    required this.deskewAngle,
+  });
+
+  final image.Image colorCorrected;
+  final image.Image? grayscale;
+  final image.Image binarized;
+  final double deskewAngle;
 }
 
 class _LineSample {

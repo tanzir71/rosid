@@ -1,0 +1,381 @@
+{
+  "excluded_stages": [
+    "document-quad detection",
+    "JPEG encode/decode for cross-language parity",
+    "line segmentation",
+    "model tensor resize, padding, layout, dtype, and normalization"
+  ],
+  "fixture_origin": "synthetic_privacy_safe",
+  "hash": "sha256_lowercase_hex",
+  "implementation": "lib/ocr/preprocess/image_preprocessor.dart#ImagePreprocessor.processPlanes",
+  "manifest_serialization": "NFC UTF-8 JSON, recursively sorted keys, two-space indent, LF terminator",
+  "pipeline_stages": [
+    "decode and bake orientation",
+    "cap input longest dimension",
+    "perspective warp from the fixed quad",
+    "apply requested quarter-turn rotation",
+    "fit configured dimensions with linear interpolation",
+    "normalize percentile contrast",
+    "convert to grayscale",
+    "apply adaptive threshold",
+    "estimate skew when enabled",
+    "for absolute skew >= 0.5 degrees: rotate color, refit, and recompute grayscale and threshold"
+  ],
+  "plane_serialization": {
+    "binarized": "Y8 restricted to 0 or 255",
+    "color": "R8,G8,B8,A8 channel order",
+    "grayscale": "Y8 from the opaque grayscale pixel red channel",
+    "hash_scope": "plane payload bytes only",
+    "jpeg_container_included": false,
+    "packing": "tightly packed with no row padding",
+    "pixel_order": "top-to-bottom rows, left-to-right pixels"
+  },
+  "python_parity_status": "not_implemented",
+  "quad_serialization": "normalized millionths as integers; divide each value by 1000000",
+  "schema": "rosid-v2-app-preprocess-goldens-v1",
+  "scope": "app_reference_only",
+  "source_decode": "package:image decodeImage then bakeOrientation",
+  "v1_jpeg_regression_scope": "app-code regression only; excluded from cross-language plane parity",
+  "vectors": [
+    {
+      "id": "english-receipt-default",
+      "options": {
+        "adaptive_window": 31,
+        "deskew": true,
+        "maximum_dimension": 3200,
+        "minimum_dimension": 1000,
+        "rotation_quarter_turns": 0,
+        "threshold_bias": 12
+      },
+      "quad": {
+        "bottom_left": [
+          100000,
+          900000
+        ],
+        "bottom_right": [
+          880000,
+          930000
+        ],
+        "top_left": [
+          80000,
+          70000
+        ],
+        "top_right": [
+          910000,
+          100000
+        ]
+      },
+      "result": {
+        "binarized_plane": {
+          "byte_count": 1836250,
+          "channel_maximums": [
+            255
+          ],
+          "channel_minimums": [
+            0
+          ],
+          "channels": 1,
+          "full_scale_count": 1733569,
+          "height": 1625,
+          "layout": "y8",
+          "sha256": "92b953111c8de1b45c7a0ef65ef7ff00b08bb50fce69562df4660b04c2eec36c",
+          "width": 1130,
+          "zero_count": 102681
+        },
+        "color_corrected_plane": {
+          "byte_count": 7345000,
+          "channel_maximums": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "channel_minimums": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "channels": 4,
+          "height": 1625,
+          "layout": "rgba8",
+          "sha256": "6e174f79ec38770aa7ed7006479b388f455311ff25af761cd1fe32aa2ceabadc",
+          "width": 1130
+        },
+        "deskew_angle_degrees": -5.0,
+        "deskew_half_degree_ticks": -10,
+        "grayscale_plane": {
+          "byte_count": 1836250,
+          "channel_maximums": [
+            255
+          ],
+          "channel_minimums": [
+            0
+          ],
+          "channels": 1,
+          "full_scale_count": 9525,
+          "height": 1625,
+          "layout": "y8",
+          "sha256": "c1f5b9c1d8c898eaf087dca4256bed614e0bd33b30e54e231fc66042325c8be4",
+          "width": 1130,
+          "zero_count": 303934
+        },
+        "height": 1625,
+        "v1_production_jpeg_regression": {
+          "binarized": {
+            "byte_count": 215378,
+            "sha256": "dcca88a881dad2c6b118cf3686a2b472e6347767eee54f0f15d4fd25110503b9"
+          },
+          "color_corrected": {
+            "byte_count": 344286,
+            "sha256": "f3f25f930ea8338040a2cb889b940c44ac136071402b07ed679115efa46a5ca2"
+          }
+        },
+        "width": 1130
+      },
+      "source_encoded_byte_count": 2447951,
+      "source_encoded_sha256": "8c28bd79f4fa6aa41eb681dc518421418dbc034d3e50cc8daca5e4557f7309f1",
+      "source_path": "assets/fixtures/english_receipt.png",
+      "source_plane": {
+        "byte_count": 6291456,
+        "channel_maximums": [
+          255,
+          255,
+          255,
+          255
+        ],
+        "channel_minimums": [
+          0,
+          0,
+          0,
+          255
+        ],
+        "channels": 4,
+        "height": 1536,
+        "layout": "rgba8",
+        "sha256": "bb1eafd5f88ef91a28ae6610b250dd934dd49f06c366dc2605ffeb3a9f0ffdc3",
+        "width": 1024
+      }
+    },
+    {
+      "id": "mixed-bangla-receipt-quarter-turn",
+      "options": {
+        "adaptive_window": 25,
+        "deskew": false,
+        "maximum_dimension": 1400,
+        "minimum_dimension": 720,
+        "rotation_quarter_turns": 1,
+        "threshold_bias": 9
+      },
+      "quad": {
+        "bottom_left": [
+          90000,
+          920000
+        ],
+        "bottom_right": [
+          900000,
+          940000
+        ],
+        "top_left": [
+          70000,
+          90000
+        ],
+        "top_right": [
+          930000,
+          60000
+        ]
+      },
+      "result": {
+        "binarized_plane": {
+          "byte_count": 933660,
+          "channel_maximums": [
+            255
+          ],
+          "channel_minimums": [
+            0
+          ],
+          "channels": 1,
+          "full_scale_count": 839559,
+          "height": 780,
+          "layout": "y8",
+          "sha256": "ba10a7b62059051b89c7004045c7d6e51c4ac5c85271c059ff9c3a0277417b8a",
+          "width": 1197,
+          "zero_count": 94101
+        },
+        "color_corrected_plane": {
+          "byte_count": 3734640,
+          "channel_maximums": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "channel_minimums": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "channels": 4,
+          "height": 780,
+          "layout": "rgba8",
+          "sha256": "a516817d5612bf2084787e4f36909a4134cba0bef1b28850181be0e6b400a9e8",
+          "width": 1197
+        },
+        "deskew_angle_degrees": 0.0,
+        "deskew_half_degree_ticks": 0,
+        "grayscale_plane": {
+          "byte_count": 933660,
+          "channel_maximums": [
+            255
+          ],
+          "channel_minimums": [
+            0
+          ],
+          "channels": 1,
+          "full_scale_count": 16978,
+          "height": 780,
+          "layout": "y8",
+          "sha256": "a9fe2256819f57c356a36f6e87984731d74ced8f7c36e2de8c47cc8d9c92c03b",
+          "width": 1197,
+          "zero_count": 17551
+        },
+        "height": 780,
+        "width": 1197
+      },
+      "source_encoded_byte_count": 2922267,
+      "source_encoded_sha256": "edf88982d9594af9bcac2500465cca03de9b702a1a228c56982a0605d1fe829e",
+      "source_path": "assets/fixtures/mixed_bangla_receipt.png",
+      "source_plane": {
+        "byte_count": 6291456,
+        "channel_maximums": [
+          255,
+          255,
+          255,
+          255
+        ],
+        "channel_minimums": [
+          0,
+          0,
+          0,
+          255
+        ],
+        "channels": 4,
+        "height": 1536,
+        "layout": "rgba8",
+        "sha256": "360b5269d414472cff10aa41e0996b5c21b0e26b6f8b7a64efc4f37fad089612",
+        "width": 1024
+      }
+    },
+    {
+      "id": "handwritten-bangla-deskew",
+      "options": {
+        "adaptive_window": 21,
+        "deskew": true,
+        "maximum_dimension": 1400,
+        "minimum_dimension": 800,
+        "rotation_quarter_turns": 0,
+        "threshold_bias": 8
+      },
+      "quad": {
+        "bottom_left": [
+          80000,
+          920000
+        ],
+        "bottom_right": [
+          910000,
+          950000
+        ],
+        "top_left": [
+          60000,
+          50000
+        ],
+        "top_right": [
+          940000,
+          80000
+        ]
+      },
+      "result": {
+        "binarized_plane": {
+          "byte_count": 1030440,
+          "channel_maximums": [
+            255
+          ],
+          "channel_minimums": [
+            0
+          ],
+          "channels": 1,
+          "full_scale_count": 923280,
+          "height": 1240,
+          "layout": "y8",
+          "sha256": "f7d87ea24f80062eacab5d448e030c90ee08a5689bbc048d5bf2bf1c05b570ef",
+          "width": 831,
+          "zero_count": 107160
+        },
+        "color_corrected_plane": {
+          "byte_count": 4121760,
+          "channel_maximums": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "channel_minimums": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "channels": 4,
+          "height": 1240,
+          "layout": "rgba8",
+          "sha256": "2e3f69411b5441aac97a4714c5d10e75cb8e56b279ae92f004e8f54b510f8598",
+          "width": 831
+        },
+        "deskew_angle_degrees": -1.5,
+        "deskew_half_degree_ticks": -3,
+        "grayscale_plane": {
+          "byte_count": 1030440,
+          "channel_maximums": [
+            255
+          ],
+          "channel_minimums": [
+            0
+          ],
+          "channels": 1,
+          "full_scale_count": 5601,
+          "height": 1240,
+          "layout": "y8",
+          "sha256": "fba27138c6b0c35c9364aa42d36539e59b4f840e6ae2b1ca18b0b7d58807bb0b",
+          "width": 831,
+          "zero_count": 58286
+        },
+        "height": 1240,
+        "width": 831
+      },
+      "source_encoded_byte_count": 2997257,
+      "source_encoded_sha256": "ebb2c1a98523655976d476853403517d0f5bf19f738774336d0fca2a2ad15c58",
+      "source_path": "assets/fixtures/handwritten_bangla_note.png",
+      "source_plane": {
+        "byte_count": 6291456,
+        "channel_maximums": [
+          255,
+          255,
+          255,
+          255
+        ],
+        "channel_minimums": [
+          0,
+          0,
+          0,
+          255
+        ],
+        "channels": 4,
+        "height": 1536,
+        "layout": "rgba8",
+        "sha256": "0a935ec6dbf6a33079b8f582753d84515be52057813f723ebe2be65cdead76c4",
+        "width": 1024
+      }
+    }
+  ]
+}

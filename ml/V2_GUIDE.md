@@ -109,6 +109,35 @@ production lineage.
 Direct execution as `python ml/verify_dataset.py` is not a supported entry
 point because the repository root must remain on Python's import path.
 
+## Prepared app preprocessing reference
+
+`[CODEX] App-side precursor ready; no Tanzir action is requested.`
+
+The existing production Dart preprocessing path now exposes canonical pre-JPEG
+RGBA/Y8/Y8 planes through the same internal transform used by the shipped JPEG
+API. Three synthetic, privacy-safe fixtures, fixed quads, explicit options,
+plane hashes and semantic statistics are frozen in:
+
+- `test/fixtures/v2_preprocessing/app_reference_v1.json`;
+- `test/fixtures/v2_preprocessing/app_reference_v1.sha256`; and
+- `test/fixtures/v2_preprocessing/README.md`.
+
+Verify the tracked app reference from the repository root:
+
+```powershell
+dart run tool/generate_v2_preprocess_goldens.dart --check
+flutter test test/ocr/preprocess/v2_preprocess_golden_test.dart
+python -m unittest ml.tests.test_app_preprocess_reference -v
+```
+
+The manifest says `scope=app_reference_only` and
+`python_parity_status=not_implemented`. The Python test checks canonical JSON,
+the digest, and public source bindings; it is not a preprocessing-parity test.
+No dataset loader, line segmentation, tensor normalization, model contract, or
+runtime choice is implied. After the relevant owner approvals, an independent
+Python implementation must reproduce the result planes and both code/config
+commitments plus this manifest SHA must enter enforced production lineage.
+
 ## Prepared P1 data-evidence tools
 
 `[CODEX] Generic scaffold ready; real P1 evidence awaits P0 approval.`

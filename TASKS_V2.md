@@ -45,7 +45,9 @@ still requires the full V1 manual script unless the owner makes a new decision.
 
 ## P2 - Training
 
-- [ ] Implement app-aligned preprocessing and dataset loaders
+- [x] Freeze and CI-check the existing app preprocessing path as an app-only canonical raw-plane reference
+- [ ] Implement independent Python preprocessing and prove exact cross-language source/output plane-hash parity
+- [ ] Implement the approved dataset loaders
 - [ ] Implement the compact CRNN+CTC model, metrics, and deterministic training
 - [ ] Produce one runnable GPU notebook and an artifact manifest for each training run
 - [ ] Run curriculum training and verify returned metrics/checkpoints

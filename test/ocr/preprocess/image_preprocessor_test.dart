@@ -138,6 +138,61 @@ void main() {
     expect(image.decodeJpg(result.binarizedJpeg), isNotNull);
   });
 
+  test('raw planes reproduce the production JPEG inputs exactly', () {
+    final encoded = Uint8List.fromList(image.encodePng(fixture()));
+    const options = PreprocessOptions(
+      minimumDimension: 100,
+      maximumDimension: 300,
+      deskew: false,
+    );
+    final planes = preprocessor.processPlanes(encoded, options: options);
+    final result = preprocessor.process(encoded, options: options);
+
+    final colorRgb = Uint8List(planes.width * planes.height * 3);
+    for (
+      var source = 0, target = 0;
+      source < planes.colorCorrectedRgba.length;
+      source += 4
+    ) {
+      colorRgb[target++] = planes.colorCorrectedRgba[source];
+      colorRgb[target++] = planes.colorCorrectedRgba[source + 1];
+      colorRgb[target++] = planes.colorCorrectedRgba[source + 2];
+    }
+    final binaryRgb = Uint8List(planes.binarizedY8.length * 3);
+    for (
+      var source = 0, target = 0;
+      source < planes.binarizedY8.length;
+      source++
+    ) {
+      final value = planes.binarizedY8[source];
+      binaryRgb[target++] = value;
+      binaryRgb[target++] = value;
+      binaryRgb[target++] = value;
+    }
+    final color = image.Image.fromBytes(
+      width: planes.width,
+      height: planes.height,
+      bytes: colorRgb.buffer,
+      numChannels: 3,
+    );
+    final binary = image.Image.fromBytes(
+      width: planes.width,
+      height: planes.height,
+      bytes: binaryRgb.buffer,
+      numChannels: 3,
+    );
+
+    expect(
+      result.colorCorrectedJpeg,
+      orderedEquals(image.encodeJpg(color, quality: 92)),
+    );
+    expect(
+      result.binarizedJpeg,
+      orderedEquals(image.encodeJpg(binary, quality: 95)),
+    );
+    expect(result.deskewAngle, planes.deskewAngle);
+  });
+
   test('processing caps a large document', () {
     final encoded = Uint8List.fromList(
       image.encodeJpg(fixture(width: 400, height: 600)),

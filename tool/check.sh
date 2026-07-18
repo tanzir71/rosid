@@ -11,6 +11,7 @@ cd "$PROJECT_DIR"
 "$FLUTTER_BIN" --no-version-check gen-l10n
 "$DART_BIN" run build_runner build
 "$DART_BIN" run tool/generate_ocr_fixture_bundle.dart
+"$DART_BIN" run tool/generate_v2_preprocess_goldens.dart --check
 "$DART_BIN" format --output=none --set-exit-if-changed lib test integration_test tool
 "$FLUTTER_BIN" --no-version-check analyze
 "$FLUTTER_BIN" --no-version-check test

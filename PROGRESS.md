@@ -7,8 +7,10 @@
   ready; the remaining inputs are the amount-gate and BN-HTRd risk posture plus
   Android/iOS device paths. V1.0.0 remains published and frozen as an immutable
   GitHub Release. V2 now has a disabled-by-default handwriting orchestration
-  contract and CPU tooling; no Flutter dependency, native runtime, model asset,
-  or app version has changed.
+  contract, CPU tooling, and an app-only preprocessing reference. No production
+  Flutter dependency, native runtime, model asset, or app version has changed;
+  existing transitive `crypto` 3.0.7 is now a direct dev dependency for golden
+  SHA-256 generation.
 - Flutter: 3.44.6 stable; Dart: 3.12.2.
 - Automated Windows gate: green on 2026-07-18 (`flutter analyze` clean; the
   full Flutter suite and offline source audit passed).
@@ -503,6 +505,36 @@ are intentionally deferred rather than release blockers:
   debug APK build, and the portable offline audit were green.
 - No publisher archive was downloaded, no real extraction/acquisition was
   recorded, no model or runtime was selected, and no P0 owner decision changed.
+
+### 2026-07-18 - V2 app-side preprocessing reference
+
+- Refactored `ImagePreprocessor.process()` through one private image-stage path
+  and added `processPlanes()` for tightly packed pre-JPEG R8G8B8A8, grayscale
+  Y8, and binary Y8 bytes. The production JPEG path does not retain the extra
+  grayscale plane. An exact regression reconstructs both JPEG inputs from the
+  raw seam, and an isolated run against pre-refactor commit `f689ac0` matched
+  the frozen English color and binary JPEG byte counts and SHA-256 values.
+- Added three fixed vectors over the synthetic English receipt, mixed Bangla
+  receipt, and handwritten Bangla fixtures. Canonical sorted/NFC/LF manifest
+  `test/fixtures/v2_preprocessing/app_reference_v1.json` binds each encoded
+  source plus decoded source plane, explicit quad/options, result dimensions,
+  half-degree deskew ticks, raw plane hashes, and reviewable channel/value
+  statistics. The paired digest is currently
+  `0c69472d1aacf75de3b724edf149bf1c55b9e82364b65f7a61e87e0aa3a2dd83`.
+- Linux CI and both local check scripts run the generator in non-writing
+  `--check` mode. Flutter recomputes every app plane and enforces nontrivial
+  grayscale/binary semantics; Python independently checks canonical manifest
+  bytes, the digest, and public fixture bindings. The manifest remains
+  `app_reference_only` with `python_parity_status=not_implemented`.
+- Local verification passed the 12 focused preprocessing tests, the Python
+  canonical/source-binding test and Ruff, formatting across 104 Dart files with
+  no changes, clean analysis, all 211 Flutter tests, and the four-manifest
+  offline audit; the debug APK built successfully. Fresh exact-SHA Linux CI
+  remains the full 169-test ML and cross-platform raw/JPEG byte gate.
+- This does not implement Python preprocessing, dataset loaders, line
+  segmentation, tensor normalization, a model/runtime contract, or enforced
+  preprocessing-golden lineage. Cross-language parity, P2 completion, and all
+  pending owner decisions remain open.
 
 ## Known limitations
 
