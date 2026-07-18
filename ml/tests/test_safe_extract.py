@@ -393,23 +393,18 @@ class SafeExtractTest(unittest.TestCase):
                     limits=self.limits(minimum_free_bytes_after=1),
                 )
 
-        inode_capacity = mock.Mock(f_files=10_000, f_favail=1_024)
         with mock.patch.object(
-            safe_extract_module.os,
-            "statvfs",
-            return_value=inode_capacity,
-            create=True,
+            safe_extract_module,
+            "_free_inode_count",
+            return_value=1_024,
         ):
             with self.assertRaisesRegex(SafeExtractionError, "free inodes"):
                 self.extract(two_files, destination_name="inode-out")
 
-        enough_inodes = mock.Mock(f_files=10_000, f_favail=10_000)
-        exhausted_inodes = mock.Mock(f_files=10_000, f_favail=1_023)
         with mock.patch.object(
-            safe_extract_module.os,
-            "statvfs",
-            side_effect=(enough_inodes, exhausted_inodes),
-            create=True,
+            safe_extract_module,
+            "_free_inode_count",
+            side_effect=(10_000, 1_023),
         ):
             with self.assertRaisesRegex(SafeExtractionError, "free-inode reserve"):
                 self.extract(two_files, destination_name="post-inode-out")
