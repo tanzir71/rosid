@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import subprocess
 import struct
 import sys
@@ -144,9 +145,9 @@ class AuditV2ModelTest(unittest.TestCase):
         self.write_model()
         companion = Path(self.temporary_directory.name) / "contract.json"
         for payload in (
-            br'{"source":"C:\\Users\\owner\\train.py"}',
-            br'{"source":"https:\/\/example.test\/model"}',
-            br'{"source":"\u002fhome\u002fowner\u002ftrain.py"}',
+            rb'{"source":"C:\\Users\\owner\\train.py"}',
+            rb'{"source":"https:\/\/example.test\/model"}',
+            rb'{"source":"\u002fhome\u002fowner\u002ftrain.py"}',
         ):
             with self.subTest(payload=payload):
                 companion.write_bytes(payload)
@@ -217,6 +218,207 @@ class AuditV2ModelTest(unittest.TestCase):
                     ),
                 )
             )
+
+    def test_rejects_reserved_trailing_dot_and_case_colliding_asset_ids(self) -> None:
+        content = self.write_model()
+        for invalid_id in (
+            "models/CON.tflite",
+            "models/model.",
+            "aux/contracts/model.json",
+        ):
+            with self.subTest(invalid_id=invalid_id):
+                with self.assertRaisesRegex(ModelAuditError, "portable relative"):
+                    self.audit(asset_id=invalid_id)
+
+        collision = CompanionExpectation(
+            "MODELS/BANGLA-HTR.TFLITE",
+            self.model,
+            hashlib.sha256(content).hexdigest(),
+            len(content),
+        )
+        with self.assertRaisesRegex(ModelAuditError, "case folding"):
+            self.audit(companions=(collision,))
+
+    def test_rejects_symbolic_link_assets(self) -> None:
+        content = self.write_model()
+        linked = Path(self.temporary_directory.name) / "linked-model.tflite"
+        try:
+            linked.symlink_to(self.model)
+        except (NotImplementedError, OSError) as error:
+            self.skipTest(f"symbolic links unavailable: {error}")
+
+        with self.assertRaisesRegex(ModelAuditError, "link or reparse"):
+            audit_tflite(
+                linked,
+                asset_id="models/linked.tflite",
+                expected_sha256=hashlib.sha256(content).hexdigest(),
+                expected_bytes=len(content),
+            )
+
+    def test_rejects_physical_parent_segments_before_path_normalization(self) -> None:
+        content = self.write_model()
+        safe = Path(self.temporary_directory.name) / "safe"
+        outside = Path(self.temporary_directory.name) / "outside"
+        (outside / "child").mkdir(parents=True)
+        safe.mkdir()
+        safe_model = safe / "model.tflite"
+        safe_model.write_bytes(content)
+        outside_model = outside / "model.tflite"
+        outside_model.write_bytes(content + b"different")
+        linked = safe / "linked"
+        try:
+            linked.symlink_to(outside / "child", target_is_directory=True)
+        except (NotImplementedError, OSError) as error:
+            self.skipTest(f"directory symbolic links unavailable: {error}")
+        ambiguous = linked / ".." / "model.tflite"
+
+        with self.assertRaisesRegex(ModelAuditError, "path is not portable"):
+            audit_tflite(
+                ambiguous,
+                asset_id="models/ambiguous.tflite",
+                expected_sha256=hashlib.sha256(content).hexdigest(),
+                expected_bytes=len(content),
+            )
+
+    def test_rejects_hardlinked_assets(self) -> None:
+        content = self.write_model()
+        linked = Path(self.temporary_directory.name) / "hardlinked-model.tflite"
+        try:
+            os.link(self.model, linked)
+        except OSError as error:
+            self.skipTest(f"hard links unavailable: {error}")
+
+        with self.assertRaisesRegex(ModelAuditError, "unlinked regular file"):
+            audit_tflite(
+                linked,
+                asset_id="models/hardlinked.tflite",
+                expected_sha256=hashlib.sha256(content).hexdigest(),
+                expected_bytes=len(content),
+            )
+
+    @unittest.skipUnless(os.name == "nt", "NTFS alternate streams are Windows-only")
+    def test_rejects_ntfs_alternate_data_stream_assets(self) -> None:
+        content = self.write_model()
+        container = Path(self.temporary_directory.name) / "container.bin"
+        container.write_bytes(b"base")
+        stream = Path(f"{container}:model.tflite")
+        try:
+            stream.write_bytes(content)
+        except OSError as error:
+            self.skipTest(f"alternate data streams unavailable: {error}")
+
+        with self.assertRaisesRegex(ModelAuditError, "path is not portable"):
+            audit_tflite(
+                stream,
+                asset_id="models/alternate-stream.tflite",
+                expected_sha256=hashlib.sha256(content).hexdigest(),
+                expected_bytes=len(content),
+            )
+
+    def test_rejects_two_logical_assets_that_alias_one_physical_file(self) -> None:
+        content = self.write_model()
+        alias = CompanionExpectation(
+            "companions/model-contract.bin",
+            self.model,
+            hashlib.sha256(content).hexdigest(),
+            len(content),
+        )
+
+        with self.assertRaisesRegex(ModelAuditError, "aliases another"):
+            self.audit(companions=(alias,))
+
+    def test_rejects_an_asset_that_changes_during_validation(self) -> None:
+        self.write_model()
+        original_stat = Path.stat
+        model_key = os.path.normcase(os.path.abspath(os.fspath(self.model)))
+        inspections = 0
+
+        class ChangedMetadata:
+            def __init__(self, metadata: os.stat_result) -> None:
+                self.metadata = metadata
+
+            def __getattr__(self, name: str) -> object:
+                value = getattr(self.metadata, name)
+                if name == "st_mtime_ns":
+                    return value + 1_000_000_000
+                return value
+
+        def changing_stat(path: Path, *args: object, **kwargs: object):
+            nonlocal inspections
+            metadata = original_stat(path, *args, **kwargs)
+            key = os.path.normcase(os.path.abspath(os.fspath(path)))
+            if key == model_key:
+                inspections += 1
+                if inspections == 2:
+                    return ChangedMetadata(metadata)
+            return metadata
+
+        with mock.patch.object(Path, "stat", changing_stat):
+            with self.assertRaisesRegex(ModelAuditError, "changed during"):
+                self.audit()
+        self.assertEqual(inspections, 2)
+
+    def test_rejects_noncanonical_hashes_and_wrong_api_types(self) -> None:
+        content = self.write_model()
+        digest = hashlib.sha256(content).hexdigest()
+        for invalid_hash in (digest.upper(), f" {digest}", 7):
+            with self.subTest(invalid_hash=invalid_hash):
+                with self.assertRaisesRegex(ModelAuditError, "lowercase hex"):
+                    self.audit(expected_sha256=invalid_hash)
+
+        with self.assertRaisesRegex(ModelAuditError, "positive integer"):
+            self.audit(expected_bytes=True)
+        with self.assertRaisesRegex(ModelAuditError, "positive integer"):
+            self.audit(max_bytes=True)
+        with self.assertRaisesRegex(ModelAuditError, "pathlib.Path"):
+            audit_tflite(
+                str(self.model),  # type: ignore[arg-type]
+                asset_id="models/bangla-htr.tflite",
+                expected_sha256=digest,
+                expected_bytes=len(content),
+            )
+        with self.assertRaisesRegex(ModelAuditError, "must be a tuple"):
+            self.audit(companions=[])  # type: ignore[arg-type]
+        with self.assertRaisesRegex(ModelAuditError, "CompanionExpectation"):
+            self.audit(companions=(object(),))  # type: ignore[arg-type]
+        malformed_path = Path(self.temporary_directory.name) / "bad\x00model.tflite"
+        with self.assertRaisesRegex(ModelAuditError, "cannot inspect asset") as caught:
+            audit_tflite(
+                malformed_path,
+                asset_id="models/malformed.tflite",
+                expected_sha256=digest,
+                expected_bytes=len(content),
+            )
+        self.assertNotIn(self.temporary_directory.name, str(caught.exception))
+
+        invalid_companions = (
+            CompanionExpectation(
+                "companions/wrong-path.json",
+                str(self.model),  # type: ignore[arg-type]
+                digest,
+                len(content),
+            ),
+            CompanionExpectation(
+                "companions/wrong-hash.json",
+                self.model,
+                digest.upper(),
+                len(content),
+            ),
+            CompanionExpectation(
+                "companions/wrong-size.json",
+                self.model,
+                digest,
+                True,
+            ),
+        )
+        for invalid, error_pattern in zip(
+            invalid_companions,
+            ("pathlib.Path", "lowercase hex", "positive integer"),
+            strict=True,
+        ):
+            with self.subTest(companion=invalid.asset_id):
+                with self.assertRaisesRegex(ModelAuditError, error_pattern):
+                    self.audit(companions=(invalid,))
 
     def test_validates_companion_ids_before_any_labeled_diagnostic(self) -> None:
         self.write_model()

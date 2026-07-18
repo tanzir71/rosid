@@ -101,6 +101,7 @@ _DYNAMIC_LOOKUP_NAMES = frozenset(
 P1_ENTRYPOINT_CODE_ROLES = MappingProxyType(
     {
         "ml/build_split_manifest.py": "splitter",
+        "ml/extract_dataset.py": "shared",
         "ml/finalize_split_approval.py": "shared",
         "ml/prepare_split_approval.py": "shared",
         "ml/record_acquisition.py": "shared",
@@ -114,6 +115,7 @@ REQUIRED_CORE_CODE_ROLES = MappingProxyType(
     {
         "ml/__init__.py": "shared",
         "ml/build_split_manifest.py": "splitter",
+        "ml/extract_dataset.py": "shared",
         "ml/finalize_split_approval.py": "shared",
         "ml/prepare_split_approval.py": "shared",
         "ml/record_acquisition.py": "shared",
@@ -127,6 +129,7 @@ REQUIRED_CORE_CODE_ROLES = MappingProxyType(
         "ml/rosid_ml/lineage.py": "shared",
         "ml/rosid_ml/metrics.py": "shared",
         "ml/rosid_ml/provenance.py": "shared",
+        "ml/rosid_ml/safe_extract.py": "shared",
         "ml/rosid_ml/split_approvals.py": "shared",
         "ml/rosid_ml/split_manifests.py": "splitter",
         "ml/rosid_ml/splits.py": "splitter",

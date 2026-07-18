@@ -28,7 +28,8 @@ still requires the full V1 manual script unless the owner makes a new decision.
 ## P1 - Data assembly
 
 - [x] Implement generic canonical source/acquisition evidence and stable archive/extracted regular-file snapshot hashing
-- [ ] If approved, download each selected archive and verify its bytes, safe extraction, exact regular-file inventory, structure, and writer mapping against the P0 contract
+- [x] Implement and adversarially test a generic fail-closed ZIP extraction boundary with pre-parser central-directory/member limits, expansion/capacity ceilings, fresh ignored destinations, exact post-write inventory and archive-stability checks, surfaced cleanup failure, and mode-bit sealing (advisory on Windows) within the documented trusted-operator boundary
+- [ ] If approved, download each selected archive, choose and review per-archive limits, invoke the generic extractor, and verify the exact regular-file inventory, dataset structure, and writer mapping against the P0 contract
 - [ ] Implement each dataset-specific adapter and audit its normalized derivations and global writer groups against the real archive/inventory
 - [ ] Produce approved production acquisition records; a cleared BN-HTRd requires a fresh amended production source manifest and acquisition rather than upgrading conditional evidence
 - [x] Implement generic private adapter evidence with exact normalized-output identity and complete used/ignored source coverage, plus a path-free public HMAC commitment and trusted-process verified-adapter marker
@@ -51,6 +52,7 @@ still requires the full V1 manual script unless the owner makes a new decision.
 
 ## P3 - Conversion and validation
 
+- [x] Harden the structural-only model-bundle audit for exact bytes/SHA, portable logical IDs, aggregate size/privacy checks, stable unlinked regular-file snapshots, and physical-alias rejection
 - [ ] Export and compare float16 and int8 TFLite models
 - [ ] Validate trained-versus-TFLite outputs on 100 frozen samples
 - [ ] Build and run the real-device latency harness

@@ -33,7 +33,10 @@ migrate_working_dir/
 /build/
 /coverage/
 
-# V2 private ML evidence and secret material
+# V2 private ML data, generated artifacts, evidence, and secret material
+/ml/data/
+/ml/checkpoints/
+/ml/artifacts/
 /ml/manifests/private/
 
 # Symbolication related

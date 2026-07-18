@@ -353,9 +353,9 @@ are intentionally deferred rather than release blockers:
   to the former through canonical source evidence. Canonical public
   source/acquisition records are written without overwrite; per-file paths and
   hashes belong in an ignored or out-of-repository private inventory with an
-  encrypted backup. The generic tool intentionally does not extract untrusted
-  archives or prove that a directory is the correct extraction, dataset
-  structure, or writer map.
+  encrypted backup. The acquisition recorder intentionally does not extract an
+  archive or attest which exact extractor produced a directory; it independently
+  rebinds both snapshots and cannot prove dataset structure or writer mapping.
 - Added canonical private adapter evidence that covers every normalized output's
   exact sample identity, global writer group, object key, image/reference hashes,
   dimensions, token count, and source derivations. Every extraction-inventory
@@ -383,7 +383,7 @@ are intentionally deferred rather than release blockers:
   owner private signing key; `finalize_split_approval` verifies the detached
   SSHSIG and approved commit tree before emitting the public approval to commit.
 - Hardened that bundle from a hand-maintained broad file list into a reviewed
-  static transitive graph: the current core is 19 files rooted at the fixed P1
+  static transitive graph: the current core is 21 files rooted at the fixed P1
   CLIs, plus every explicitly configured source in the fixed adapter subtree.
   Local absolute/relative imports, executable
   package initializers, cycles, and case/NFKC resolution are followed; reachable
@@ -414,8 +414,9 @@ are intentionally deferred rather than release blockers:
   `ml/V2_GUIDE.md`.
   No dataset was downloaded, no real acquisition/split was claimed, and P0
   model/toolchain/rights/device decisions remain unaccepted. Real archive
-  downloads, dataset-specific safe extractors and adapters, structure/writer-map
-  audits, external owner policy activation/signing and recorded P0 approval,
+  downloads, invocations of the generic extractor with approved per-archive
+  limits, dataset-specific adapters and structure/writer-map audits, external
+  owner policy activation/signing and recorded P0 approval,
   production acquisitions, and the real global split are still required after
   source approval.
 - The pre-audit 128-test ML suite was green (177.182 seconds), including fixed
@@ -445,6 +446,51 @@ are intentionally deferred rather than release blockers:
   preceding run exposed a test-fixture-only executable-bit mismatch on Linux;
   the production mode checker rejected it correctly, the fixture now
   materializes `100755`, and the exact-SHA rerun passed.
+
+### 2026-07-18 - V2 generic extraction and structural audit hardening
+
+- Added `ml.extract_dataset` and `ml/rosid_ml/safe_extract.py` to the reviewed
+  P1 closure. The extractor verifies the tracked canonical source manifest and
+  exact archive, scans a bounded conventional single-disk ZIP/ZIP64 central
+  directory before `ZipFile` allocation, accepts only stored/deflated regular
+  members with portable collision-free paths, and enforces mandatory member,
+  central-directory, per-file, total, ratio, and free-space ceilings plus an
+  inode reserve where the filesystem exposes inode capacity.
+- Extraction reserves a fresh ignored private destination, materializes without
+  delegating paths to `zipfile`, re-hashes the still-open archive, inventories
+  and reverifies the exact regular-file tree, rechecks capacity and directory
+  identity, then removes write mode bits. Failure cleanup is identity-bound and
+  surfaced if private residue cannot be removed. The successful mode-bit seal is
+  advisory on Windows rather than an ACL-enforced immutable directory.
+- `.gitignore` now keeps `ml/data/`, `ml/checkpoints/`, `ml/artifacts/`, and the
+  existing private-manifest tree outside Git. Nonproduction mode is explicitly
+  quarantine-only, but the CLI does not yet choose or enforce a quarantine
+  location. Its path-free JSON is an operational summary, not a canonical
+  acquisition receipt or proof of exact code execution. Qualifying provenance
+  still requires the approved P1 code identity, canonical acquisition evidence,
+  and dataset-specific structure/writer-map review.
+- Hardened `tool/audit_v2_model.py` around stable unlinked regular-file
+  snapshots, canonical lowercase hashes and portable logical IDs, NTFS alternate
+  streams, symlink/reparse/hardlink and physical-alias rejection, aggregate
+  bundle limits, and path-free diagnostics. The result remains explicitly
+  `structural_only`: it proves no operator/tensor/quantization contract,
+  interpreter loadability, trained-model parity, accuracy, routing, or device
+  performance gate.
+- Both filesystem tools assume a trusted clean process without hostile
+  concurrent mutation of source, parent, or destination namespaces. Their
+  repeated snapshots detect ordinary drift; neither is a descriptor-relative
+  hostile-filesystem sandbox.
+- Local focused verification passed the 19-test extractor suite in 433.315
+  seconds, then separately passed the added path-private CLI failure regression
+  and corrected implicit-directory reporting case. The 23 structural model
+  tests and 17 P1 closure tests passed (with the expected Windows reserved-name
+  skip), Ruff was clean, Flutter generation wrote no changes, Dart formatting
+  changed none of 101 files, analysis was clean, all 209 Flutter tests passed,
+  and the iOS privacy and offline audits were green. A unified Windows ML
+  discovery run remained healthy but exceeded its 30-minute process limit in
+  slow temporary-Git calls; fresh Linux exact-SHA CI remains the unified gate.
+- No publisher archive was downloaded, no real extraction/acquisition was
+  recorded, no model or runtime was selected, and no P0 owner decision changed.
 
 ## Known limitations
 

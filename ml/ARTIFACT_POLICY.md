@@ -82,8 +82,13 @@ directories are intentionally not represented. Both reject links, special
 files, nonportable paths, NFC/case-fold collisions, and a regular-file set that
 changes while it is being read. This proves the two recorded snapshots, not
 that the asserted directory was correctly derived from the archive.
-Dataset-specific safe extraction and structure/writer-map validation must prove
-that relation during P1.
+`ml.extract_dataset` supplies a guarded generic ZIP extraction boundary and then
+inventories/reverifies its result. It does not validate dataset schema, labels,
+writer identity, or cross-corpus identity. Its stdout is operational output,
+not a canonical manifest or an attestation of the exact code that executed.
+Production evidence still requires an approved exact extractor/code identity,
+canonical acquisition evidence, and dataset-specific structure and writer-map
+validation during P1.
 
 The acquisition commitment binds the reviewed source-evidence commitment,
 exact downloaded-content and extracted-artifact hashes, extracted type/role,
@@ -403,3 +408,16 @@ portable logical asset IDs, never caller/workstation paths.
 The audit permits a lower temporary byte limit but never a value above the hard
 20,000,000-byte ceiling. Privacy scanning normalizes common nested JSON escapes
 before checking network endpoints and workstation-profile paths.
+
+`tool/audit_v2_model.py` implements only this bundle's structural precursor: it
+binds stable unlinked regular-file snapshots to portable logical asset IDs,
+checks exact bytes and SHA-256 values, enforces the aggregate byte ceiling, and
+scans for prohibited path/network markers and physical aliases. A
+`"structural_only": true` result does **not** prove operator/tensor/quantization
+contracts, interpreter loadability, trained-model parity, accuracy, routing, or
+device latency/memory behavior. Those remain P3-P5 gates.
+
+The generic ZIP extractor and structural model auditor assume a trusted clean
+filesystem with no hostile concurrent mutation of their source, parent, or
+destination namespaces. Their repeated snapshots detect ordinary drift; neither
+tool is a descriptor-relative hostile-filesystem sandbox.

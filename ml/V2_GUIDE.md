@@ -140,9 +140,43 @@ The verifier always rejects `excluded` sources. `--allow-nonproduction` is only
 for an explicitly quarantined conditional/research workspace and never upgrades
 eligibility.
 
-After a dataset-specific safe extractor and structure/writer-map audit has
-created the ignored extracted directory, bind both snapshots without
-overwriting any prior evidence:
+After byte verification, use the generic extractor only with limits reviewed
+for that exact archive:
+
+```powershell
+python -m ml.extract_dataset `
+  <source-manifest.json> `
+  <verified-archive.zip> `
+  <fresh-ignored-extracted-directory> `
+  --max-members <approved-positive-integer> `
+  --max-central-directory-bytes <approved-positive-integer> `
+  --max-total-bytes <approved-positive-integer> `
+  --max-member-bytes <approved-positive-integer> `
+  --max-compression-ratio <approved-positive-integer> `
+  --minimum-free-bytes-after <approved-operator-reserve>
+```
+
+All six ceilings are mandatory. The extractor accepts conventional single-disk
+ZIP/ZIP64 archives using only stored or deflated members. It preflights the
+central directory before `ZipFile` parsing, rejects unsafe/nonportable members,
+writes only to a fresh ignored private destination, verifies the archive and
+resulting regular-file inventory again, and removes write bits from a successful
+tree. `--allow-nonproduction` is quarantine-only and never upgrades source
+eligibility. It does not choose or enforce a quarantine location; the operator
+must supply a dedicated ignored quarantine destination. Mode-bit sealing is
+advisory on Windows rather than an ACL-enforced immutable directory, so the
+post-seal inventory is the state claim.
+
+Run this only in a trusted clean workspace: the opened archive, its filesystem
+namespace, destination, and parent namespaces must not be mutated concurrently.
+The final re-hash detects ordinary drift but is not a hostile-writer sandbox.
+The JSON printed to stdout is an operational summary, not a canonical
+acquisition receipt or proof of the exact code that ran. Production evidence
+still needs an approved exact extractor/code-bundle identity, canonical
+acquisition evidence, and the dataset-specific structure and writer-map audit.
+
+After generic extraction and the dataset-specific structure/writer-map audit,
+bind both snapshots without overwriting any prior evidence:
 
 ```powershell
 python -m ml.record_acquisition `
@@ -154,12 +188,12 @@ python -m ml.record_acquisition `
   --extractor <exact-tool-and-version>
 ```
 
-Add `--quarantined-research` for conditional/research-only evidence. The command
-records an exact archive and extracted regular-file-set assertion; empty
-directories are intentionally excluded. It deliberately does not extract an
-untrusted archive or prove that the asserted directory is the correct
-extraction, dataset structure, or writer map. Public source/acquisition JSON
-goes under
+Add `--quarantined-research` for conditional/research-only evidence. The
+acquisition command records an exact archive and extracted regular-file-set
+assertion; empty directories are intentionally excluded. It independently
+reverifies both snapshots, but cannot attest which extractor/code produced the
+tree or prove its dataset structure or writer map. Public source/acquisition
+JSON goes under
 `ml/manifests/acquisitions/`; the per-file inventory goes under the ignored
 `ml/manifests/private/acquisitions/` tree or outside the repository. Keep an
 encrypted backup outside the working copy.

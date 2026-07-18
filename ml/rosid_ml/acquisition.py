@@ -475,9 +475,9 @@ def build_acquisition_artifacts(
 ) -> AcquisitionArtifacts:
     """Bind reviewed bytes to an asserted, separately extracted tree snapshot.
 
-    This verifies both snapshots but does not prove which extractor produced the
-    directory. Dataset-specific safe extraction and structure checks remain a
-    separate gate.
+    This independently verifies both snapshots but cannot attest which exact
+    extractor/code produced the directory. Generic safe extraction and the
+    dataset-specific structure/writer-map audit remain separate gates.
     """
 
     source = source_manifest.to_source_evidence()

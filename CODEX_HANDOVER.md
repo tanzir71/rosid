@@ -339,6 +339,7 @@ Model training cannot happen inside the app build loop: it needs dataset downloa
 
   **Realism gate (before any HTR training)**: train a small real-vs-synthetic discriminator on line crops — if it separates them too easily (AUC > 0.85), the generator needs work; log per-tier AUC. Additionally: a model trained on synthetic-only must be evaluated on real public-dataset lines every iteration — the synthetic→real CER gap is *the* generator quality metric and must trend down across generator versions.
 - **Public datasets, download-only (zero manual effort):** BN-HTRd (~788 pages, ~150 writers), BanglaWriting, and character-level sets (Ekush, BanglaLekha-Isolated) for pretraining. These require nothing from Tanzir beyond clicking a download link Codex provides; license terms logged in `ml/DECISIONS.md`.
+- Every approved ZIP must pass `ml.extract_dataset` with reviewed per-archive member, central-directory, expansion, and capacity ceilings before a dataset-specific structure/writer-map audit. The extractor's operational JSON alone is not qualifying provenance; exact approved code identity and canonical acquisition evidence remain mandatory.
 - **Held-out test set = writer-disjoint split of the public datasets** (writers never seen in training) plus a frozen synthetic set. Real handwriting evaluation cannot come from synthetic data alone — this is the only honest way to measure generalization without collecting our own corpus.
 - ⚠️ **Recorded risk**: if public datasets are also excluded and the model is trained *and* evaluated purely on synthetic data, reported accuracy will be inflated and real-world handwriting performance is unknown. Codex must state this in `PROGRESS.md` and the landing-page changelog rather than hide it.
 
@@ -351,6 +352,7 @@ Model training cannot happen inside the app build loop: it needs dataset downloa
 **P3 — Conversion + on-device validation**
 - Export → TFLite with post-training quantization (try float16 first, int8 if size demands; compare CER deltas).
 - `ml/export/validate_tflite.py`: bit-for-bit comparison of TFLite vs trained-model outputs on 100 samples; latency benchmark script Tanzir runs on a real device via a tiny Flutter bench harness Codex builds.
+- `tool/audit_v2_model.py` is only a structural bundle precursor. Its success does not satisfy operator/tensor/quantization inspection, interpreter loading, 100-sample parity, accuracy, routing, or real-device performance gates.
 
 **P4 — App integration (pure Codex, normal build loop)**
 - Implement `TfliteBanglaHandwritingEngine` (via `tflite_flutter`): line detection → per-line inference → CTC decode (greedy + optional small beam) → `OcrResult` with real confidences.
