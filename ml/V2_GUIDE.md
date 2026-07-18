@@ -66,4 +66,3 @@ git diff --exit-code v1.0.0 -- pubspec.yaml pubspec.lock lib android ios assets
 ```
 
 Expected output: none; exit code `0`.
-

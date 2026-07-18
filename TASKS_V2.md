@@ -61,4 +61,3 @@ still requires the full V1 manual script unless the owner makes a new decision.
 - [ ] Keep the quantized model <= 20 MB and line-batch latency <= 1.5 seconds on a 2022 mid-range Android device
 - [ ] Pass printed-receipt regressions and the full V1 manual script
 - [ ] Publish immutable V2 artifacts and only measured landing-page claims
-

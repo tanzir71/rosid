@@ -23,4 +23,3 @@ may be committed or redistributed.
 2. Tanzir approves or changes the recommendation.
 3. The row is updated to `Accepted`, including the decision date and evidence.
 4. Code depending on that decision may then be committed.
-
