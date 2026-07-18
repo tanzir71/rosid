@@ -2,9 +2,16 @@
 
 ## Current status
 
-- Active milestone: V2 P0 design, dataset-license, and artifact-policy decisions on `codex/v2`. V1.0.0 remains published and frozen as an immutable GitHub Release. The V2 kickoff changes documentation and branch CI only; no app behavior, dependency, model asset, or version has changed.
+- Active milestone: V2 P0 owner approval on `codex/v2`. The architecture,
+  dataset/license, metric, artifact, runtime, and amount-evidence packet is
+  ready; the remaining inputs are the amount-gate and BN-HTRd risk posture plus
+  Android/iOS device paths. V1.0.0 remains published and frozen as an immutable
+  GitHub Release. V2 now has a disabled-by-default handwriting orchestration
+  contract and CPU tooling; no Flutter dependency, native runtime, model asset,
+  or app version has changed.
 - Flutter: 3.44.6 stable; Dart: 3.12.2.
-- Automated Windows gate: green on 2026-07-18 (`flutter analyze` clean; all 185 tests passed; offline source audit passed).
+- Automated Windows gate: green on 2026-07-18 (`flutter analyze` clean; the
+  full Flutter suite and offline source audit passed).
 - Bundled OCR data: pinned `tessdata_best` English and Bangla models are checked in and hash-verified by the release workflow.
 - Native Android validation: debug and unsigned R8 release APKs built; the strict merged release-manifest audit passed; an airplane-mode emulator OCR run passed all three fixtures.
 - Published release: protected tag `v1.0.0` and permanent branch `release/v1`
@@ -276,6 +283,53 @@ are intentionally deferred rather than release blockers:
 - Strict merged release-manifest audit: passed; only `CAMERA` and AndroidX's
   app-scoped signature permission are present.
 - Android emulator airplane-mode OCR fixture integration: 3/3 passed.
+
+### 2026-07-18 - V2 P0 evidence and dormant integration contract
+
+- Audited the frozen V1/mobile seam. The registered
+  `TfliteBanglaHandwritingEngine` was unreachable because `OcrService` never
+  invoked it and capture callers never emitted the handwriting hint.
+- Added an injected, disabled-by-default routing policy, typed recoverable HTR
+  failures, result-arbitration boundary, strict line-output validation, and a
+  reliable Tesseract-first fallback. Production recognition blocks and engine
+  selection remain V1-equivalent until a model/router is explicitly enabled.
+  All targeted routing/service/Tesseract seam tests pass and `flutter analyze`
+  is clean.
+- Researched and pinned authoritative hashes for BN-HTRd V4,
+  BanglaLekha-Isolated V2, and both BanglaWriting V1 archives. BanglaWriting is
+  quarantined by its noncommercial license; Ekush is excluded because image and
+  public-weight rights plus an immutable archive are not established.
+- BN-HTRd remains conditional despite its CC BY catalog record: the downloaded
+  archive must prove page-to-writer grouping, and BBC-derived ground-truth text
+  requires documented owner risk acceptance or a rights review before public
+  model lineage is production-eligible.
+- Added strict source manifests and offline archive verification, deterministic
+  writer-disjoint split/leakage checks, recursive eligibility/test-lineage
+  checks, NFC micro CER/WER and normalized amount CER, relative-improvement
+  scoring, and generic TFLite hash/size/header/privacy audit primitives.
+  External lineage now binds canonical reviewed source, artifact type/role,
+  exact extracted bytes, and acquisition evidence. Source archives, one global
+  writer split, partition views, Tier 1/2/3 inputs, checkpoints, conversions,
+  prediction streams, final metrics, and mobile companions each fail closed on
+  ambiguous or mismatched dependencies. Empty/duplicate holdout evidence,
+  zero-denominator CER, unverified amounts, and empty release partitions fail
+  closed. Companion assets are privacy-scanned from one immutable byte snapshot
+  with portable IDs and a non-overridable 20,000,000-byte ceiling. All 56
+  ML-policy tests and 15 model-audit tests pass without datasets, a GPU, or
+  network access.
+- Drafted the full P0 packet with conditional CRNN/CTC and TCN fallback,
+  grapheme-aware hybrid vocabulary, exact metric/parity semantics, all-three
+  synthesis gates, transitive provenance, routing acceptance, and runtime/device
+  requirements. The current Flutter plugin's Android/iOS native runtime skew is
+  an explicit pre-training spike gate rather than an assumed compatibility claim.
+- Completed the real-amount audit across BN-HTRd V4, Bayanno V2, and
+  PromitoLipi V2. No corpus can satisfy the proposed writer-disjoint monetary
+  gate: BN-HTRd has only 37 digit-plus-currency lines across 12 writers, no
+  strict amount-only/`৳` lines, and numeric-label defects; the other corpora
+  lack the required line annotations and writer identity. V2-009 now requires
+  an explicit owner choice: retain the <=12% amount CER gate and block release
+  pending new licensed data, or remove it as a release gate, keep diagnostics,
+  and make no real-amount accuracy claim.
 
 ## Known limitations
 

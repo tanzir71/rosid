@@ -59,6 +59,7 @@ abstract final class OcrMerger {
     return OcrResult(
       blocks: merged,
       engineIds: {...latin.engineIds, ...bangla.engineIds},
+      diagnostics: [...latin.diagnostics, ...bangla.diagnostics],
     );
   }
 

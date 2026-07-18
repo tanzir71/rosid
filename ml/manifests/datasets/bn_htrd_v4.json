@@ -1,0 +1,14 @@
+{
+  "attribution": "BN-HTRd V4 by Md Ataur Rahman, Mitu Paul, Nazifa Tabassum, Riya Pal, Bipon Das, Raisa Tasnim, Md Osman Gony, Fatin Noor, Sheikh Mohammad Jubaer, Mehanaz Chowdhury, Yeasmin Ara Akter, and Mohammad Khairul Islam; DOI 10.17632/743k6dm543.4; catalog license CC BY 4.0.",
+  "bytes": 2608394039,
+  "dataset_id": "bn-htrd",
+  "doi": "10.17632/743k6dm543.4",
+  "eligibility": "conditional",
+  "filename": "BN-HTR_Dataset.zip",
+  "license_id": "CC-BY-4.0",
+  "rights_notes": "Conditional: verify page-to-writer mapping and record owner risk acceptance or rights review for BBC Bangla ground-truth text before production training or public weight distribution.",
+  "schema_version": 1,
+  "sha256": "9ccb7e3e8ebfadc7b57d250496e12be59e1910b4759d150a909f1bffcef2a72e",
+  "source_url": "https://data.mendeley.com/datasets/743k6dm543/4",
+  "version": "4"
+}

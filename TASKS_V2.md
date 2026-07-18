@@ -18,11 +18,11 @@ still requires the full V1 manual script unless the owner makes a new decision.
 ## P0 - Design decisions
 
 - [ ] Verify primary dataset sources, current licenses, redistribution terms, writer metadata, versions, and checksums
-- [ ] Prepare the CRNN/CTC, grapheme tokenization, input shape, decoder, classifier, and fallback decision packet
+- [x] Prepare the CRNN/CTC, grapheme tokenization, input shape, decoder, classifier, and fallback decision packet
 - [ ] Obtain Tanzir's P0 approval and record it in `ml/DECISIONS.md`
 - [ ] Decide dataset, checkpoint, model, metrics, and provenance storage formats
 - [ ] Add a reproducible pinned Python project, seed/config handling, smoke tests, and one dependency lockfile
-- [ ] Add CPU-only ML CI that downloads no datasets and requires no GPU
+- [x] Add CPU-only ML CI that downloads no datasets and requires no GPU
 
 ## P1 - Data assembly
 
@@ -57,7 +57,7 @@ still requires the full V1 manual script unless the owner makes a new decision.
 ## P5 - Acceptance and release
 
 - [ ] Meet Bangla handwriting CER <= 25% and at least 30% relative improvement over Tesseract on the writer-disjoint real holdout
-- [ ] Meet amounts-only CER <= 12%
-- [ ] Keep the quantized model <= 20 MB and line-batch latency <= 1.5 seconds on a 2022 mid-range Android device
+- [ ] Satisfy recorded V2-009: either real amounts-only CER <= 12%, or supplemental diagnostics plus no real-amount claim
+- [ ] Keep the complete HTR bundle <= 20,000,000 bytes and line-batch latency <= 1.5 seconds on a 2022 mid-range Android device
 - [ ] Pass printed-receipt regressions and the full V1 manual script
 - [ ] Publish immutable V2 artifacts and only measured landing-page claims

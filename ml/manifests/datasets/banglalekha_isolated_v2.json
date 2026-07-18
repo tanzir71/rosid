@@ -1,0 +1,14 @@
+{
+  "attribution": "BanglaLekha-Isolated V2 by Nabeel Mohammed, Sifat Momen, Anowarul Abedin, Mithun Biswas, Rafiqul Islam, Gautam Shom, and Md. Shopon; DOI 10.17632/hf6sf8zrkc.2; CC BY 4.0.",
+  "bytes": 197085712,
+  "dataset_id": "banglalekha-isolated",
+  "doi": "10.17632/hf6sf8zrkc.2",
+  "eligibility": "production",
+  "filename": "BanglaLekha-Isolated.zip",
+  "license_id": "CC-BY-4.0",
+  "rights_notes": "Optional isolated-character pretraining only. Contributors include minors; quarantine source filenames/demographics and group conservatively by private form serial using an opaque mapping.",
+  "schema_version": 1,
+  "sha256": "df8a78b7a9eaf33ff776b12094a887229b9c3064b8c9600e9c63c2a12a1cf32a",
+  "source_url": "https://data.mendeley.com/datasets/hf6sf8zrkc/2",
+  "version": "2"
+}

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:rosid/ocr/engines/tesseract_bn.dart';
 import 'package:rosid/ocr/models/ocr_models.dart';
@@ -62,14 +63,30 @@ void main() {
       throwsA(isA<TesseractOcrTimeoutException>()),
     );
   });
+
+  test('a native channel failure is converted to a typed exception', () {
+    final client = _FakeClient(error: PlatformException(code: 'native-failed'));
+
+    expect(
+      TesseractBanglaEngine(client: client, useHocr: true).recognize(page),
+      throwsA(
+        isA<TesseractOcrRuntimeException>().having(
+          (error) => error.code,
+          'code',
+          'native-failed',
+        ),
+      ),
+    );
+  });
 }
 
 class _FakeClient implements TesseractOcrClient {
-  _FakeClient({this.hocr = '', this.text = '', this.hocrFuture});
+  _FakeClient({this.hocr = '', this.text = '', this.hocrFuture, this.error});
 
   final String hocr;
   final String text;
   final Future<String>? hocrFuture;
+  final Object? error;
   var hocrCalls = 0;
   var textCalls = 0;
 
@@ -80,6 +97,7 @@ class _FakeClient implements TesseractOcrClient {
     required Map<String, String> args,
   }) {
     hocrCalls++;
+    if (error case final error?) return Future.error(error);
     return hocrFuture ?? Future.value(hocr);
   }
 
@@ -90,6 +108,7 @@ class _FakeClient implements TesseractOcrClient {
     required Map<String, String> args,
   }) async {
     textCalls++;
+    if (error case final error?) throw error;
     return text;
   }
 }

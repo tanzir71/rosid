@@ -1,0 +1,14 @@
+{
+  "attribution": "BanglaWriting V1 by M. F. Mridha, Abu Quwsar Ohi, M. Ameer Ali, Mazedul Islam Emon, and Md Mohsin Kabir; DOI 10.17632/r43wkvdk4w.1; CC BY-NC 3.0.",
+  "bytes": 136437956,
+  "dataset_id": "banglawriting",
+  "doi": "10.17632/r43wkvdk4w.1",
+  "eligibility": "research_only",
+  "filename": "raw.zip",
+  "license_id": "CC-BY-NC-3.0",
+  "rights_notes": "Research-only quarantine. Do not use for production training, learned synthesis, public checkpoints, bundled weights, or release claims without written permission or legal approval.",
+  "schema_version": 1,
+  "sha256": "0cbe22cb7f4263f57182243e98a577bb6cd8c29466b9b4469ac9d452c896a3e3",
+  "source_url": "https://data.mendeley.com/datasets/r43wkvdk4w/1",
+  "version": "1"
+}

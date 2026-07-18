@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/services.dart';
 import 'package:flutter_tesseract_ocr/flutter_tesseract_ocr.dart';
 import 'package:rosid/ocr/engines/ocr_engine.dart';
 import 'package:rosid/ocr/engines/tesseract_hocr_parser.dart';
@@ -56,6 +57,16 @@ class TesseractOcrTimeoutException implements Exception {
   String toString() => 'Tesseract OCR timed out on $platform.';
 }
 
+class TesseractOcrRuntimeException implements Exception {
+  const TesseractOcrRuntimeException(this.platform, this.code);
+
+  final String platform;
+  final String code;
+
+  @override
+  String toString() => 'Tesseract OCR failed on $platform ($code).';
+}
+
 class TesseractBanglaEngine implements OcrEngine {
   const TesseractBanglaEngine({
     this.client = const FlutterTesseractOcrClient(),
@@ -109,6 +120,16 @@ class TesseractBanglaEngine implements OcrEngine {
       return OcrResult(blocks: _plainTextBlocks(text, image), engineIds: {id});
     } on TimeoutException {
       throw TesseractOcrTimeoutException(shouldUseHocr ? 'Android' : 'iOS');
+    } on PlatformException catch (error) {
+      throw TesseractOcrRuntimeException(
+        shouldUseHocr ? 'Android' : 'iOS',
+        error.code,
+      );
+    } on MissingPluginException {
+      throw TesseractOcrRuntimeException(
+        shouldUseHocr ? 'Android' : 'iOS',
+        'missing-plugin',
+      );
     }
   }
 

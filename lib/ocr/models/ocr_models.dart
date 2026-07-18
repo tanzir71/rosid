@@ -42,6 +42,32 @@ enum ScriptHint { automatic, latin, bangla, mixed, banglaHandwriting }
 
 enum DetectedScript { latin, bangla, mixed, unknown }
 
+enum OcrDiagnosticCode {
+  handwritingNotRouted,
+  handwritingProbeRequested,
+  handwritingFallbackUnavailable,
+  handwritingAttempted,
+  handwritingAccepted,
+  handwritingFallbackSelected,
+  handwritingEmpty,
+  handwritingInvalid,
+  handwritingRecoverableFailure,
+}
+
+class OcrDiagnostic {
+  const OcrDiagnostic({
+    required this.code,
+    required this.pageIndex,
+    required this.engineId,
+    this.detail,
+  });
+
+  final OcrDiagnosticCode code;
+  final int pageIndex;
+  final String engineId;
+  final String? detail;
+}
+
 class OcrBlock {
   const OcrBlock({
     required this.text,
@@ -70,10 +96,15 @@ class OcrBlock {
 }
 
 class OcrResult {
-  const OcrResult({required this.blocks, required this.engineIds});
+  const OcrResult({
+    required this.blocks,
+    required this.engineIds,
+    this.diagnostics = const [],
+  });
 
   final List<OcrBlock> blocks;
   final Set<String> engineIds;
+  final List<OcrDiagnostic> diagnostics;
 
   String get text => blocks
       .map((block) => block.text.trim())

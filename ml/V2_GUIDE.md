@@ -2,12 +2,32 @@
 
 ## Current step
 
-`[CODEX] P0 - architecture, dataset-license, and artifact-policy research.`
+`[READY FOR TANZIR] P0 - approve the packet, choose the amount-gate posture,
+and identify device paths.`
 
-No action is currently required from Tanzir. Codex must research the candidate
-datasets and compatible toolchain, then commit the decision packet and runnable
-code before marking any human step `[READY FOR TANZIR]` or
-`[WAITING ON TANZIR]`.
+The decision packet, dataset evidence, metric/lineage contracts, CPU tests,
+and dormant app routing seam are complete. The public-corpus audit found no
+eligible real monetary holdout; this is now an explicit owner decision rather
+than an open research task. No dataset download or handwriting collection is
+requested at this step.
+
+Reply with this completed template (plain text is sufficient):
+
+```text
+P0 packet (V2-005 through V2-013): APPROVE / CHANGES: ...
+Amount gate (V2-009): A RETAIN AND BLOCK / B AMEND AND NO AMOUNT CLAIM
+BN-HTRd rights posture: ACCEPT DOCUMENTED RISK / REQUIRE RIGHTS REVIEW
+Android benchmark device: <model and Android version> / NONE AVAILABLE
+Physical iOS runtime path: <device and iOS version> / NONE AVAILABLE
+```
+
+Choice A preserves the original amount-CER requirement but blocks V2 release
+until a qualifying licensed corpus exists. Choice B keeps amount scoring only
+as a supplemental diagnostic and prohibits a real handwritten-amount accuracy
+claim. `research/AMOUNT_BENCHMARK.md` contains the evidence. A rights review is
+the conservative BN-HTRd choice; accepting documented risk is an owner posture,
+not a legal determination. Reporting `NONE AVAILABLE` records a real device
+blocker without pretending the gate passed.
 
 ## Frozen V1 baseline
 
@@ -16,8 +36,10 @@ code before marking any human step `[READY FOR TANZIR]` or
 - Release commit: `602ca4eda36cf7895809c4d308665392aae80db2`
 - Release: `https://github.com/tanzir-lameh/rosid/releases/tag/v1.0.0`
 - Landing page: `https://tanzir-lameh.github.io/rosid/`
-- V2 kickoff changed documentation and branch CI only. `pubspec`, dependencies,
-  mobile source, native projects, and bundled assets match the V1 tag.
+- The initial V2 kickoff commit changed documentation and branch CI only and
+  passed the preservation command below. Subsequent P0 work intentionally added
+  a disabled-by-default handwriting routing contract and tests; dependencies,
+  native projects, model assets, and version still match V1.
 
 ## Guide states
 
@@ -57,12 +79,38 @@ Codex prepares these before requesting approval:
 5. After approval, a pinned CPU-smokeable Python project and lockfile. GPU
    training remains a later explicit guide step.
 
+Current packet:
+
+- `ml/P0_DECISION_PACKET.md`
+- `ml/METRICS.md`
+- `ml/ARTIFACT_POLICY.md`
+- `ml/research/DATASETS.md`
+- `ml/research/AMOUNT_BENCHMARK.md`
+- `ml/DECISIONS.md`
+
+When an approved archive is downloaded later, run the verifier from the
+repository root through its supported module entry point:
+
+```powershell
+python -m ml.verify_dataset <source-manifest.json> <downloaded-archive>
+```
+
+This defaults to production-only and rejects conditional, research-only, and
+excluded records. `--allow-nonproduction` may be used only when a later guide
+step explicitly creates a quarantined research workspace; it never authorizes
+production lineage.
+
+Direct execution as `python ml/verify_dataset.py` is not a supported entry
+point because the repository root must remain on Python's import path.
+
 ## First verification command
 
-From the repository root, V2 must initially preserve all mobile behavior:
+The kickoff preservation check was run from the repository root before app
+source work began:
 
 ```powershell
 git diff --exit-code v1.0.0 -- pubspec.yaml pubspec.lock lib android ios assets
 ```
 
-Expected output: none; exit code `0`.
+Recorded result at kickoff: no output; exit code `0`. It is historical evidence,
+not a current-tree expectation after the intentional dormant routing change.

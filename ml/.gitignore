@@ -10,5 +10,8 @@ data/raw/
 data/interim/
 data/processed/
 data/external/
-runs/
-artifacts/inbox/
+manifests/private/
+/runs/
+reports/runs/*/raw/
+checkpoints/
+artifacts/

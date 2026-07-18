@@ -11,6 +11,11 @@ $flutterBin = if ([string]::IsNullOrWhiteSpace($env:FLUTTER_BIN)) {
 } else {
     $env:FLUTTER_BIN
 }
+$pythonBin = if ([string]::IsNullOrWhiteSpace($env:PYTHON_BIN)) {
+    'python'
+} else {
+    $env:PYTHON_BIN
+}
 
 $dartBin = $env:DART_BIN
 if ([string]::IsNullOrWhiteSpace($dartBin)) {
@@ -43,6 +48,8 @@ try {
     Invoke-CheckedCommand $dartBin @('format', '--output=none', '--set-exit-if-changed', 'lib', 'test', 'integration_test', 'tool')
     Invoke-CheckedCommand $flutterBin @('--no-version-check', 'analyze')
     Invoke-CheckedCommand $flutterBin @('--no-version-check', 'test')
+    Invoke-CheckedCommand $pythonBin @('-m', 'unittest', 'tool.test_audit_v2_model')
+    Invoke-CheckedCommand $pythonBin @('-m', 'unittest', 'discover', '-s', 'ml/tests', '-v')
     & (Join-Path $PSScriptRoot 'audit_offline.ps1')
 
     if ($RunBuild.IsPresent -or $env:ROSID_RUN_BUILD -eq '1') {

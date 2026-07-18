@@ -14,6 +14,8 @@ cd "$PROJECT_DIR"
 "$DART_BIN" format --output=none --set-exit-if-changed lib test integration_test tool
 "$FLUTTER_BIN" --no-version-check analyze
 "$FLUTTER_BIN" --no-version-check test
+"${PYTHON_BIN:-python3}" -m unittest tool.test_audit_v2_model
+"${PYTHON_BIN:-python3}" -m unittest discover -s ml/tests -v
 "$PROJECT_DIR/tool/audit_offline.sh"
 
 if [[ "${ROSID_RUN_BUILD:-0}" == "1" ]]; then
