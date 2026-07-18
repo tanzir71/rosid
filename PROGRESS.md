@@ -437,6 +437,14 @@ are intentionally deferred rather than release blockers:
   the iOS privacy and offline manifest audits were green. Two independent
   adversarial reviews found no remaining concrete false-complete source-graph
   path within the documented trusted-runtime boundary.
+- Exact implementation commit `88297f3b952d2c52aa72af0b76a2e59a2b69ace2`
+  passed [Checks run 29639672402](https://github.com/tanzir-lameh/rosid/actions/runs/29639672402)
+  on a fresh Linux checkout in 7 minutes 52 seconds: all 148 ML tests, 15 model
+  audit tests, Flutter generation/format/analyze/tests, iOS privacy, static-site
+  validation, debug APK build, and the portable offline audit were green. The
+  preceding run exposed a test-fixture-only executable-bit mismatch on Linux;
+  the production mode checker rejected it correctly, the fixture now
+  materializes `100755`, and the exact-SHA rerun passed.
 
 ## Known limitations
 
