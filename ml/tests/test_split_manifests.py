@@ -678,7 +678,7 @@ class SplitManifestTest(unittest.TestCase):
                 "remote",
                 "add",
                 "origin",
-                "https://github.com/tanzir-lameh/rosid.git",
+                "https://github.com/tanzir71/rosid.git",
             )
             (repository / ".gitattributes").write_bytes(b"* -text\n")
 

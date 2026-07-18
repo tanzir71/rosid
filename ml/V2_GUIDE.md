@@ -34,8 +34,8 @@ blocker without pretending the gate passed.
 - Release tag: `v1.0.0`
 - Release branch: `release/v1`
 - Release commit: `602ca4eda36cf7895809c4d308665392aae80db2`
-- Release: `https://github.com/tanzir-lameh/rosid/releases/tag/v1.0.0`
-- Landing page: `https://tanzir-lameh.github.io/rosid/`
+- Release: `https://github.com/tanzir71/rosid/releases/tag/v1.0.0`
+- Landing page: `https://tanzir71.github.io/rosid/`
 - The initial V2 kickoff commit changed documentation and branch CI only and
   passed the preservation command below. Subsequent P0 work intentionally added
   a disabled-by-default handwriting routing contract and tests; dependencies,

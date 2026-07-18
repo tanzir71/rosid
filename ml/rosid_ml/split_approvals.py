@@ -30,14 +30,14 @@ from .storage import (
 )
 
 
-ROSID_REPOSITORY_ID = "tanzir-lameh/rosid"
+ROSID_REPOSITORY_ID = "tanzir71/rosid"
 APPROVAL_SIGNATURE_NAMESPACE = "rosid-v2-split-approval"
 _EXPECTED_ORIGINS = frozenset(
     {
-        "git@github.com:tanzir-lameh/rosid.git",
-        "ssh://git@github.com/tanzir-lameh/rosid.git",
-        "https://github.com/tanzir-lameh/rosid.git",
-        "https://github.com/tanzir-lameh/rosid",
+        "git@github.com:tanzir71/rosid.git",
+        "ssh://git@github.com/tanzir71/rosid.git",
+        "https://github.com/tanzir71/rosid.git",
+        "https://github.com/tanzir71/rosid",
     }
 )
 _SHA256 = re.compile(r"[0-9a-f]{64}\Z")

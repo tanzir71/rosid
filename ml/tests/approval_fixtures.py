@@ -46,7 +46,7 @@ def fake_verified_split_approval(
     policy_sha256 = _digest("test-approval-policy")
     request = SplitApprovalRequest(
         schema_version=1,
-        repository_id="tanzir-lameh/rosid",
+        repository_id="tanzir71/rosid",
         approval_id="unit-test-split-approval",
         approved_by="unit-test-owner",
         approved_git_commit="0" * 40,

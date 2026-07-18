@@ -91,7 +91,7 @@ class SplitApprovalsTest(unittest.TestCase):
             "remote",
             "add",
             "origin",
-            "https://github.com/tanzir-lameh/rosid.git",
+            "https://github.com/tanzir71/rosid.git",
         )
 
         self.private_key, public_key = self._generate_key("owner")
