@@ -352,6 +352,7 @@ class StoragePolicyTest(unittest.TestCase):
         executable = self.repository / "tool.sh"
         source.write_bytes(b"VALUE = 1\n")
         executable.write_bytes(b"#!/bin/sh\nexit 0\n")
+        executable.chmod(0o755)
         self.run_git(self.repository, "add", "--all")
         self.run_git(self.repository, "update-index", "--chmod=+x", "tool.sh")
         self.run_git(self.repository, "commit", "--quiet", "-m", "complete")
