@@ -16,7 +16,7 @@ import os
 import re
 import stat
 import unicodedata
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 from .acquisition import validate_portable_relative_path
@@ -150,6 +150,142 @@ class AppPreprocessReference:
     scope: str
     python_parity_status: str
     vectors: tuple[AppPreprocessVector, ...]
+
+
+@dataclass(frozen=True)
+class CandidatePlane:
+    """One immutable diagnostic plane whose bytes must be recomputed by a caller."""
+
+    layout: str
+    width: int
+    height: int
+    payload: bytes = field(repr=False)
+
+
+def require_candidate_plane_match(
+    reference: PlaneReference,
+    candidate: CandidatePlane,
+) -> None:
+    """Require exact raw-byte agreement with one app plane reference.
+
+    This is a diagnostic equality oracle only. A successful comparison proves
+    neither independent Python execution nor cross-language parity, provenance,
+    eligibility, or production readiness.
+    """
+
+    if type(reference) is not PlaneReference:
+        raise ValueError("reference plane must be a PlaneReference")
+    if type(candidate) is not CandidatePlane:
+        raise ValueError("candidate plane must be a CandidatePlane")
+
+    reference_channels = _validate_reference_plane(reference)
+    candidate_channels = _validate_candidate_plane(candidate)
+    if candidate.layout != reference.layout:
+        raise ValueError("candidate plane layout differs from the reference")
+    if candidate_channels != reference_channels:
+        raise ValueError("candidate plane channel count differs from the reference")
+    if (candidate.width, candidate.height) != (reference.width, reference.height):
+        raise ValueError("candidate plane dimensions differ from the reference")
+    if len(candidate.payload) != reference.byte_count:
+        raise ValueError("candidate plane byte count differs from the reference")
+
+    if candidate_channels == 1:
+        minimums = (min(candidate.payload),)
+        maximums = (max(candidate.payload),)
+        zero_count = candidate.payload.count(0)
+        full_scale_count = candidate.payload.count(255)
+    else:
+        collected_minimums: list[int] = []
+        collected_maximums: list[int] = []
+        for channel in range(candidate_channels):
+            channel_payload = candidate.payload[channel::candidate_channels]
+            collected_minimums.append(min(channel_payload))
+            collected_maximums.append(max(channel_payload))
+            del channel_payload
+        minimums = tuple(collected_minimums)
+        maximums = tuple(collected_maximums)
+        zero_count = 0
+        full_scale_count = 0
+
+    if minimums != reference.channel_minimums:
+        raise ValueError("candidate plane channel minima differ from the reference")
+    if maximums != reference.channel_maximums:
+        raise ValueError("candidate plane channel maxima differ from the reference")
+    if candidate_channels == 1 and (
+        zero_count != reference.zero_count
+        or full_scale_count != reference.full_scale_count
+    ):
+        raise ValueError("candidate plane endpoint counts differ from the reference")
+    if hashlib.sha256(candidate.payload).hexdigest() != reference.sha256:
+        raise ValueError("candidate plane SHA-256 differs from the reference")
+
+
+def _validate_candidate_plane(candidate: CandidatePlane) -> int:
+    if type(candidate.layout) is not str or candidate.layout not in {"rgba8", "y8"}:
+        raise ValueError("candidate plane layout must be rgba8 or y8")
+    if type(candidate.width) is not int or candidate.width <= 0:
+        raise ValueError("candidate plane width must be a positive integer")
+    if type(candidate.height) is not int or candidate.height <= 0:
+        raise ValueError("candidate plane height must be a positive integer")
+    if type(candidate.payload) is not bytes:
+        raise ValueError("candidate plane payload must be immutable bytes")
+    channels = 4 if candidate.layout == "rgba8" else 1
+    if len(candidate.payload) != candidate.width * candidate.height * channels:
+        raise ValueError("candidate plane payload length does not match its shape")
+    return channels
+
+
+def _validate_reference_plane(reference: PlaneReference) -> int:
+    if type(reference.layout) is not str or reference.layout not in {"rgba8", "y8"}:
+        raise ValueError("reference plane layout must be rgba8 or y8")
+    if type(reference.width) is not int or reference.width <= 0:
+        raise ValueError("reference plane width must be a positive integer")
+    if type(reference.height) is not int or reference.height <= 0:
+        raise ValueError("reference plane height must be a positive integer")
+    channels = 4 if reference.layout == "rgba8" else 1
+    if type(reference.channels) is not int or reference.channels != channels:
+        raise ValueError("reference plane channels do not match its layout")
+    expected_bytes = reference.width * reference.height * channels
+    if type(reference.byte_count) is not int or reference.byte_count != expected_bytes:
+        raise ValueError("reference plane byte count does not match its shape")
+    if (
+        type(reference.channel_minimums) is not tuple
+        or type(reference.channel_maximums) is not tuple
+        or len(reference.channel_minimums) != channels
+        or len(reference.channel_maximums) != channels
+    ):
+        raise ValueError("reference plane channel statistics have the wrong shape")
+    for minimum, maximum in zip(
+        reference.channel_minimums,
+        reference.channel_maximums,
+        strict=True,
+    ):
+        if (
+            type(minimum) is not int
+            or type(maximum) is not int
+            or not 0 <= minimum <= maximum <= 255
+        ):
+            raise ValueError("reference plane channel statistics are invalid")
+    _sha256(reference.sha256, label="reference plane SHA-256")
+    if channels == 4:
+        if reference.zero_count is not None or reference.full_scale_count is not None:
+            raise ValueError("RGBA reference plane must not contain Y8 endpoint counts")
+        if reference.channel_minimums[3] != 255 or reference.channel_maximums[3] != 255:
+            raise ValueError("RGBA reference plane alpha channel must be opaque")
+    else:
+        if (
+            type(reference.zero_count) is not int
+            or type(reference.full_scale_count) is not int
+            or reference.zero_count < 0
+            or reference.full_scale_count < 0
+            or reference.zero_count + reference.full_scale_count > reference.byte_count
+        ):
+            raise ValueError("Y8 reference plane endpoint counts are invalid")
+        if (reference.channel_minimums[0] == 0) != (reference.zero_count > 0):
+            raise ValueError("Y8 reference zero count is inconsistent")
+        if (reference.channel_maximums[0] == 255) != (reference.full_scale_count > 0):
+            raise ValueError("Y8 reference full-scale count is inconsistent")
+    return channels
 
 
 def verify_app_preprocess_reference(
