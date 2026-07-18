@@ -2,7 +2,7 @@
 
 ## Current status
 
-- Active milestone: V1.0.0 is published as an immutable GitHub Release. The signed Android APK, explicitly unsigned iPhone IPA, and public Pages landing page are live and independently smoke-tested. Physical-device QA remains owner-deferred and Apple distribution remains unavailable without a membership.
+- Active milestone: V2 P0 design, dataset-license, and artifact-policy decisions on `codex/v2`. V1.0.0 remains published and frozen as an immutable GitHub Release. The V2 kickoff changes documentation and branch CI only; no app behavior, dependency, model asset, or version has changed.
 - Flutter: 3.44.6 stable; Dart: 3.12.2.
 - Automated Windows gate: green on 2026-07-18 (`flutter analyze` clean; all 185 tests passed; offline source audit passed).
 - Bundled OCR data: pinned `tessdata_best` English and Bangla models are checked in and hash-verified by the release workflow.
