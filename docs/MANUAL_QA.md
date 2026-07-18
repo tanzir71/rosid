@@ -75,15 +75,17 @@ verifies that a larger document is rejected before any page file is read.
 
 ## Remaining distribution checks
 
-1. After the tag workflow produces it, install and verify the signed Android
-   GitHub Release asset. This physical-device check is owner-deferred for the
-   initial early-access publication; the signed build itself is still pending.
-2. Verify that Pages links to `rosid.apk` and the explicitly unsigned
-   `rosid-ios-unsigned.ipa`, and that the displayed file hashes match the latest
-   GitHub Release metadata.
+1. Install and verify the signed Android V1.0.0 GitHub Release asset on a clean
+   physical device. The artifact itself passed CI signing and manifest checks;
+   this physical-device check is owner-deferred for the initial early-access
+   publication.
+2. Pages now links to `rosid.apk` and the explicitly unsigned
+   `rosid-ios-unsigned.ipa`; automated public smoke checks confirmed that the
+   displayed version, file hashes, certificate fingerprint, and versioned URLs
+   match the immutable V1.0.0 Release. Reconfirm these values for future tags.
 3. If testing iPhone self-signing, follow `IOS_SELF_SIGNING.md` and verify that
    the 7-day free-provisioning limitation is shown before download.
-4. Smoke-test the public Pages URL on mobile after deployment, confirm the
-   published page matches the intended release, and run Lighthouse against the
-   rebuilt page. Record the new result rather than carrying forward the prior
-   design's accessibility score.
+4. The V1.0.0 public Pages URL passed an HTTP/asset/link smoke test, and the
+   rebuilt page's checked-in local Lighthouse evidence records 100 in all four
+   mobile categories. A physical mobile visual pass remains owner-deferred;
+   rerun both smoke and Lighthouse checks for future design or release changes.

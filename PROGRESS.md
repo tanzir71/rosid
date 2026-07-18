@@ -2,21 +2,25 @@
 
 ## Current status
 
-- Active milestone: V1 implementation is complete; Android emulator OCR, unsigned Android artifact, and privacy-safe iOS dependency-lock gates are green. Release signing infrastructure is configured, while the signed Android build, unsigned iOS compile, release publication, and public Pages deployment remain pending. Physical-device QA is owner-deferred and Apple distribution is unavailable without a membership.
+- Active milestone: V1.0.0 is published as an immutable GitHub Release. The signed Android APK, explicitly unsigned iPhone IPA, and public Pages landing page are live and independently smoke-tested. Physical-device QA remains owner-deferred and Apple distribution remains unavailable without a membership.
 - Flutter: 3.44.6 stable; Dart: 3.12.2.
 - Automated Windows gate: green on 2026-07-18 (`flutter analyze` clean; all 185 tests passed; offline source audit passed).
 - Bundled OCR data: pinned `tessdata_best` English and Bangla models are checked in and hash-verified by the release workflow.
 - Native Android validation: debug and unsigned R8 release APKs built; the strict merged release-manifest audit passed; an airplane-mode emulator OCR run passed all three fixtures.
+- Published release: protected tag `v1.0.0` and permanent branch `release/v1`
+  preserve commit `602ca4e`; release run `29625460054` verified both native
+  artifacts, locked the Release, and deployed
+  `https://tanzir-lameh.github.io/rosid/`.
 - Landing page: five real emulator captures are retained under
   `site/screenshots/`; the site displays four of them in place of product
   mockups. The optimized rebuilt page scored 100 in all four Lighthouse mobile
   categories; compact evidence is recorded in `docs/audits/lighthouse-v1.json`.
-- V2 has not started. Under the owner-amended gate, it awaits a verified signed
-  Android release, a verified unsigned iOS compile artifact, live Pages, and a
-  preserved `release/v1` reference; deferred physical QA and unavailable Apple
-  distribution do not block that transition.
+- The owner-amended V2 transition gate is satisfied: signed Android, unsigned
+  iOS, live Pages, and the preserved V1 references are verified. V2 begins on
+  `codex/v2`; deferred physical QA and unavailable Apple distribution are
+  carried explicitly rather than treated as passed.
 
-## Validation status and blockers
+## Validation status and deferred checks
 
 The source gate ran code generation, fixture-bundle generation, formatting,
 static analysis, the automated test suite, and the offline policy audit
@@ -34,17 +38,14 @@ The real fixture harness passed 3/3 on an Android emulator launched and exercise
 in airplane mode: English through ML Kit, mixed English/Bangla through ML Kit +
 Tesseract, and handwritten text through the editable document-review path.
 
-Release infrastructure is now provisioned: the release keystore is backed up
-outside the repository, all four Android secrets are configured in the
-tag-restricted `android-release` environment, an enforced `v*` tag ruleset is
-active, immutable releases are enabled, and Pages is configured to use GitHub
-Actions. These are configuration checks, not release-artifact acceptance. The
-remaining gates are:
+Release infrastructure and artifact acceptance are green. The keystore is
+backed up outside the repository; all four Android secrets remain scoped to the
+tag-restricted `android-release` environment; the enforced `v*` ruleset,
+immutable-release setting, and Pages tag policy are active. Release run
+`29625460054` compiled both platforms, matched the APK signer to the configured
+keystore, published the immutable assets, and deployed Pages. Remaining checks
+are intentionally deferred rather than release blockers:
 
-- verify the unsigned iOS compile against the committed, privacy-audited
-  `ios/Podfile.lock` in the release workflow;
-- push the reviewed protected release tag and verify the signed APK signer,
-  unsigned iPhone package, GitHub Release metadata, and public Pages deployment;
 - complete the camera, gallery, first-launch, search/export,
   constrained-memory PDF, native iOS, and share-sheet checks on physical
   devices later, as explicitly deferred by the owner;
@@ -87,9 +88,9 @@ remaining gates are:
 - The upstream Tesseract plugin does not implement hOCR on iOS. Android uses
   hOCR geometry/confidence; iOS uses the plugin's plain-text channel, synthesizes
   line boxes, and assigns conservative 0.4 confidence so review is mandatory.
-- The signed Android and Pages workflows are configured but have not been run to
-  successful release completion. App Store/TestFlight publishing remains
-  unavailable because the owner has no Apple distribution membership.
+- The signed Android, unsigned iOS, immutable Release, and Pages paths completed
+  successfully in release run `29625460054`. App Store/TestFlight publishing
+  remains unavailable because the owner has no Apple distribution membership.
 
 ## Log
 
@@ -200,8 +201,8 @@ remaining gates are:
   four signing secrets in the `android-release` environment, restricted that
   environment to `v*` tags, and enabled the enforced `v*` repository tag
   ruleset plus repository-level immutable releases.
-- Configured GitHub Pages to use Actions. No release-triggered public deployment
-  has completed yet.
+- Configured GitHub Pages to use Actions; the first release-triggered public
+  deployment later completed in run `29625460054`.
 - Added the GitHub-hosted macOS dependency-lock helper. Its first run
   (`29621736516`) succeeded and the downloaded file matched its artifact, but
   review found that it still contained Google ML Kit telemetry/network support
@@ -223,6 +224,35 @@ remaining gates are:
   images with optimized WebP variants, and added the release favicon. Mobile
   Lighthouse 13.4 scored Performance 100, Accessibility 100, Best Practices 100,
   and SEO 100; the compact audited metrics are checked in.
+
+### 2026-07-18 - Immutable V1.0.0 publication
+
+- Main Checks run `29625183481` passed at release commit `602ca4e`: locked
+  dependencies, generation, formatting, analysis, all 185 tests, iOS privacy
+  audit, site preparation, debug APK build, and portable offline audit.
+- The first protected-tag run exposed a parser assumption about modern
+  `apksigner` labels; the produced APK was valid, single-signer, and correctly
+  signed. The second run exposed a missing checkout in the publish job. Both
+  workflow defects failed before any GitHub Release existed and were corrected
+  and revalidated on `main`.
+- Final release run `29625460054` passed Android signing/manifest verification,
+  the Tesseract-only unsigned iOS compile/package, immutable publication, and
+  the tag-authorized Pages deployment.
+- Published `rosid.apk`: 150,056,622 bytes, SHA-256
+  `2CBE4774FA3B0E9D4CD7869E74DE234B885BFFFDBA489BE3F0DDD813F21C4183`.
+  Its sole signing certificate SHA-256 is
+  `3980AC0407EDC1AD2E46BE86A07A266910B2EF6634A42997CAB7C1BBD3EC29F7`.
+- Published `rosid-ios-unsigned.ipa`: 58,555,375 bytes, SHA-256
+  `2D90BA2C8F863F641B9A4A410770E3842958627EE1F131EB1FB311541C05621C`.
+  It is explicitly unsigned and remains a user-self-signing artifact rather
+  than an App Store, TestFlight, enterprise, or one-tap web distribution build.
+- GitHub reports the V1 Release immutable. The public Pages smoke test returned
+  HTTP 200 and displayed the exact release version, hashes, and certificate
+  fingerprint. Live HTML SHA-256 is
+  `EF3A071B0A1BD7D87603329746DAAC8593843BB7B8BB5477EE5D8D0168BF3889`;
+  all local resources matched the tagged Git blobs and no runtime network or
+  analytics call was found. Protected tag `v1.0.0` and `release/v1` both
+  preserve `602ca4e`.
 
 ### 2026-07-17 - Final automated and Android native gates
 
@@ -255,17 +285,16 @@ remaining gates are:
   and the Android emulator OCR subset is green. Camera/gallery hardware behavior,
   first-launch install from a clean physical device, constrained-memory export,
   and platform share sheets still require the full physical-device script.
-- The unsigned release manifest has been produced and strictly audited. The
-  keystore and environment secrets are now configured, but no signed APK has
-  passed the protected tag workflow yet.
+- The signed release APK passed the protected tag workflow, strict merged
+  manifest allowlist, single-signer check, and configured-keystore fingerprint
+  comparison. A clean physical-device install remains owner-deferred.
 - A GitHub-hosted macOS runner produced the committed privacy-safe lock artifact
   after the first artifact exposed and prompted removal of iOS ML Kit support
-  pods. The unsigned compile remains pending in the protected tag workflow.
+  pods. The protected tag workflow compiled and packaged the unsigned IPA.
   Apple signing and TestFlight remain unavailable without membership.
 - The displayed screenshots are optimized versions of real emulator captures.
-  The rebuilt page's four mobile Lighthouse category scores are 100. Live
-  Pages/Release publication and the post-deployment smoke check are pending.
-- `TASKS_V2.md` is intentionally absent until the owner-amended V1 transition
-  gate is met: verified release artifacts, live Pages, and a preserved
-  `release/v1` reference. Physical-device QA and Apple distribution are
+  The rebuilt page's four mobile Lighthouse category scores are 100. The live
+  Release/Pages smoke test is green; physical mobile visual QA remains deferred.
+- The owner-amended V1 transition gate is met. `TASKS_V2.md` and the guided ML
+  ledger begin on `codex/v2`; physical-device QA and Apple distribution remain
   explicitly deferred rather than falsely marked complete.

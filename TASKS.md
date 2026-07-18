@@ -69,7 +69,7 @@ handover gate, not a pass.
 - [x] M8.3 Add a release workflow that verifies model hashes, the emitted APK signer, and keystore fingerprint before publishing
 - [x] M8.4 Build the debug APK and inspect native plugin packaging
 - [x] M8.5a Build the unsigned R8 release APK and pass the strict merged release-manifest audit
-- [ ] M8.5b Build and verify the signed release APK (keystore and all four protected environment secrets are configured; tag workflow verification is pending)
+- [x] M8.5b Build and verify the signed release APK (release run `29625460054`; SHA-256 `2CBE4774FA3B0E9D4CD7869E74DE234B885BFFFDBA489BE3F0DDD813F21C4183`; signer `3980AC0407EDC1AD2E46BE86A07A266910B2EF6634A42997CAB7C1BBD3EC29F7`)
 - [DEFERRED BY OWNER: physical-device testing will be completed later] M8.6 Run the full airplane-mode English/Bangla receipt and handwritten-document script
 
 ## M9 - iOS profile
@@ -77,7 +77,7 @@ handover gate, not a pass.
 - [x] M9.1 Verify documents-first home, expense toggle, stable navigation, and route/surface gating via profile tests
 - [x] M9.2 Implement multi-page document persistence, pinned documents, and bounded local PDF export
 - [x] M9.3 Add iOS usage strings, tessdata bundle resources, backup exclusion, and iOS 15.5 configuration
-- [ ] M9.4 Resolve and commit `Podfile.lock`, then compile the unsigned iOS target on GitHub-hosted macOS (privacy-safe lock artifact from run `29623751861` is committed; compile pending)
+- [x] M9.4 Resolve and commit `Podfile.lock`, then compile the unsigned iOS target on GitHub-hosted macOS (privacy-safe lock run `29623751861`; compile/package run `29625460054`)
 - [DEFERRED BY OWNER: physical-device testing will be completed later] M9.5 Verify native OCR, profile flow, multi-page PDF, and share sheet end to end
 
 ## M10 - Landing page and distribution
@@ -87,9 +87,9 @@ handover gate, not a pass.
 - [x] M10.3 Document Android signing, iPhone self-signing constraints, install, and manual verification steps
 - [x] M10.4 Replace landing-page mockups with four real emulator screenshots (five captures retained)
 - [x] M10.5 Re-run mobile Lighthouse for the rebuilt landing page (Performance, Accessibility, Best Practices, and SEO: 100 each)
-- [ ] M10.6 Publish Pages and a signed Android GitHub Release (Pages is configured; no public release deployment exists yet)
+- [x] M10.6 Publish Pages and a signed Android GitHub Release (immutable `v1.0.0`; `https://tanzir-lameh.github.io/rosid/`)
 - [DEFERRED: owner has no paid Apple distribution membership] M10.7 Publish an App Store/TestFlight build
-- [ ] M10.8 Compile and publish the explicitly unsigned iPhone IPA for advanced self-signing
+- [x] M10.8 Compile and publish the explicitly unsigned iPhone IPA for advanced self-signing (SHA-256 `2D90BA2C8F863F641B9A4A410770E3842958627EE1F131EB1FB311541C05621C`)
 - [x] M10.9 Research direct-download competitors and rebuild the landing page around outcome, trust, and release integrity
 
 ## Final V1 audit
@@ -101,11 +101,11 @@ handover gate, not a pass.
 - [x] Confirm the source Android manifest has no `INTERNET` or `ACCESS_NETWORK_STATE` permission
 - [x] Build debug and unsigned R8 release APKs
 - [x] Audit the merged Android release manifest (only `CAMERA` and AndroidX's app-scoped signature permission)
-- [ ] Build and verify a signed release APK
+- [x] Build and verify a signed release APK
 - [x] Pass the Android-emulator airplane-mode native OCR fixture subset (3/3)
 - [DEFERRED BY OWNER: to be completed later] Pass the full section 13 camera/gallery/search/export/PDF/share physical-device script
-- [ ] Compile the unsigned native iOS target on a hosted macOS runner
+- [x] Compile the unsigned native iOS target on a hosted macOS runner
 - [DEFERRED: no Apple distribution membership] Sign and publish through App Store/TestFlight
-- [ ] Publish live Pages, the signed Android APK, and the unsigned iPhone IPA
+- [x] Publish live Pages, the signed Android APK, and the unsigned iPhone IPA
 - [x] Re-run local mobile Lighthouse against the rebuilt landing page and record the four 100 scores
-- [ ] Preserve the released V1 commit on `release/v1` and generate `TASKS_V2.md` under the owner-amended section 17 gate
+- [x] Preserve release commit `602ca4e` on `release/v1` and `v1.0.0`; start the owner-amended section 17 ledger as `TASKS_V2.md` on `codex/v2`

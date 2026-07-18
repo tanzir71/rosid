@@ -2,11 +2,12 @@
 
 The Windows workspace has successfully built a debug APK and an unsigned,
 minified R8 release APK. The strict merged release-manifest audit also passed.
-A release keystore has been created and backed up outside the repository, and
-all four signing secrets are configured in the `android-release` environment.
-The enforced `v*` tag ruleset, environment tag policy, and GitHub Actions Pages
-source are also configured. A signed APK, unsigned iPhone package, GitHub
-Release, and public Pages deployment have not yet been produced or verified.
+A release keystore is backed up outside the repository, and all four signing
+secrets are scoped to the `android-release` environment. The enforced `v*` tag
+ruleset, immutable-release setting, environment tag policies, and GitHub Actions
+Pages source are configured. V1.0.0 subsequently completed the protected signed
+Android build, unsigned iOS compile/package, immutable GitHub Release, and public
+Pages deployment.
 
 ## Local verification
 
@@ -80,6 +81,25 @@ trusted that root. Do not disable TLS verification. Do not commit a local
 truststore or its password; machines with TLS interception should use their own
 administrator-approved temporary trust configuration.
 
+## Published V1.0.0 evidence
+
+- Release: `https://github.com/tanzir-lameh/rosid/releases/tag/v1.0.0`
+- Landing page: `https://tanzir-lameh.github.io/rosid/`
+- Release commit: `602ca4eda36cf7895809c4d308665392aae80db2`, preserved by
+  both `v1.0.0` and `release/v1`
+- Successful release workflow: `29625460054`
+- Signed APK: 150,056,622 bytes, SHA-256
+  `2CBE4774FA3B0E9D4CD7869E74DE234B885BFFFDBA489BE3F0DDD813F21C4183`
+- APK signing certificate SHA-256:
+  `3980AC0407EDC1AD2E46BE86A07A266910B2EF6634A42997CAB7C1BBD3EC29F7`
+- Explicitly unsigned IPA: 58,555,375 bytes, SHA-256
+  `2D90BA2C8F863F641B9A4A410770E3842958627EE1F131EB1FB311541C05621C`
+
+GitHub reports the Release immutable, and the public Pages smoke test matches
+its version, checksums, certificate fingerprint, and versioned download URLs.
+This is artifact/publication evidence, not a substitute for the owner-deferred
+physical-device script in `MANUAL_QA.md`.
+
 ## One-time repository setup
 
 1. The canonical public repository is
@@ -115,9 +135,10 @@ administrator-approved temporary trust configuration.
 As of 2026-07-18, these one-time steps are complete: immutable releases are
 enabled, the keystore backup and four environment secrets exist, the `v*` tag
 ruleset is enforced, the `android-release` environment accepts only `v*` tags,
-and Pages uses GitHub Actions. The sole maintainer cannot provide an independent
-environment review, so no required reviewer is configured yet. This setup is
-readiness evidence; the signed release workflow itself is still unverified.
+the `github-pages` environment accepts both `main` and `v*`, and Pages uses
+GitHub Actions. The sole maintainer cannot provide an independent environment
+review, so no required reviewer is configured yet. Release run `29625460054`
+verified the complete protected publication path.
 
 ## Signed Android release
 
