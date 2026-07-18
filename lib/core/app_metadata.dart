@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 const rosidLatestReleaseUrl =
-    'https://github.com/tanzir-lameh/rosid/releases/latest';
+    'https://github.com/tanzir71/rosid/releases/latest';
 
 class AppMetadata {
   const AppMetadata({required this.version, required this.buildNumber});

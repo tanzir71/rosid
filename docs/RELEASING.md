@@ -83,8 +83,8 @@ administrator-approved temporary trust configuration.
 
 ## Published V1.0.0 evidence
 
-- Release: `https://github.com/tanzir-lameh/rosid/releases/tag/v1.0.0`
-- Landing page: `https://tanzir-lameh.github.io/rosid/`
+- Release: `https://github.com/tanzir71/rosid/releases/tag/v1.0.0`
+- Landing page: `https://tanzir71.github.io/rosid/`
 - Release commit: `602ca4eda36cf7895809c4d308665392aae80db2`, preserved by
   both `v1.0.0` and `release/v1`
 - Successful release workflow: `29625460054`
@@ -103,7 +103,7 @@ physical-device script in `MANUAL_QA.md`.
 ## One-time repository setup
 
 1. The canonical public repository is
-   `https://github.com/tanzir-lameh/rosid`. Enable Pages with **GitHub Actions**
+   `https://github.com/tanzir71/rosid`. Enable Pages with **GitHub Actions**
    as the source.
 2. Enable repository-level immutable releases. This makes each published
    release, its assets, and its associated tag read-only after publication.

@@ -14,7 +14,7 @@ device. See Apple's current
 
 - The target iPhone must run iOS 15.5 or later.
 - Only download the IPA from the project's official
-  [GitHub Releases](https://github.com/tanzir-lameh/rosid/releases).
+  [GitHub Releases](https://github.com/tanzir71/rosid/releases).
 - Compare the downloaded file's SHA-256 with
   `rosid-ios-unsigned.ipa.sha256` from the same release.
 - Self-signing is an advanced, user-managed installation route. It may stop
@@ -31,7 +31,7 @@ Xcode, and CocoaPods.
 1. Clone the immutable V1 tag rather than the evolving `main` branch:
 
    ```sh
-   git clone --branch v1.0.0 --single-branch https://github.com/tanzir-lameh/rosid.git
+   git clone --branch v1.0.0 --single-branch https://github.com/tanzir71/rosid.git
    cd rosid
    ```
 

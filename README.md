@@ -6,7 +6,7 @@ defaults to a documents-first experience. `AppProfile` keeps those variants in
 one codebase.
 
 Download the signed Android APK or the advanced unsigned iPhone package from
-the [Rosid landing page](https://tanzir-lameh.github.io/rosid/). GitHub Releases
+the [Rosid landing page](https://tanzir71.github.io/rosid/). GitHub Releases
 hosts every version, checksum, and Android signing-certificate fingerprint.
 The iPhone package requires user-managed self-signing; it is not an App Store or
 TestFlight build.

@@ -19,7 +19,7 @@
 - Published release: protected tag `v1.0.0` and permanent branch `release/v1`
   preserve commit `602ca4e`; release run `29625460054` verified both native
   artifacts, locked the Release, and deployed
-  `https://tanzir-lameh.github.io/rosid/`.
+  `https://tanzir71.github.io/rosid/`.
 - Landing page: five real emulator captures are retained under
   `site/screenshots/`; the site displays four of them in place of product
   mockups. The optimized rebuilt page scored 100 in all four Lighthouse mobile
