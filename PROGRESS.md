@@ -320,9 +320,11 @@ are intentionally deferred rather than release blockers:
   non-overridable 20,000,000-byte ceiling. The 128-test ML suite passed this
   foundation without datasets, a GPU, or network access. The later independent
   audit added one quarantine-scope regression test; all 29 lineage tests and a
-  70-test affected/fast group pass after that fix, while Linux CI remains the
-  authoritative full 129-test rerun because Git-heavy groups exceeded local
-  Windows process bounds without a test failure.
+  70-test affected/fast group pass after that fix. On exact commit `4a7beb2`,
+  [Checks run 29636752507](https://github.com/tanzir-lameh/rosid/actions/runs/29636752507)
+  passed the complete 129-test ML suite in 7.078 seconds on pinned Python
+  3.12.10 after local Git-heavy groups exceeded Windows process bounds without
+  a test failure.
 - Drafted the full P0 packet with conditional CRNN/CTC and TCN fallback,
   grapheme-aware hybrid vocabulary, exact metric/parity semantics, all-three
   synthesis gates, transitive provenance, routing acceptance, and runtime/device
@@ -405,8 +407,10 @@ are intentionally deferred rather than release blockers:
   privacy/tamper, and verified-lineage cases. After the audit found a
   quarantined-scope eligibility-laundering path, lineage now maps signed scope
   onto both split and approval-node eligibility; all 29 lineage tests and the
-  70-test affected/fast group pass. Full 129-test confirmation is delegated to
-  Linux CI after local Git-heavy reruns timed out without failure output.
+  70-test affected/fast group pass locally. Exact-SHA Linux CI passed all 129 ML
+  tests in 7.078 seconds, plus Flutter generation/format/analyze/tests, iOS
+  privacy, static-site validation, debug APK build, and the portable offline
+  audit.
   Mobile dependencies, model assets, app routing defaults, and V1 behavior
   remain unchanged.
 
