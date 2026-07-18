@@ -489,6 +489,18 @@ are intentionally deferred rather than release blockers:
   and the iOS privacy and offline audits were green. A unified Windows ML
   discovery run remained healthy but exceeded its 30-minute process limit in
   slow temporary-Git calls; fresh Linux exact-SHA CI remains the unified gate.
+- Exact implementation commit `7d157cc7b0d839ebdeab3eb40bf2a0493fffa125`
+  first exposed a Linux test-fixture collision in
+  [Checks run 29644627537](https://github.com/tanzir-lameh/rosid/actions/runs/29644627537):
+  its `os.statvfs` mock also reached `shutil.disk_usage`, producing a `Mock`
+  arithmetic error before reaching the intended inode-reserve assertion. Fix
+  commit `f689ac0e3e23ffe558192fee6a713f124f5e4beb` now mocks the dedicated inode
+  seam. That exact SHA passed
+  [Checks run 29644810246](https://github.com/tanzir-lameh/rosid/actions/runs/29644810246)
+  on a fresh Linux checkout: the 23-test structural model suite was OK with its
+  expected Windows-only ADS case skipped, all 168 ML tests passed, and Flutter
+  generation/format/analyze and 209 tests, iOS privacy, static-site validation,
+  debug APK build, and the portable offline audit were green.
 - No publisher archive was downloaded, no real extraction/acquisition was
   recorded, no model or runtime was selected, and no P0 owner decision changed.
 
