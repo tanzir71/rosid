@@ -2,7 +2,7 @@
 
 ## Current status
 
-- Active milestone: V1 implementation is complete; Android emulator OCR and unsigned native-artifact gates are green. Release signing infrastructure is configured, while the signed Android build, unsigned iOS compile, release publication, and public Pages deployment remain pending. Physical-device QA is owner-deferred and Apple distribution is unavailable without a membership.
+- Active milestone: V1 implementation is complete; Android emulator OCR, unsigned Android artifact, and privacy-safe iOS dependency-lock gates are green. Release signing infrastructure is configured, while the signed Android build, unsigned iOS compile, release publication, and public Pages deployment remain pending. Physical-device QA is owner-deferred and Apple distribution is unavailable without a membership.
 - Flutter: 3.44.6 stable; Dart: 3.12.2.
 - Automated Windows gate: green on 2026-07-18 (`flutter analyze` clean; all 185 tests passed; offline source audit passed).
 - Bundled OCR data: pinned `tessdata_best` English and Bangla models are checked in and hash-verified by the release workflow.
@@ -41,9 +41,8 @@ active, immutable releases are enabled, and Pages is configured to use GitHub
 Actions. These are configuration checks, not release-artifact acceptance. The
 remaining gates are:
 
-- regenerate and commit a privacy-safe `ios/Podfile.lock` on hosted macOS after
-  removing the cross-platform ML Kit plugins, then verify the unsigned iOS
-  compile in the release workflow;
+- verify the unsigned iOS compile against the committed, privacy-audited
+  `ios/Podfile.lock` in the release workflow;
 - push the reviewed protected release tag and verify the signed APK signer,
   unsigned iPhone package, GitHub Release metadata, and public Pages deployment;
 - complete the camera, gallery, first-launch, search/export,
@@ -206,8 +205,11 @@ remaining gates are:
 - Added the GitHub-hosted macOS dependency-lock helper. Its first run
   (`29621736516`) succeeded and the downloaded file matched its artifact, but
   review found that it still contained Google ML Kit telemetry/network support
-  pods. That lock is superseded; a privacy-safe refresh is required before the
-  unsigned iOS compile can run in the protected tag workflow.
+  pods. That lock is superseded. Replacement run `29623751861` resolved only
+  Flutter, `flutter_tesseract_ocr`, and SwiftyTesseract with CocoaPods 1.17.0;
+  its exact artifact (SHA-256
+  `A008BF3142D4527512E42AC8D92CA5C8B48EAEB8EAC1BEF441058780BFCC3A33`)
+  passed the privacy audit and is committed for the protected tag workflow.
 - Removed the Flutter ML Kit plugins. Android now calls the same bundled Latin
   ML Kit library through an Android-only MethodChannel; iOS and other platforms
   use the bundled Tesseract `ben+eng` path. Analyze, all 185 tests, the debug APK,
@@ -256,10 +258,10 @@ remaining gates are:
 - The unsigned release manifest has been produced and strictly audited. The
   keystore and environment secrets are now configured, but no signed APK has
   passed the protected tag workflow yet.
-- A GitHub-hosted macOS runner is available. The first exact lock artifact was
-  superseded because it exposed ML Kit support pods in iOS; a privacy-safe lock
-  refresh and unsigned compile are pending. Apple signing and TestFlight remain
-  unavailable without membership.
+- A GitHub-hosted macOS runner produced the committed privacy-safe lock artifact
+  after the first artifact exposed and prompted removal of iOS ML Kit support
+  pods. The unsigned compile remains pending in the protected tag workflow.
+  Apple signing and TestFlight remain unavailable without membership.
 - The displayed screenshots are optimized versions of real emulator captures.
   The rebuilt page's four mobile Lighthouse category scores are 100. Live
   Pages/Release publication and the post-deployment smoke check are pending.

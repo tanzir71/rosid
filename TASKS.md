@@ -77,7 +77,7 @@ handover gate, not a pass.
 - [x] M9.1 Verify documents-first home, expense toggle, stable navigation, and route/surface gating via profile tests
 - [x] M9.2 Implement multi-page document persistence, pinned documents, and bounded local PDF export
 - [x] M9.3 Add iOS usage strings, tessdata bundle resources, backup exclusion, and iOS 15.5 configuration
-- [ ] M9.4 Resolve and commit `Podfile.lock`, then compile the unsigned iOS target on GitHub-hosted macOS (the first exact lock artifact is committed; privacy-safe lock refresh and compile pending)
+- [ ] M9.4 Resolve and commit `Podfile.lock`, then compile the unsigned iOS target on GitHub-hosted macOS (privacy-safe lock artifact from run `29623751861` is committed; compile pending)
 - [DEFERRED BY OWNER: physical-device testing will be completed later] M9.5 Verify native OCR, profile flow, multi-page PDF, and share sheet end to end
 
 ## M10 - Landing page and distribution

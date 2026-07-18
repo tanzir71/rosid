@@ -130,9 +130,12 @@ readiness evidence; the signed release workflow itself is still unverified.
    its `Podfile.lock` at `ios/Podfile.lock`, inspect the resolved dependencies,
    commit the lockfile to `main`, and rerun the checks. Do not tag a revision
    without the committed lockfile. The first helper run (`29621736516`) exposed
-   ML Kit telemetry/network support pods and is superseded. The replacement lock
-   must pass `tool/audit_ios_privacy.py`, which forbids those package and pod
-   names before upload and again before the unsigned compile.
+   ML Kit telemetry/network support pods and is superseded. Replacement run
+   `29623751861` produced the committed Tesseract-only lock artifact (SHA-256
+   `A008BF3142D4527512E42AC8D92CA5C8B48EAEB8EAC1BEF441058780BFCC3A33`).
+   Every replacement lock must pass `tool/audit_ios_privacy.py`, which forbids
+   those package and pod names before upload and again before the unsigned
+   compile.
 4. A trusted release maintainer creates and pushes a protected semantic tag,
    such as `v1.0.0`, pointing at that reviewed `main` commit.
 5. Verify the tag target, version, and workflow revision. If the environment has
