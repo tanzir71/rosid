@@ -131,8 +131,11 @@ python -m unittest ml.tests.test_app_preprocess_reference -v
 ```
 
 The manifest says `scope=app_reference_only` and
-`python_parity_status=not_implemented`. The Python test checks canonical JSON,
-the digest, and public source bindings; it is not a preprocessing-parity test.
+`python_parity_status=not_implemented`. The Python verifier fails closed on
+unknown or malformed schema content and requires canonical unique-key JSON,
+the exact sidecar, and tracked-`HEAD` public source bindings. Its typed result
+has no parity, eligibility, lineage, or production marker; this is not a
+preprocessing-parity test.
 No dataset loader, line segmentation, tensor normalization, model contract, or
 runtime choice is implied. After the relevant owner approvals, an independent
 Python implementation must reproduce the result planes and both code/config

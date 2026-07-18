@@ -475,6 +475,11 @@ class CodeBundleTest(unittest.TestCase):
         found = discover_p1_implementation_paths(root, adapter_paths=())
         self.assertEqual(set(found), set(REQUIRED_CORE_CODE_ROLES))
         self.assertNotIn("ml/rosid_ml/limits.py", found)
+        self.assertNotIn("ml/rosid_ml/preprocess_reference.py", found)
+        self.assertNotIn(
+            "ml/rosid_ml/preprocess_reference.py",
+            REQUIRED_CORE_CODE_ROLES,
+        )
 
     def test_entrypoint_roles_are_consistent_with_reviewed_role_table(self) -> None:
         self.assertTrue(set(P1_ENTRYPOINT_CODE_ROLES) < set(REQUIRED_CORE_CODE_ROLES))

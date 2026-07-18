@@ -529,8 +529,25 @@ are intentionally deferred rather than release blockers:
 - Local verification passed the 12 focused preprocessing tests, the Python
   canonical/source-binding test and Ruff, formatting across 104 Dart files with
   no changes, clean analysis, all 211 Flutter tests, and the four-manifest
-  offline audit; the debug APK built successfully. Fresh exact-SHA Linux CI
-  remains the full 169-test ML and cross-platform raw/JPEG byte gate.
+  offline audit; the debug APK built successfully. Exact implementation commit
+  `0f8279c324e43aa9a2edc019501196313aa52e0f` passed
+  [Checks run 29646688206](https://github.com/tanzir-lameh/rosid/actions/runs/29646688206)
+  on a fresh Linux checkout: the Dart generator reproduced the tracked bytes,
+  all 169 ML tests and 23 structural model tests passed (with the expected
+  Windows-only ADS case skipped), and Flutter generation/format/analyze/tests,
+  iOS privacy, site validation, debug APK build, and offline audit were green.
+- Added a strict Python verifier for this deliberately non-qualifying app-only
+  reference. It requires unique-key canonical JSON, exact schema/constants and
+  nested invariants, the exact digest record, and ordinary tracked sources whose
+  index/worktree bytes match Git `HEAD`. Its typed result exposes no parity,
+  eligibility, lineage, or production marker, and the module remains outside
+  the reviewed 21-file P1 import closure.
+- Adversarial coverage rejects schema/type/key drift, noncanonical and deeply
+  nested JSON, oversized inputs before unbounded reads, malformed quads/options/
+  plane statistics, dirty or untracked sources, and hardlinks. All 175 ML tests
+  passed locally with the expected POSIX-only skip on Windows; all 23 structural
+  model tests, 211 Flutter tests, generation, formatting, analysis, iOS privacy,
+  and the four-manifest offline audit were also green.
 - This does not implement Python preprocessing, dataset loaders, line
   segmentation, tensor normalization, a model/runtime contract, or enforced
   preprocessing-golden lineage. Cross-language parity, P2 completion, and all

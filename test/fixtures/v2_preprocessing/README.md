@@ -11,7 +11,13 @@ Regenerate only after intentionally reviewing a preprocessing change:
 dart run tool/generate_v2_preprocess_goldens.dart
 dart run tool/generate_v2_preprocess_goldens.dart --check
 flutter test test/ocr/preprocess/v2_preprocess_golden_test.dart
+python -m unittest ml.tests.test_app_preprocess_reference -v
 ```
+
+The Python verifier accepts only the fixed canonical schema and exact digest,
+and requires the manifest, sidecar, and all three source fixtures to be
+ordinary tracked files whose bytes match Git `HEAD`. Its typed return value is
+app-reference metadata only; it has no parity or production-eligibility API.
 
 The normative planes are tightly packed, with rows top-to-bottom and pixels
 left-to-right. Color bytes use R8,G8,B8,A8 channel order; grayscale uses the Y8

@@ -368,6 +368,10 @@ The tracked `test/fixtures/v2_preprocessing/app_reference_v1.json` and its
 digest are a non-qualifying app-side precursor to item 6. Recomputing that
 manifest in Dart, checking its canonical form in Python, and binding the public
 fixture sources prove only app-reference stability and manifest integrity.
+The Python app-reference verifier additionally rejects unknown schema content,
+malformed plane metadata, noncanonical sidecars, and public files that are not
+ordinary tracked, unchanged `HEAD` inputs. Its `AppPreprocessReference` result
+is intentionally not a parity, eligibility, lineage, or production capability.
 Item 6 remains unmet until an independently implemented, approved Python path
 recomputes matching source and result plane hashes. Before any synthetic corpus
 or trained artifact becomes production-eligible, lineage verification must
