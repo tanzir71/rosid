@@ -30,6 +30,8 @@ def verify(
     require_production: bool = True,
 ) -> DatasetSource:
     source = DatasetSource.from_json_file(manifest_path)
+    if source.eligibility == Eligibility.EXCLUDED:
+        raise ValueError(f"{source.dataset_id} is excluded from acquisition")
     if require_production and source.eligibility != Eligibility.PRODUCTION:
         raise ValueError(
             f"{source.dataset_id} eligibility is {source.eligibility.value}, "
@@ -57,7 +59,9 @@ def main() -> int:
                 "eligibility": source.eligibility.value,
                 "filename": source.filename,
                 "sha256": source.sha256,
-                "source_commitment_sha256": source.to_source_evidence().commitment_sha256,
+                "source_commitment_sha256": (
+                    source.to_source_evidence().commitment_sha256
+                ),
                 "version": source.version,
             },
             ensure_ascii=False,

@@ -33,6 +33,9 @@ migrate_working_dir/
 /build/
 /coverage/
 
+# V2 private ML evidence and secret material
+/ml/manifests/private/
+
 # Symbolication related
 app.*.symbols
 

@@ -8,7 +8,7 @@ from collections import defaultdict
 from dataclasses import dataclass
 from enum import StrEnum
 from pathlib import Path
-from typing import Iterable
+from typing import TYPE_CHECKING, Iterable, Mapping
 
 from ml.rosid_ml.provenance import (
     AcquisitionRecord,
@@ -18,12 +18,17 @@ from ml.rosid_ml.provenance import (
     eligibility_restrictiveness,
 )
 
+if TYPE_CHECKING:
+    from ml.rosid_ml.split_manifests import VerifiedSplitEvidence
+
 
 _SHA256 = re.compile(r"[0-9a-f]{64}\Z")
 
 
 class ArtifactType(StrEnum):
     DATASET = "dataset"
+    APPROVAL_POLICY = "approval_policy"
+    SPLIT_APPROVAL = "split_approval"
     SPLIT_MANIFEST = "split_manifest"
     DATA_PARTITION = "data_partition"
     FONT = "font"
@@ -202,6 +207,7 @@ class LineageGraph:
         *,
         source_evidence: Iterable[SourceEvidence] = (),
         acquisitions: Iterable[AcquisitionRecord] = (),
+        split_commitments: Mapping[str, VerifiedSplitEvidence] | None = None,
     ) -> None:
         materialized = list(nodes)
         self._nodes = {node.artifact_id: node for node in materialized}
@@ -219,8 +225,10 @@ class LineageGraph:
         }
         if len(self._acquisitions) != len(acquisition_values):
             raise ValueError("acquisition commitments must be unique")
+        self._split_commitments = dict(split_commitments or {})
         self._validate_references_and_cycles()
         self._validate_external_evidence()
+        self._validate_split_commitments()
         self._validate_test_isolation()
         self._validate_transitive_eligibility()
         self._validate_type_completeness()
@@ -280,6 +288,7 @@ class LineageGraph:
         *,
         source_evidence: Iterable[SourceEvidence] = (),
         acquisitions: Iterable[AcquisitionRecord] = (),
+        split_commitments: Mapping[str, VerifiedSplitEvidence] | None = None,
     ) -> LineageGraph:
         if set(value) != {"schema_version", "nodes"}:
             raise ValueError("lineage graph keys differ from schema")
@@ -294,6 +303,7 @@ class LineageGraph:
             (LineageNode.from_dict(node) for node in nodes),
             source_evidence=source_evidence,
             acquisitions=acquisitions,
+            split_commitments=split_commitments,
         )
 
     @classmethod
@@ -303,6 +313,7 @@ class LineageGraph:
         *,
         source_evidence: Iterable[SourceEvidence] = (),
         acquisitions: Iterable[AcquisitionRecord] = (),
+        split_commitments: Mapping[str, VerifiedSplitEvidence] | None = None,
     ) -> LineageGraph:
         def unique_object(pairs: list[tuple[str, object]]) -> dict[str, object]:
             result: dict[str, object] = {}
@@ -326,6 +337,7 @@ class LineageGraph:
             value,
             source_evidence=source_evidence,
             acquisitions=acquisitions,
+            split_commitments=split_commitments,
         )
         if raw != graph.canonical_bytes():
             raise ValueError("lineage manifest is not canonical UTF-8/LF JSON")
@@ -385,9 +397,9 @@ class LineageGraph:
             mismatches = []
             if node.sha256 != acquisition.artifact_sha256:
                 mismatches.append("content")
-            if node.artifact_type.value != source.artifact_type:
+            if node.artifact_type.value != acquisition.artifact_type:
                 mismatches.append("artifact type")
-            if node.role != source.artifact_role:
+            if node.role != acquisition.artifact_role:
                 mismatches.append("artifact role")
             if node.source != source.source_url:
                 mismatches.append("source")
@@ -401,6 +413,164 @@ class LineageGraph:
                 raise ValueError(
                     f"external artifact {node.artifact_id} contradicts evidence: "
                     f"{mismatches}"
+                )
+
+    def _validate_split_commitments(self) -> None:
+        from ml.rosid_ml.split_manifests import VerifiedSplitEvidence
+        from ml.rosid_ml.split_approvals import ApprovalScope
+
+        split_ids = {
+            node.artifact_id
+            for node in self._nodes.values()
+            if node.artifact_type == ArtifactType.SPLIT_MANIFEST
+        }
+        supplied_ids = set(self._split_commitments)
+        missing = sorted(split_ids - supplied_ids)
+        extra = sorted(supplied_ids - split_ids)
+        if missing or extra:
+            raise ValueError(
+                "split commitment keys must exactly match split-manifest artifacts; "
+                f"missing={missing}, extra={extra}"
+            )
+
+        for artifact_id in sorted(split_ids):
+            evidence = self._split_commitments[artifact_id]
+            if not isinstance(evidence, VerifiedSplitEvidence):
+                raise ValueError(
+                    f"split commitment {artifact_id} is not verified split evidence"
+                )
+            commitment = evidence.public
+            node = self._nodes[artifact_id]
+            if node.sha256 != commitment.commitment_sha256:
+                raise ValueError(
+                    f"split manifest {artifact_id} SHA-256 does not match its "
+                    "public split commitment"
+                )
+
+            code_parents = [
+                self._nodes[parent_id]
+                for parent_id in node.parents
+                if self._nodes[parent_id].artifact_type == ArtifactType.CODE
+            ]
+            config_parents = [
+                self._nodes[parent_id]
+                for parent_id in node.parents
+                if self._nodes[parent_id].artifact_type == ArtifactType.CONFIG
+            ]
+            policy_parents = [
+                self._nodes[parent_id]
+                for parent_id in node.parents
+                if self._nodes[parent_id].artifact_type
+                == ArtifactType.APPROVAL_POLICY
+            ]
+            approval_parents = [
+                self._nodes[parent_id]
+                for parent_id in node.parents
+                if self._nodes[parent_id].artifact_type
+                == ArtifactType.SPLIT_APPROVAL
+            ]
+            if (
+                len(code_parents) != 1
+                or len(config_parents) != 1
+                or len(policy_parents) != 1
+                or len(approval_parents) != 1
+            ):
+                raise ValueError(
+                    f"split manifest {artifact_id} must bind exactly one splitter "
+                    "code, config, approval-policy, and split-approval artifact"
+                )
+            if code_parents[0].sha256 != commitment.config.splitter_code_sha256:
+                raise ValueError(
+                    f"split manifest {artifact_id} code parent differs from the "
+                    "public split config"
+                )
+            if config_parents[0].sha256 != commitment.config.commitment_sha256:
+                raise ValueError(
+                    f"split manifest {artifact_id} config parent differs from the "
+                    "public split config"
+                )
+            if policy_parents[0].sha256 != commitment.approval_policy_sha256:
+                raise ValueError(
+                    f"split manifest {artifact_id} approval-policy parent differs "
+                    "from the public split commitment"
+                )
+            if approval_parents[0].sha256 != commitment.split_approval_sha256:
+                raise ValueError(
+                    f"split manifest {artifact_id} approval parent differs from "
+                    "the public split commitment"
+                )
+
+            scope_eligibility = {
+                ApprovalScope.PRODUCTION: Eligibility.PRODUCTION,
+                ApprovalScope.QUARANTINED_RESEARCH: Eligibility.RESEARCH_ONLY,
+            }[commitment.approval_scope]
+            if node.eligibility != scope_eligibility:
+                raise ValueError(
+                    f"split manifest {artifact_id} approval scope "
+                    f"{commitment.approval_scope.value} requires "
+                    f"{scope_eligibility.value} eligibility"
+                )
+            if approval_parents[0].eligibility != scope_eligibility:
+                raise ValueError(
+                    f"split manifest {artifact_id} approval parent scope "
+                    f"{commitment.approval_scope.value} requires "
+                    f"{scope_eligibility.value} eligibility"
+                )
+
+            dataset_parents = [
+                self._nodes[parent_id]
+                for parent_id in node.parents
+                if self._nodes[parent_id].artifact_type == ArtifactType.DATASET
+            ]
+            non_external = sorted(
+                parent.artifact_id
+                for parent in dataset_parents
+                if parent.source_evidence_sha256 is None
+                or parent.acquisition_sha256 is None
+            )
+            if non_external:
+                raise ValueError(
+                    f"split manifest {artifact_id} has non-external dataset "
+                    f"parents: {non_external}"
+                )
+            parent_acquisitions = {
+                parent.acquisition_sha256 for parent in dataset_parents
+            }
+            public_acquisitions = set(
+                commitment.source_acquisition_sha256s
+            )
+            missing_parents = sorted(public_acquisitions - parent_acquisitions)
+            extra_parents = sorted(parent_acquisitions - public_acquisitions)
+            if missing_parents or extra_parents:
+                raise ValueError(
+                    f"split manifest {artifact_id} dataset parents contradict its "
+                    "public split commitment; "
+                    f"missing={missing_parents}, extra={extra_parents}"
+                )
+
+            parent_dataset_ids: set[str] = set()
+            for parent in dataset_parents:
+                source_commitment = parent.source_evidence_sha256
+                if source_commitment is None:
+                    raise ValueError(
+                        f"split manifest {artifact_id} has a dataset parent "
+                        "without source evidence"
+                    )
+                source = self._source_evidence[source_commitment]
+                if source.dataset_id is None:
+                    raise ValueError(
+                        f"split manifest {artifact_id} has dataset source "
+                        "evidence without a dataset ID"
+                    )
+                parent_dataset_ids.add(source.dataset_id)
+            public_dataset_ids = set(commitment.dataset_ids)
+            missing_dataset_ids = sorted(public_dataset_ids - parent_dataset_ids)
+            extra_dataset_ids = sorted(parent_dataset_ids - public_dataset_ids)
+            if missing_dataset_ids or extra_dataset_ids:
+                raise ValueError(
+                    f"split manifest {artifact_id} dataset IDs contradict its "
+                    "direct dataset-parent source evidence; "
+                    f"missing={missing_dataset_ids}, extra={extra_dataset_ids}"
                 )
 
     def _validate_test_isolation(self) -> None:
@@ -518,25 +688,50 @@ class LineageGraph:
             if node.artifact_type == ArtifactType.DATASET:
                 if node.partition != DataPartition.NONE:
                     raise ValueError(
-                        "external dataset is a source archive, not a split partition"
+                        "external dataset is an extracted source, not a split "
+                        "partition"
+                    )
+                if node.role != "extracted_dataset":
+                    raise ValueError(
+                        "external dataset must use the extracted_dataset role"
                     )
             return
-        if node.artifact_type in {ArtifactType.CODE, ArtifactType.CONFIG}:
+        if node.artifact_type in {
+            ArtifactType.CODE,
+            ArtifactType.CONFIG,
+            ArtifactType.APPROVAL_POLICY,
+            ArtifactType.SPLIT_APPROVAL,
+        }:
             if node.partition != DataPartition.NONE or direct_nodes:
-                raise ValueError("code/config artifacts must be standalone and unpartitioned")
+                raise ValueError(
+                    "code/config/approval artifacts must be standalone and "
+                    "unpartitioned"
+                )
             return
         if node.artifact_type == ArtifactType.SPLIT_MANIFEST:
             if node.partition != DataPartition.NONE:
                 raise ValueError("split manifest cannot claim one data partition")
             require_direct(
-                {ArtifactType.DATASET, ArtifactType.CODE, ArtifactType.CONFIG},
+                {
+                    ArtifactType.DATASET,
+                    ArtifactType.CODE,
+                    ArtifactType.CONFIG,
+                    ArtifactType.APPROVAL_POLICY,
+                    ArtifactType.SPLIT_APPROVAL,
+                },
                 "split manifest",
             )
             unexpected = sorted(
                 value.artifact_id
                 for value in direct_nodes
                 if value.artifact_type
-                not in {ArtifactType.DATASET, ArtifactType.CODE, ArtifactType.CONFIG}
+                not in {
+                    ArtifactType.DATASET,
+                    ArtifactType.CODE,
+                    ArtifactType.CONFIG,
+                    ArtifactType.APPROVAL_POLICY,
+                    ArtifactType.SPLIT_APPROVAL,
+                }
             )
             if unexpected:
                 raise ValueError(
@@ -758,7 +953,9 @@ class LineageGraph:
                 if value.artifact_type == ArtifactType.CONVERSION_EXPORT
             ]
             if len(exports) != 1 or exports[0].role != node.role:
-                raise ValueError("mobile model must bind one matching conversion export")
+                raise ValueError(
+                    "mobile model must bind one matching conversion export"
+                )
             if exports[0].sha256 != node.sha256:
                 raise ValueError("mobile model bytes differ from conversion export")
             for artifact_type, label in (
@@ -831,7 +1028,10 @@ class LineageGraph:
                 for value in direct_nodes
                 if value.artifact_type == ArtifactType.EVALUATION_SET
             ]
-            if len(evaluation_sets) != 1 or evaluation_sets[0].partition != node.partition:
+            if (
+                len(evaluation_sets) != 1
+                or evaluation_sets[0].partition != node.partition
+            ):
                 raise ValueError("predictions must bind one matching evaluation set")
             if node.role == "raw_htr":
                 require_direct({ArtifactType.MOBILE_MODEL}, "raw HTR predictions")
@@ -873,7 +1073,9 @@ class LineageGraph:
                     ArtifactType.PRETRAINED_WEIGHTS,
                 }
             else:
-                raise ValueError("prediction role must be raw_htr or tesseract_baseline")
+                raise ValueError(
+                    "prediction role must be raw_htr or tesseract_baseline"
+                )
             unexpected = sorted(
                 value.artifact_id
                 for value in direct_nodes
@@ -945,7 +1147,9 @@ class LineageGraph:
                 )
             if node.role == "final":
                 if evaluation.partition != DataPartition.TEST:
-                    raise ValueError("final metrics require a sealed test evaluation set")
+                    raise ValueError(
+                        "final metrics require a sealed test evaluation set"
+                    )
                 predictions_by_role = {
                     role: [value for value in predictions if value.role == role]
                     for role in ("raw_htr", "tesseract_baseline")
@@ -986,6 +1190,8 @@ class LineageGraph:
                         "final metrics require real train and sealed-test partitions"
                     )
             elif evaluation.partition != DataPartition.VALIDATION:
-                raise ValueError("non-final metrics require a validation evaluation set")
+                raise ValueError(
+                    "non-final metrics require a validation evaluation set"
+                )
             return
         raise AssertionError(f"unhandled artifact type: {node.artifact_type}")

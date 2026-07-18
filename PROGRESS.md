@@ -302,21 +302,27 @@ are intentionally deferred rather than release blockers:
 - BN-HTRd remains conditional despite its CC BY catalog record: the downloaded
   archive must prove page-to-writer grouping, and BBC-derived ground-truth text
   requires documented owner risk acceptance or a rights review before public
-  model lineage is production-eligible.
+  model lineage is production-eligible. Clearing those gates does not upgrade
+  existing conditional evidence: it requires an amended production source
+  manifest/source-evidence record and a fresh production acquisition.
 - Added strict source manifests and offline archive verification, deterministic
   writer-disjoint split/leakage checks, recursive eligibility/test-lineage
   checks, NFC micro CER/WER and normalized amount CER, relative-improvement
   scoring, and generic TFLite hash/size/header/privacy audit primitives.
-  External lineage now binds canonical reviewed source, artifact type/role,
-  exact extracted bytes, and acquisition evidence. Source archives, one global
-  writer split, partition views, Tier 1/2/3 inputs, checkpoints, conversions,
-  prediction streams, final metrics, and mobile companions each fail closed on
-  ambiguous or mismatched dependencies. Empty/duplicate holdout evidence,
-  zero-denominator CER, unverified amounts, and empty release partitions fail
-  closed. Companion assets are privacy-scanned from one immutable byte snapshot
-  with portable IDs and a non-overridable 20,000,000-byte ceiling. All 56
-  ML-policy tests and 15 model-audit tests pass without datasets, a GPU, or
-  network access.
+  P0 now defines the intended transitive source-archive, extracted-dataset,
+  global-split, partition, Tier 1/2/3, checkpoint, conversion, prediction,
+  metric, and mobile-companion verification contract. The real archive/extracted
+  regular-file-set, writer-map, adapter, and split audit remains P1 work.
+  Empty/duplicate holdout evidence, zero-denominator CER, unverified amounts,
+  and empty release
+  partitions fail closed in the generic validators. Companion assets are
+  privacy-scanned from one immutable byte snapshot with portable IDs and a
+  non-overridable 20,000,000-byte ceiling. The 128-test ML suite passed this
+  foundation without datasets, a GPU, or network access. The later independent
+  audit added one quarantine-scope regression test; all 29 lineage tests and a
+  70-test affected/fast group pass after that fix, while Linux CI remains the
+  authoritative full 129-test rerun because Git-heavy groups exceeded local
+  Windows process bounds without a test failure.
 - Drafted the full P0 packet with conditional CRNN/CTC and TCN fallback,
   grapheme-aware hybrid vocabulary, exact metric/parity semantics, all-three
   synthesis gates, transitive provenance, routing acceptance, and runtime/device
@@ -330,6 +336,79 @@ are intentionally deferred rather than release blockers:
   an explicit owner choice: retain the <=12% amount CER gate and block release
   pending new licensed data, or remove it as a release gate, keep diagnostics,
   and make no real-amount accuracy claim.
+
+### 2026-07-18 - V2 P1 provenance and global-split scaffold
+
+- Added an executable, standard-library-only acquisition path that verifies an
+  exact publisher archive from one stable opened snapshot and independently
+  inventories an asserted extracted directory's exact regular-file set and
+  bytes. Empty directories are intentionally outside that commitment. The
+  snapshot hash is path/size/content bound and rejects links, special files,
+  nonportable names, NFC/case-fold collisions, and membership/content mutation
+  while hashing.
+- Acquisition schema V3 now distinguishes the reviewed `source_archive` bytes
+  from the typed `extracted_dataset` snapshot and binds the latter transitively
+  to the former through canonical source evidence. Canonical public
+  source/acquisition records are written without overwrite; per-file paths and
+  hashes belong in an ignored or out-of-repository private inventory with an
+  encrypted backup. The generic tool intentionally does not extract untrusted
+  archives or prove that a directory is the correct extraction, dataset
+  structure, or writer map.
+- Added canonical private adapter evidence that covers every normalized output's
+  exact sample identity, global writer group, object key, image/reference hashes,
+  dimensions, token count, and source derivations. Every extraction-inventory
+  file must be classified exactly once as used or explicitly ignored with a
+  reason. A path-free `PublicAdapterCommitment` HMAC-binds that private evidence,
+  its acquisition and inventory, the approved adapter config, and the combined
+  code bundle; only exact reverification produces `VerifiedAdapterEvidence`.
+- Added canonical private sample/split JSONL, exact integer-weighted global
+  writer assignment, acquisition-reference checks, release minimum/leakage
+  validation, and `PublicSplitCommitment` schema V3. The public split binds the
+  exact dataset IDs, source acquisitions, adapter commitments, canonical config,
+  approval-policy SHA pinned out of band, external split-approval SHA and scope,
+  domain-separated fingerprints of the actual seed and commitment keys,
+  aggregate counts, and private-manifest HMAC. Separate 32-byte seed and HMAC
+  keys and all private manifests remain ignored or outside the repository and
+  require an encrypted backup.
+- `prepare_split_approval` now auto-includes the exact required core ML code
+  closure and accepts repeatable adapter implementation files only; the retained
+  `SplitConfig.splitter_code_sha256` field denotes that complete bundle. After
+  all public inputs are committed at commit A, `request_split_approval` binds
+  their exact paths, roles, bytes, canonical repository origin, production or
+  quarantine scope, full code closure, and the real private split-key
+  fingerprints in a canonical request. The request must be committed before the
+  owner signs it externally with OpenSSH. Repository Python never accepts the
+  owner private signing key; `finalize_split_approval` verifies the detached
+  SSHSIG and approved commit tree before emitting the public approval to commit.
+- The fixed `ml/APPROVAL_POLICY.json` remains `pending`, so no qualifying split
+  exists. Tanzir must create an external Ed25519 key, activate and commit the
+  policy, distribute and independently verify its canonical SHA out of band,
+  and record P0 approval before any production or quarantined split approval can
+  qualify. This work does not imply that Tanzir has approved the policy or split.
+- Build and verify require the committed approval plus the separately trusted
+  policy SHA, reverify the actual private key fingerprints and all approved
+  public/private evidence, and only then return `VerifiedSplitEvidence`.
+  Lineage requires that capability and exact approval-policy, split-approval,
+  config, combined-code, and external-dataset parents; a bare public commitment
+  cannot qualify a split node.
+- Added conditional future download destinations and commands to
+  `ml/V2_GUIDE.md`.
+  No dataset was downloaded, no real acquisition/split was claimed, and P0
+  model/toolchain/rights/device decisions remain unaccepted. Real archive
+  downloads, dataset-specific safe extractors and adapters, structure/writer-map
+  audits, external owner policy activation/signing and recorded P0 approval,
+  production acquisitions, and the real global split are still required after
+  source approval.
+- The pre-audit 128-test ML suite was green (177.182 seconds), including fixed
+  inventory, adapter-coverage, assignment, HMAC, external
+  approval-policy/request/SSHSIG, public-commitment, CLI round-trip,
+  privacy/tamper, and verified-lineage cases. After the audit found a
+  quarantined-scope eligibility-laundering path, lineage now maps signed scope
+  onto both split and approval-node eligibility; all 29 lineage tests and the
+  70-test affected/fast group pass. Full 129-test confirmation is delegated to
+  Linux CI after local Git-heavy reruns timed out without failure output.
+  Mobile dependencies, model assets, app routing defaults, and V1 behavior
+  remain unchanged.
 
 ## Known limitations
 

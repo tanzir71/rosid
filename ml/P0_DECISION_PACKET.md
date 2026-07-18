@@ -30,7 +30,10 @@ These cannot be approved by assumption:
 
 - BN-HTRd must expose a stable page-to-writer mapping. Tanzir must also accept
   the documented BBC-source-text rights risk after review, or obtain a rights
-  determination, before BN-HTRd descendants become production-eligible.
+  determination, before BN-HTRd descendants become production-eligible. Any
+  conditional audit remains conditional: after both gates pass, production use
+  requires an amended production source manifest/source-evidence record and a
+  fresh production acquisition rather than an in-place eligibility upgrade.
 - The completed public-corpus audit found no eligible real monetary-amount
   slice. BN-HTRd has only 37 currency-plus-digit lines across 12 writers, zero
   strict amount-only lines, zero `৳` labels, and numeric transcription defects;
@@ -67,6 +70,10 @@ Approval records these owner-visible clarifications:
    `tesseract-ben-eng` with language string `ben+eng`, both traineddata hashes,
    binary/plugin version, PSM, preprocessing, and options frozen. Also report a
    ben-only diagnostic, but gate the 30% improvement against the shipped path.
+7. P0 approval freezes the verification contract and authorizes the named P1
+   audits. It does not verify an undownloaded archive, extraction, dataset
+   structure, writer map, normalized sample, acquisition, or global split; P1
+   must produce that evidence from the actual approved bytes.
 
 ## Recognition baseline
 
@@ -186,32 +193,91 @@ rejection cannot hide recognition failures.
 
 ## Data, synthesis, and leakage policy
 
-Conditionally use BN-HTRd V4 for real lines and BanglaLekha-Isolated V2 only for
-optional isolated-character pretraining/confusion diagnostics. Their catalogs
-are CC BY 4.0, but BN-HTRd remains conditional on writer-map and BBC-source-text
-risk acceptance. Quarantine BanglaWriting (CC BY-NC 3.0) and exclude Ekush
-because its image/weight rights and immutable version are not established.
+If approved, use BN-HTRd V4 for real lines only under its recorded eligibility
+and BanglaLekha-Isolated V2 only for optional isolated-character
+pretraining/confusion diagnostics. Their catalogs are CC BY 4.0, but BN-HTRd
+remains conditional on writer-map and BBC-source-text risk acceptance. A
+quarantined P1 audit may establish the writer map; if both gates later clear,
+create an amended production source manifest/source evidence and a fresh
+production acquisition. Quarantine BanglaWriting (CC BY-NC 3.0) and exclude
+Ekush because its image/weight rights and immutable version are not established.
 
-Writer-disjoint train, validation, and sealed final-test partitions are created
-before vocabulary construction or Tier-3 learned synthesis. Writer-group keys
-are global across datasets; known shared people remain together and unresolved
-cross-corpus identity is an evidence gap, not silently treated as disjoint.
+Writer-disjoint train, validation, and sealed final-test partitions must be
+created before vocabulary construction or Tier-3 learned synthesis.
+Writer-group keys are global across datasets; known shared people remain
+together and unresolved cross-corpus identity is an evidence gap, not silently
+treated as disjoint.
 Tier 3 may learn only from eligible **training-writer** styles. Validation
 writers drive realism, synthetic-to-real trends, routing, confidence, decoder,
 and model selection. Final-test writers influence only final metrics.
 
-The recursive lineage DAG in `ARTIFACT_POLICY.md` covers datasets, fonts,
+The recursive lineage contract in `ARTIFACT_POLICY.md` covers datasets, fonts,
 textures, receipt vocabularies/text sources, pretrained weights, generator
-code/checkpoints, and generated corpora. External bytes bind canonical reviewed
-source and post-download acquisition commitments, including reviewed type/role
-and exact extracted bytes. Source archives bind derived split manifests and
-partition artifacts before any train/validation/test claim. Derived nodes record
-their role/transformation, synthesis tier, and parents. Type-specific completeness
-binds generator/model checkpoints, vocabularies, conversion code/config,
-representative sets, contracts, prediction streams, final metrics, and exports.
-Eligibility is transitive,
-so a generator cannot launder restrictive inputs. Tier 3 also requires exact
-and perceptual memorization/nearest-neighbor audits.
+code/checkpoints, and generated corpora. A post-download acquisition binds an
+`extracted_dataset` transitively to the canonical reviewed `source_archive`,
+including the exact regular-file-set hash and private inventory commitment;
+empty directories are outside that snapshot. A qualifying global split binds
+one path-free public adapter commitment per exact source acquisition, the
+`PublicSplitCommitment` schema V3 record, approved adapter/split configs, and the
+complete core/adapter executable code closure before any train/validation/test
+claim. Schema V3 also binds the canonical approval-policy SHA pinned out of
+band, external split-approval SHA and production/quarantined-research scope,
+domain-separated fingerprints of the actual split seed and HMAC keys, aggregate
+counts, and private-manifest HMAC. The retained
+`SplitConfig.splitter_code_sha256` field denotes that entire closure, not only
+the splitter. Derived nodes record their role/transformation, synthesis tier,
+and parents. Type-specific completeness binds generator/model checkpoints,
+vocabularies, conversion code/config, representative sets, contracts,
+prediction streams, final metrics, and exports. Eligibility is transitive, so a
+generator cannot launder restrictive inputs. Tier 3 also requires exact and
+perceptual memorization/nearest-neighbor audits.
+
+The generic tooling now rebinds the canonical `DatasetSource`, source evidence,
+acquisition, private extraction inventory, and normalized sample inventory.
+Each private adapter-evidence record must enumerate every exact normalized
+sample identity and source derivation and classify every inventoried source file
+as used or explicitly ignored with a reason. Its public commitment is path-free
+and HMAC-binds the private evidence plus the acquisition, inventory, adapter
+config, and combined code bundle. This proves the declared byte-level
+relationships and complete coverage; it does not establish that a
+dataset-specific transformation is semantically correct or that two publisher
+writer IDs denote different people. The real adapters and writer audit remain
+P1 work.
+
+The fixed `ml/APPROVAL_POLICY.json` is deliberately `pending` and currently
+authorizes no qualifying split. Before either production or quarantined research
+can qualify, Tanzir must create an Ed25519 key outside the repository, activate
+and commit the policy, distribute and independently verify its canonical SHA out
+of band, and record P0 approval. The owner private signing key never enters the
+repository or a repository Python process. This packet records a proposal, not
+Tanzir's approval.
+
+`prepare_split_approval` auto-includes the exact core code closure and accepts
+only repeatable adapter implementation files. Commit the policy, generated
+bundle/config, source manifests/evidence, acquisitions, public adapter
+commitments/configs, and bound implementation files as commit A.
+`request_split_approval` uses the separately trusted policy SHA and actual
+private split keys to generate a canonical request binding the exact paths,
+roles, and hashes at commit A, canonical repository origin, scope, full code
+closure, and domain-separated key fingerprints. Commit that request. Tanzir
+then signs the canonical request externally with
+`ssh-keygen -Y sign -n rosid-v2-split-approval`; repository Python receives only
+the request and detached SSHSIG. `finalize_split_approval` verifies the SSHSIG,
+canonical origin, commit ancestry, and exact approved tree, emits the canonical
+approval, and that approval is committed.
+
+Split build/verify require the committed approval and out-of-band policy SHA in
+addition to all committed public records and private evidence. They reverify the
+actual split keys against the approved fingerprints and return
+the trusted-process `VerifiedSplitEvidence` marker only after the complete
+public/private proof succeeds. The fixed CLI is the adversarial boundary;
+arbitrary code already running in the same Python interpreter is trusted.
+Lineage requires that marker, exact approval-policy, split-approval, config,
+complete-code, and external-dataset parents, and scope-derived eligibility.
+HMAC verification alone proves consistency, not approval. Real downloads,
+dataset-specific
+adapters/writer audits, owner policy activation and P0 approval, production
+acquisitions, external request signing, and the production split remain pending.
 
 All three synthesis tiers, at least 500k lines, Tier 1 at most 40%, every P1a
 slice, per-tier/combined realism AUC at most 0.85, improving synthetic-to-real

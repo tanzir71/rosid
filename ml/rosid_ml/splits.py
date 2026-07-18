@@ -8,6 +8,7 @@ import re
 from collections import defaultdict
 from dataclasses import dataclass
 from enum import StrEnum
+from types import MappingProxyType
 from typing import Iterable, Mapping
 
 
@@ -19,6 +20,14 @@ class Split(StrEnum):
 
 _SHA256 = re.compile(r"[0-9a-f]{64}\Z")
 _OPAQUE_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9._:-]{0,127}\Z")
+WRITER_SPLIT_ALGORITHM = "rosid-v2-split-v2"
+DEFAULT_SPLIT_WEIGHTS: Mapping[Split, int] = MappingProxyType(
+    {
+        Split.TRAIN: 8,
+        Split.VALIDATION: 1,
+        Split.TEST: 1,
+    }
+)
 
 
 @dataclass(frozen=True)
@@ -45,15 +54,64 @@ class SampleKey:
 
 @dataclass(frozen=True)
 class ReleaseSplitEvidence:
-    sample_counts: dict[Split, int]
-    writer_counts: dict[Split, int]
-    unique_image_counts: dict[Split, int]
+    sample_counts: Mapping[Split, int]
+    writer_counts: Mapping[Split, int]
+    unique_image_counts: Mapping[Split, int]
+
+    def __post_init__(self) -> None:
+        for field in (
+            "sample_counts",
+            "writer_counts",
+            "unique_image_counts",
+        ):
+            values = getattr(self, field)
+            object.__setattr__(self, field, MappingProxyType(dict(values)))
 
 
 def _writer_order(seed: str, writer_id: str) -> bytes:
     return hashlib.sha256(
-        f"rosid-v2-split-v2\0{seed}\0{writer_id}".encode()
+        f"{WRITER_SPLIT_ALGORITHM}\0{seed}\0{writer_id}".encode()
     ).digest()
+
+
+def _allocate_weighted_counts(
+    total: int,
+    weights: Mapping[Split, int],
+) -> dict[Split, int]:
+    ordered = (Split.TRAIN, Split.VALIDATION, Split.TEST)
+    if set(weights) != set(ordered):
+        raise ValueError("split weights must define train, validation, and test")
+    if any(type(weights[split]) is not int or weights[split] < 0 for split in ordered):
+        raise ValueError("split weights must be non-negative integers")
+    total_weight = sum(weights.values())
+    if total_weight <= 0:
+        raise ValueError("at least one split weight must be positive")
+    if total <= 0:
+        return {split: 0 for split in ordered}
+
+    numerators = {split: total * weights[split] for split in ordered}
+    counts = {
+        split: numerators[split] // total_weight
+        for split in ordered
+    }
+    remaining = total - sum(counts.values())
+    by_remainder = sorted(
+        ordered,
+        key=lambda split: (
+            -(numerators[split] % total_weight),
+            ordered.index(split),
+        ),
+    )
+    for split in by_remainder[:remaining]:
+        counts[split] += 1
+
+    nonzero = [split for split in ordered if weights[split] > 0]
+    if total >= len(nonzero):
+        for empty in (split for split in nonzero if counts[split] == 0):
+            donor = max(nonzero, key=lambda split: counts[split])
+            counts[donor] -= 1
+            counts[empty] += 1
+    return counts
 
 
 def _allocate_counts(total: int, ratios: Mapping[Split, float]) -> dict[Split, int]:
@@ -112,6 +170,43 @@ def assign_writer_splits(
         key=lambda writer: (_writer_order(seed, writer), writer),
     )
     counts = _allocate_counts(len(ordered_writers), chosen_ratios)
+    writer_split: dict[str, Split] = {}
+    cursor = 0
+    for split in (Split.TRAIN, Split.VALIDATION, Split.TEST):
+        for writer in ordered_writers[cursor : cursor + counts[split]]:
+            writer_split[writer] = split
+        cursor += counts[split]
+
+    assignments = {
+        sample.sample_id: writer_split[sample.writer_id]
+        for sample in materialized
+    }
+    assert_writer_disjoint(materialized, assignments)
+    return assignments
+
+
+def assign_writer_splits_weighted(
+    samples: Iterable[SampleKey],
+    *,
+    seed: str,
+    weights: Mapping[Split, int] | None = None,
+) -> dict[str, Split]:
+    """Assign global writers using exact integer weights."""
+
+    if not seed:
+        raise ValueError("split seed must be nonempty")
+    chosen_weights = DEFAULT_SPLIT_WEIGHTS if weights is None else weights
+    _allocate_weighted_counts(0, chosen_weights)
+    materialized = list(samples)
+    sample_ids = [sample.sample_id for sample in materialized]
+    if len(sample_ids) != len(set(sample_ids)):
+        raise ValueError("sample IDs must be globally unique")
+
+    ordered_writers = sorted(
+        {sample.writer_id for sample in materialized},
+        key=lambda writer: (_writer_order(seed, writer), writer),
+    )
+    counts = _allocate_weighted_counts(len(ordered_writers), chosen_weights)
     writer_split: dict[str, Split] = {}
     cursor = 0
     for split in (Split.TRAIN, Split.VALIDATION, Split.TEST):

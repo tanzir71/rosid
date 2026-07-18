@@ -5,6 +5,7 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
+from typing import Mapping
 
 from ml.rosid_ml.lineage import (
     ArtifactType,
@@ -18,6 +19,14 @@ from ml.rosid_ml.provenance import (
     Eligibility,
     SourceEvidence,
 )
+from ml.rosid_ml import split_manifests as split_manifest_module
+from ml.rosid_ml.split_manifests import (
+    PublicSplitCommitment,
+    SplitConfig,
+    VerifiedSplitEvidence,
+)
+from ml.rosid_ml.split_approvals import ApprovalScope
+from ml.rosid_ml.splits import Split, WRITER_SPLIT_ALGORITHM
 
 
 def digest(value: str) -> str:
@@ -46,7 +55,11 @@ def evidence(
         content_sha256=digest(f"content:{evidence_id}"),
         artifact_type=artifact_type.value,
         artifact_role=artifact_role
-        or ("source_archive" if artifact_type == ArtifactType.DATASET else artifact_type.value),
+        or (
+            "source_archive"
+            if artifact_type == ArtifactType.DATASET
+            else artifact_type.value
+        ),
         eligibility=eligibility,
         attribution="Synthetic unit-test evidence.",
         rights_notes="No real external bytes.",
@@ -55,17 +68,87 @@ def evidence(
 
 def acquisition(source: SourceEvidence) -> AcquisitionRecord:
     return AcquisitionRecord(
-        schema_version=2,
-        record_id=f"acquired:{source.evidence_id}",
+        schema_version=3,
+        record_id=f"acquired-{digest(source.evidence_id)[:24]}",
         source_evidence_sha256=source.commitment_sha256,
         content_sha256=source.content_sha256,
         artifact_sha256=source.content_sha256,
+        artifact_type=source.artifact_type,
+        artifact_role=(
+            "extracted_dataset"
+            if source.artifact_type == ArtifactType.DATASET.value
+            else source.artifact_role
+        ),
         inventory_sha256=digest(f"inventory:{source.evidence_id}"),
         acquired_at_utc="2026-07-18T00:00:00Z",
         accepted_by="unit-test",
         terms_accepted=True,
         extractor="unit-test/1",
         eligibility=source.eligibility,
+    )
+
+
+def public_split_commitment(
+    *source_acquisition_sha256s: str,
+    splitter_code_sha256: str | None = None,
+    dataset_ids: tuple[str, ...] = ("unit-test",),
+    approval_scope: ApprovalScope = ApprovalScope.PRODUCTION,
+) -> PublicSplitCommitment:
+    counts: Mapping[Split, int] = {split: 1 for split in Split}
+    sources = tuple(sorted(source_acquisition_sha256s))
+    return PublicSplitCommitment(
+        schema_version=3,
+        config=SplitConfig(
+            schema_version=2,
+            algorithm=WRITER_SPLIT_ALGORITHM,
+            splitter_code_sha256=splitter_code_sha256 or digest("split-code"),
+            seed_id="unit-test-seed",
+            key_id="unit-test-key",
+            weights={
+                Split.TRAIN: 8,
+                Split.VALIDATION: 1,
+                Split.TEST: 1,
+            },
+            minimum_writers=counts,
+            minimum_samples=counts,
+        ),
+        approval_policy_sha256=digest("approval-policy"),
+        split_approval_sha256=digest(
+            "split-approval:" + ",".join(sources)
+        ),
+        approval_scope=approval_scope,
+        seed_key_fingerprint_sha256=digest("seed-key"),
+        commitment_key_fingerprint_sha256=digest("commitment-key"),
+        dataset_ids=tuple(
+            sorted(dataset_ids, key=lambda value: value.encode("utf-8"))
+        ),
+        source_acquisition_sha256s=sources,
+        adapter_commitment_sha256s=tuple(
+            sorted(
+                digest(f"verified-adapter:{source}") for source in sources
+            )
+        ),
+        sample_counts=counts,
+        writer_counts=counts,
+        unique_image_counts=counts,
+        private_manifest_hmac_sha256=digest(
+            "private-split:" + ",".join(sources)
+        ),
+    )
+
+
+def verified_split_evidence(
+    commitment: PublicSplitCommitment,
+) -> VerifiedSplitEvidence:
+    """Create a test capability after lower-level verifier coverage."""
+
+    return VerifiedSplitEvidence(
+        public=commitment,
+        private_manifest_sha256=digest(
+            f"verified-private:{commitment.commitment_sha256}"
+        ),
+        acquisition_sha256s=commitment.source_acquisition_sha256s,
+        _token=split_manifest_module._VERIFIED_SPLIT_TOKEN,
     )
 
 
@@ -109,8 +192,8 @@ def node(
         license_id=license_id,
         role=role
         or (
-            external_source.artifact_role
-            if external_source is not None
+            external_acquisition.artifact_role
+            if external_acquisition is not None
             else artifact_type.value
         ),
         transformation="unit-test",
@@ -121,15 +204,171 @@ def node(
     )
 
 
+def bind_split_approval_parents(
+    nodes: list[LineageNode],
+    commitment: PublicSplitCommitment,
+    *,
+    split_id: str = "split",
+) -> list[LineageNode]:
+    policy_id = f"{split_id}-approval-policy"
+    approval_id = f"{split_id}-approval"
+    bound = [
+        LineageNode(
+            **{
+                **value.__dict__,
+                "parents": (
+                    (*value.parents, policy_id, approval_id)
+                    if value.artifact_id == split_id
+                    else value.parents
+                ),
+            }
+        )
+        for value in nodes
+    ]
+    return [
+        *bound,
+        node(
+            policy_id,
+            ArtifactType.APPROVAL_POLICY,
+            sha256=commitment.approval_policy_sha256,
+        ),
+        node(
+            approval_id,
+            ArtifactType.SPLIT_APPROVAL,
+            sha256=commitment.split_approval_sha256,
+            eligibility=(
+                Eligibility.PRODUCTION
+                if commitment.approval_scope == ApprovalScope.PRODUCTION
+                else Eligibility.RESEARCH_ONLY
+            ),
+        ),
+    ]
+
+
 def graph(
     nodes: list[LineageNode],
     sources: tuple[SourceEvidence, ...] = (),
     acquisitions: tuple[AcquisitionRecord, ...] = (),
 ) -> LineageGraph:
+    by_id = {value.artifact_id: value for value in nodes}
+    source_by_commitment = {
+        value.commitment_sha256: value for value in sources
+    }
+    split_commitments: dict[str, VerifiedSplitEvidence] = {}
+    replacement_sha256s: dict[str, str] = {}
+    approval_nodes: list[LineageNode] = []
+    replacement_parents: dict[str, tuple[str, ...]] = {}
+    for value in nodes:
+        if value.artifact_type == ArtifactType.SPLIT_MANIFEST:
+            source_acquisitions = tuple(
+                sorted(
+                    {
+                        parent.acquisition_sha256
+                        for parent_id in value.parents
+                        if (parent := by_id.get(parent_id)) is not None
+                        and parent.artifact_type == ArtifactType.DATASET
+                        and parent.acquisition_sha256 is not None
+                    }
+                )
+            )
+            code_parents = [
+                by_id[parent_id]
+                for parent_id in value.parents
+                if by_id[parent_id].artifact_type == ArtifactType.CODE
+            ]
+            config_parents = [
+                by_id[parent_id]
+                for parent_id in value.parents
+                if by_id[parent_id].artifact_type == ArtifactType.CONFIG
+            ]
+            splitter_code_sha256 = (
+                code_parents[0].sha256
+                if len(code_parents) == 1
+                else digest("invalid-split-code-set")
+            )
+            commitment = public_split_commitment(
+                *source_acquisitions,
+                splitter_code_sha256=splitter_code_sha256,
+                dataset_ids=tuple(
+                    sorted(
+                        {
+                            source.dataset_id
+                            for parent_id in value.parents
+                            if (parent := by_id.get(parent_id)) is not None
+                            and parent.artifact_type == ArtifactType.DATASET
+                            and parent.source_evidence_sha256 is not None
+                            and (
+                                source := source_by_commitment[
+                                    parent.source_evidence_sha256
+                                ]
+                            ).dataset_id
+                            is not None
+                        },
+                        key=lambda item: item.encode("utf-8"),
+                    )
+                ),
+                approval_scope=(
+                    ApprovalScope.PRODUCTION
+                    if value.eligibility == Eligibility.PRODUCTION
+                    else ApprovalScope.QUARANTINED_RESEARCH
+                ),
+            )
+            replacement_sha256s[value.artifact_id] = commitment.commitment_sha256
+            if len(config_parents) == 1:
+                replacement_sha256s[config_parents[0].artifact_id] = (
+                    commitment.config.commitment_sha256
+                )
+            split_commitments[value.artifact_id] = verified_split_evidence(
+                commitment
+            )
+            policy_id = f"{value.artifact_id}-approval-policy"
+            approval_id = f"{value.artifact_id}-approval"
+            replacement_parents[value.artifact_id] = (
+                *value.parents,
+                policy_id,
+                approval_id,
+            )
+            approval_nodes.extend(
+                (
+                    node(
+                        policy_id,
+                        ArtifactType.APPROVAL_POLICY,
+                        sha256=commitment.approval_policy_sha256,
+                    ),
+                    node(
+                        approval_id,
+                        ArtifactType.SPLIT_APPROVAL,
+                        sha256=commitment.split_approval_sha256,
+                        eligibility=(
+                            Eligibility.PRODUCTION
+                            if commitment.approval_scope
+                            == ApprovalScope.PRODUCTION
+                            else Eligibility.RESEARCH_ONLY
+                        ),
+                    ),
+                )
+            )
+    bound_nodes = [
+        LineageNode(
+            **{
+                **value.__dict__,
+                "sha256": replacement_sha256s.get(
+                    value.artifact_id,
+                    value.sha256,
+                ),
+                "parents": replacement_parents.get(
+                    value.artifact_id,
+                    value.parents,
+                ),
+            }
+        )
+        for value in nodes
+    ]
     return LineageGraph(
-        nodes,
+        [*bound_nodes, *approval_nodes],
         source_evidence=sources,
         acquisitions=acquisitions,
+        split_commitments=split_commitments,
     )
 
 
@@ -290,6 +529,532 @@ class LineageTest(unittest.TestCase):
         value.assert_final_metrics("final-metrics")
         self.assertIn("test-data", value.ancestors("final-metrics"))
 
+    def test_split_manifest_requires_a_public_commitment(self) -> None:
+        source = evidence("split-source")
+        acquired = acquisition(source)
+        commitment = public_split_commitment(acquired.commitment_sha256)
+        nodes = [
+            node(
+                "archive",
+                ArtifactType.DATASET,
+                external_source=source,
+                external_acquisition=acquired,
+            ),
+            node("split-code", ArtifactType.CODE),
+            node(
+                "split-config",
+                ArtifactType.CONFIG,
+                sha256=commitment.config.commitment_sha256,
+            ),
+            node(
+                "split",
+                ArtifactType.SPLIT_MANIFEST,
+                parents=("archive", "split-code", "split-config"),
+                sha256=commitment.commitment_sha256,
+            ),
+        ]
+        nodes = bind_split_approval_parents(nodes, commitment)
+
+        with self.assertRaisesRegex(ValueError, "split commitment keys.*missing"):
+            LineageGraph(
+                nodes,
+                source_evidence=(source,),
+                acquisitions=(acquired,),
+            )
+        with self.assertRaisesRegex(ValueError, "not verified split evidence"):
+            LineageGraph(
+                nodes,
+                source_evidence=(source,),
+                acquisitions=(acquired,),
+                split_commitments={"split": commitment},
+            )
+
+    def test_split_manifest_rejects_an_extra_public_commitment(self) -> None:
+        commitment = public_split_commitment(digest("ghost-acquisition"))
+
+        with self.assertRaisesRegex(ValueError, "split commitment keys.*extra"):
+            LineageGraph(
+                [node("code", ArtifactType.CODE)],
+                split_commitments={
+                    "ghost-split": verified_split_evidence(commitment)
+                },
+            )
+
+    def test_split_manifest_sha_must_be_the_public_commitment_sha(self) -> None:
+        source = evidence("split-source")
+        acquired = acquisition(source)
+        commitment = public_split_commitment(acquired.commitment_sha256)
+        nodes = [
+            node(
+                "archive",
+                ArtifactType.DATASET,
+                external_source=source,
+                external_acquisition=acquired,
+            ),
+            node("split-code", ArtifactType.CODE),
+            node(
+                "split-config",
+                ArtifactType.CONFIG,
+                sha256=commitment.config.commitment_sha256,
+            ),
+            node(
+                "split",
+                ArtifactType.SPLIT_MANIFEST,
+                parents=("archive", "split-code", "split-config"),
+                sha256=digest("caller-asserted-split"),
+            ),
+        ]
+        nodes = bind_split_approval_parents(nodes, commitment)
+
+        with self.assertRaisesRegex(ValueError, "SHA-256 does not match"):
+            LineageGraph(
+                nodes,
+                source_evidence=(source,),
+                acquisitions=(acquired,),
+                split_commitments={"split": verified_split_evidence(commitment)},
+            )
+
+    def test_split_manifest_code_and_config_match_public_config(self) -> None:
+        source = evidence("split-source")
+        acquired = acquisition(source)
+        approved_code = digest("approved-split-code")
+        commitment = public_split_commitment(
+            acquired.commitment_sha256,
+            splitter_code_sha256=approved_code,
+        )
+
+        def nodes(*, code_sha256: str, config_sha256: str) -> list[LineageNode]:
+            values = [
+                node(
+                    "archive",
+                    ArtifactType.DATASET,
+                    external_source=source,
+                    external_acquisition=acquired,
+                ),
+                node("split-code", ArtifactType.CODE, sha256=code_sha256),
+                node(
+                    "split-config",
+                    ArtifactType.CONFIG,
+                    sha256=config_sha256,
+                ),
+                node(
+                    "split",
+                    ArtifactType.SPLIT_MANIFEST,
+                    parents=("archive", "split-code", "split-config"),
+                    sha256=commitment.commitment_sha256,
+                ),
+            ]
+            return bind_split_approval_parents(values, commitment)
+
+        with self.assertRaisesRegex(ValueError, "code parent differs"):
+            LineageGraph(
+                nodes(
+                    code_sha256=digest("wrong-code"),
+                    config_sha256=commitment.config.commitment_sha256,
+                ),
+                source_evidence=(source,),
+                acquisitions=(acquired,),
+                split_commitments={"split": verified_split_evidence(commitment)},
+            )
+        with self.assertRaisesRegex(ValueError, "config parent differs"):
+            LineageGraph(
+                nodes(
+                    code_sha256=approved_code,
+                    config_sha256=digest("wrong-config"),
+                ),
+                source_evidence=(source,),
+                acquisitions=(acquired,),
+                split_commitments={"split": verified_split_evidence(commitment)},
+            )
+
+    def test_split_manifest_requires_matching_approval_parents(self) -> None:
+        source = evidence("split-source")
+        acquired = acquisition(source)
+        commitment = public_split_commitment(acquired.commitment_sha256)
+        nodes = bind_split_approval_parents(
+            [
+                node(
+                    "archive",
+                    ArtifactType.DATASET,
+                    external_source=source,
+                    external_acquisition=acquired,
+                ),
+                node("split-code", ArtifactType.CODE),
+                node(
+                    "split-config",
+                    ArtifactType.CONFIG,
+                    sha256=commitment.config.commitment_sha256,
+                ),
+                node(
+                    "split",
+                    ArtifactType.SPLIT_MANIFEST,
+                    parents=("archive", "split-code", "split-config"),
+                    sha256=commitment.commitment_sha256,
+                ),
+            ],
+            commitment,
+        )
+        approval_id = "split-approval"
+        without_approval = [
+            LineageNode(
+                **{
+                    **value.__dict__,
+                    "parents": tuple(
+                        parent
+                        for parent in value.parents
+                        if parent != approval_id
+                    ),
+                }
+            )
+            for value in nodes
+            if value.artifact_id != approval_id
+        ]
+        with self.assertRaisesRegex(ValueError, "must bind exactly one"):
+            LineageGraph(
+                without_approval,
+                source_evidence=(source,),
+                acquisitions=(acquired,),
+                split_commitments={"split": verified_split_evidence(commitment)},
+            )
+
+        for parent_id, message in (
+            ("split-approval-policy", "approval-policy parent differs"),
+            ("split-approval", "approval parent differs"),
+        ):
+            with self.subTest(parent_id=parent_id):
+                mismatched = [
+                    LineageNode(
+                        **{
+                            **value.__dict__,
+                            "sha256": digest(f"wrong:{parent_id}"),
+                        }
+                    )
+                    if value.artifact_id == parent_id
+                    else value
+                    for value in nodes
+                ]
+                with self.assertRaisesRegex(ValueError, message):
+                    LineageGraph(
+                        mismatched,
+                        source_evidence=(source,),
+                        acquisitions=(acquired,),
+                        split_commitments={
+                            "split": verified_split_evidence(commitment)
+                        },
+                    )
+
+    def test_quarantined_split_scope_cannot_be_laundered_to_production(
+        self,
+    ) -> None:
+        source = evidence("quarantined-scope-source")
+        acquired = acquisition(source)
+        commitment = public_split_commitment(
+            acquired.commitment_sha256,
+            dataset_ids=(source.dataset_id,),
+            approval_scope=ApprovalScope.QUARANTINED_RESEARCH,
+        )
+        nodes = bind_split_approval_parents(
+            [
+                node(
+                    "archive",
+                    ArtifactType.DATASET,
+                    external_source=source,
+                    external_acquisition=acquired,
+                ),
+                node("split-code", ArtifactType.CODE),
+                node(
+                    "split-config",
+                    ArtifactType.CONFIG,
+                    sha256=commitment.config.commitment_sha256,
+                ),
+                node(
+                    "split",
+                    ArtifactType.SPLIT_MANIFEST,
+                    parents=("archive", "split-code", "split-config"),
+                    eligibility=Eligibility.RESEARCH_ONLY,
+                    sha256=commitment.commitment_sha256,
+                ),
+            ],
+            commitment,
+        )
+
+        production_split = [
+            LineageNode(
+                **{
+                    **value.__dict__,
+                    "eligibility": Eligibility.PRODUCTION,
+                }
+            )
+            if value.artifact_id == "split"
+            else value
+            for value in nodes
+        ]
+        with self.assertRaisesRegex(
+            ValueError,
+            "approval scope quarantined_research requires research_only",
+        ):
+            LineageGraph(
+                production_split,
+                source_evidence=(source,),
+                acquisitions=(acquired,),
+                split_commitments={"split": verified_split_evidence(commitment)},
+            )
+
+        production_approval = [
+            LineageNode(
+                **{
+                    **value.__dict__,
+                    "eligibility": Eligibility.PRODUCTION,
+                }
+            )
+            if value.artifact_id == "split-approval"
+            else value
+            for value in nodes
+        ]
+        with self.assertRaisesRegex(
+            ValueError,
+            "approval parent scope quarantined_research requires research_only",
+        ):
+            LineageGraph(
+                production_approval,
+                source_evidence=(source,),
+                acquisitions=(acquired,),
+                split_commitments={"split": verified_split_evidence(commitment)},
+            )
+
+        graph = LineageGraph(
+            nodes,
+            source_evidence=(source,),
+            acquisitions=(acquired,),
+            split_commitments={"split": verified_split_evidence(commitment)},
+        )
+        with self.assertRaisesRegex(ValueError, "non-production lineage"):
+            graph.assert_production_eligible("split")
+
+    def test_split_manifest_rejects_a_missing_dataset_parent(self) -> None:
+        first_source = evidence("first-split-source")
+        second_source = evidence("second-split-source")
+        first_acquisition = acquisition(first_source)
+        second_acquisition = acquisition(second_source)
+        commitment = public_split_commitment(
+            first_acquisition.commitment_sha256,
+            second_acquisition.commitment_sha256,
+        )
+        nodes = [
+            node(
+                "first-archive",
+                ArtifactType.DATASET,
+                external_source=first_source,
+                external_acquisition=first_acquisition,
+            ),
+            node("split-code", ArtifactType.CODE),
+            node(
+                "split-config",
+                ArtifactType.CONFIG,
+                sha256=commitment.config.commitment_sha256,
+            ),
+            node(
+                "split",
+                ArtifactType.SPLIT_MANIFEST,
+                parents=("first-archive", "split-code", "split-config"),
+                sha256=commitment.commitment_sha256,
+            ),
+        ]
+        nodes = bind_split_approval_parents(nodes, commitment)
+
+        with self.assertRaisesRegex(ValueError, "dataset parents contradict.*missing"):
+            LineageGraph(
+                nodes,
+                source_evidence=(first_source,),
+                acquisitions=(first_acquisition,),
+                split_commitments={"split": verified_split_evidence(commitment)},
+            )
+
+    def test_split_manifest_rejects_an_extra_dataset_parent(self) -> None:
+        first_source = evidence("first-split-source")
+        second_source = evidence("second-split-source")
+        first_acquisition = acquisition(first_source)
+        second_acquisition = acquisition(second_source)
+        commitment = public_split_commitment(
+            first_acquisition.commitment_sha256
+        )
+        nodes = [
+            node(
+                "first-archive",
+                ArtifactType.DATASET,
+                external_source=first_source,
+                external_acquisition=first_acquisition,
+            ),
+            node(
+                "second-archive",
+                ArtifactType.DATASET,
+                external_source=second_source,
+                external_acquisition=second_acquisition,
+            ),
+            node("split-code", ArtifactType.CODE),
+            node(
+                "split-config",
+                ArtifactType.CONFIG,
+                sha256=commitment.config.commitment_sha256,
+            ),
+            node(
+                "split",
+                ArtifactType.SPLIT_MANIFEST,
+                parents=(
+                    "first-archive",
+                    "second-archive",
+                    "split-code",
+                    "split-config",
+                ),
+                sha256=commitment.commitment_sha256,
+            ),
+        ]
+        nodes = bind_split_approval_parents(nodes, commitment)
+
+        with self.assertRaisesRegex(ValueError, "dataset parents contradict.*extra"):
+            LineageGraph(
+                nodes,
+                source_evidence=(first_source, second_source),
+                acquisitions=(first_acquisition, second_acquisition),
+                split_commitments={"split": verified_split_evidence(commitment)},
+            )
+
+    def test_split_manifest_dataset_id_must_match_parent_source(self) -> None:
+        source = evidence("actual-dataset")
+        acquired = acquisition(source)
+        commitment = public_split_commitment(
+            acquired.commitment_sha256,
+            dataset_ids=("claimed-dataset",),
+        )
+        nodes = [
+            node(
+                "archive",
+                ArtifactType.DATASET,
+                external_source=source,
+                external_acquisition=acquired,
+            ),
+            node("split-code", ArtifactType.CODE),
+            node(
+                "split-config",
+                ArtifactType.CONFIG,
+                sha256=commitment.config.commitment_sha256,
+            ),
+            node(
+                "split",
+                ArtifactType.SPLIT_MANIFEST,
+                parents=("archive", "split-code", "split-config"),
+                sha256=commitment.commitment_sha256,
+            ),
+        ]
+        nodes = bind_split_approval_parents(nodes, commitment)
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "dataset IDs contradict.*missing=\\['claimed-dataset'\\].*"
+            "extra=\\['actual-dataset'\\]",
+        ):
+            LineageGraph(
+                nodes,
+                source_evidence=(source,),
+                acquisitions=(acquired,),
+                split_commitments={"split": verified_split_evidence(commitment)},
+            )
+
+    def test_split_manifest_rejects_a_missing_public_dataset_parent(self) -> None:
+        source = evidence("present-dataset")
+        acquired = acquisition(source)
+        commitment = public_split_commitment(
+            acquired.commitment_sha256,
+            dataset_ids=("missing-dataset", "present-dataset"),
+        )
+        nodes = [
+            node(
+                "archive",
+                ArtifactType.DATASET,
+                external_source=source,
+                external_acquisition=acquired,
+            ),
+            node("split-code", ArtifactType.CODE),
+            node(
+                "split-config",
+                ArtifactType.CONFIG,
+                sha256=commitment.config.commitment_sha256,
+            ),
+            node(
+                "split",
+                ArtifactType.SPLIT_MANIFEST,
+                parents=("archive", "split-code", "split-config"),
+                sha256=commitment.commitment_sha256,
+            ),
+        ]
+        nodes = bind_split_approval_parents(nodes, commitment)
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "dataset IDs contradict.*missing=\\['missing-dataset'\\].*extra=\\[\\]",
+        ):
+            LineageGraph(
+                nodes,
+                source_evidence=(source,),
+                acquisitions=(acquired,),
+                split_commitments={"split": verified_split_evidence(commitment)},
+            )
+
+    def test_split_manifest_rejects_an_extra_parent_dataset_id(self) -> None:
+        first_source = evidence("first-dataset")
+        second_source = evidence("second-dataset")
+        first_acquisition = acquisition(first_source)
+        second_acquisition = acquisition(second_source)
+        commitment = public_split_commitment(
+            first_acquisition.commitment_sha256,
+            second_acquisition.commitment_sha256,
+            dataset_ids=("first-dataset",),
+        )
+        nodes = [
+            node(
+                "first-archive",
+                ArtifactType.DATASET,
+                external_source=first_source,
+                external_acquisition=first_acquisition,
+            ),
+            node(
+                "second-archive",
+                ArtifactType.DATASET,
+                external_source=second_source,
+                external_acquisition=second_acquisition,
+            ),
+            node("split-code", ArtifactType.CODE),
+            node(
+                "split-config",
+                ArtifactType.CONFIG,
+                sha256=commitment.config.commitment_sha256,
+            ),
+            node(
+                "split",
+                ArtifactType.SPLIT_MANIFEST,
+                parents=(
+                    "first-archive",
+                    "second-archive",
+                    "split-code",
+                    "split-config",
+                ),
+                sha256=commitment.commitment_sha256,
+            ),
+        ]
+        nodes = bind_split_approval_parents(nodes, commitment)
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "dataset IDs contradict.*missing=\\[\\].*"
+            "extra=\\['second-dataset'\\]",
+        ):
+            LineageGraph(
+                nodes,
+                source_evidence=(first_source, second_source),
+                acquisitions=(first_acquisition, second_acquisition),
+                split_commitments={"split": verified_split_evidence(commitment)},
+            )
+
     def test_external_evidence_binds_type_role_and_extracted_bytes(self) -> None:
         source = evidence("font-source", artifact_type=ArtifactType.FONT)
         acquired = AcquisitionRecord(
@@ -317,6 +1082,11 @@ class LineageTest(unittest.TestCase):
         wrong_role = LineageNode(**{**font.__dict__, "role": "texture"})
         with self.assertRaisesRegex(ValueError, "artifact role"):
             graph([wrong_role], (source,), (acquired,))
+
+        with self.assertRaisesRegex(ValueError, "reviewed source role"):
+            AcquisitionRecord(
+                **{**acquired.__dict__, "artifact_role": "tesseract-ben"}
+            ).validate_source(source)
 
     def test_evaluation_set_must_bind_matching_partition_sources(self) -> None:
         source = evidence("evaluation-source")
@@ -401,7 +1171,7 @@ class LineageTest(unittest.TestCase):
                 (acquired,),
             )
 
-        with self.assertRaisesRegex(ValueError, "source archive"):
+        with self.assertRaisesRegex(ValueError, "extracted source"):
             graph(
                 [
                     node(
@@ -990,7 +1760,9 @@ class LineageTest(unittest.TestCase):
                 (test_acquired,),
             )
 
-    def test_canonical_schema_rejects_duplicate_keys_and_noncanonical_bytes(self) -> None:
+    def test_canonical_schema_rejects_duplicate_keys_and_noncanonical_bytes(
+        self,
+    ) -> None:
         code = node("code", ArtifactType.CODE)
         value = graph([code])
         with tempfile.TemporaryDirectory() as directory:

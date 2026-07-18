@@ -17,7 +17,8 @@ still requires the full V1 manual script unless the owner makes a new decision.
 
 ## P0 - Design decisions
 
-- [ ] Verify primary dataset sources, current licenses, redistribution terms, writer metadata, versions, and checksums
+- [x] Verify publisher sources, licenses, redistribution risks, reported writer metadata, versions, and exact publisher checksums
+- [x] Define the fail-closed archive, extracted regular-file inventory, dataset-adapter, global-writer, split-config/code, and lineage verification contract
 - [x] Prepare the CRNN/CTC, grapheme tokenization, input shape, decoder, classifier, and fallback decision packet
 - [ ] Obtain Tanzir's P0 approval and record it in `ml/DECISIONS.md`
 - [ ] Decide dataset, checkpoint, model, metrics, and provenance storage formats
@@ -26,8 +27,15 @@ still requires the full V1 manual script unless the owner makes a new decision.
 
 ## P1 - Data assembly
 
-- [ ] Implement validated dataset manifests and download instructions
-- [ ] Implement deterministic writer-disjoint train/validation/test manifests and leakage tests
+- [x] Implement generic canonical source/acquisition evidence and stable archive/extracted regular-file snapshot hashing
+- [ ] If approved, download each selected archive and verify its bytes, safe extraction, exact regular-file inventory, structure, and writer mapping against the P0 contract
+- [ ] Implement each dataset-specific adapter and audit its normalized derivations and global writer groups against the real archive/inventory
+- [ ] Produce approved production acquisition records; a cleared BN-HTRd requires a fresh amended production source manifest and acquisition rather than upgrading conditional evidence
+- [x] Implement generic private adapter evidence with exact normalized-output identity and complete used/ignored source coverage, plus a path-free public HMAC commitment and trusted-process verified-adapter marker
+- [x] Implement a generic one-global deterministic writer-disjoint manifest scaffold whose `PublicSplitCommitment` schema V3 binds the out-of-band-pinned approval-policy SHA, external split-approval SHA and scope, domain-separated seed/commitment-key fingerprints, every exact adapter commitment, config, aggregate counts, and private-manifest HMAC
+- [x] Generate a reviewable full core/adapter code-closure bundle and `SplitConfig` from tracked HEAD-identical code; bind every exact public input at commit A in a canonical approval request, verify an externally produced OpenSSH SSHSIG, and require build/verify to consume the committed policy, approval, bundle, config, and adapter configs
+- [x] Require the trusted-process `VerifiedSplitEvidence` marker in lineage; bind the exact public split SHA, signed scope and resulting eligibility, dataset IDs, acquisitions, canonical config, combined code bundle, approval-policy parent, and split-approval parent
+- [ ] Tanzir creates an external Ed25519 signing key, activates and commits the currently pending `ml/APPROVAL_POLICY.json`, distributes/verifies its canonical SHA out of band, records P0 approval, and externally signs the exact split request; then complete real downloads, adapters/writer audits, production acquisitions, and the sealed global split
 - [ ] Implement grapheme-aware receipt-domain text sampling
 - [ ] Implement Tier 1 font/degradation synthesis
 - [ ] Implement Tier 2 stroke surgery, writer hierarchy, and confusion-pair slices

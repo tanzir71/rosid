@@ -4,6 +4,7 @@ import hashlib
 import unittest
 
 from ml.rosid_ml.splits import (
+    DEFAULT_SPLIT_WEIGHTS,
     SampleKey,
     Split,
     assert_writer_disjoint,
@@ -159,6 +160,10 @@ class WriterSplitTest(unittest.TestCase):
         samples = self.samples()
         assignments = assign_writer_splits(samples, seed="release")
         evidence = validate_release_split(samples, assignments)
+        with self.assertRaises(TypeError):
+            DEFAULT_SPLIT_WEIGHTS[Split.TRAIN] = 1
+        with self.assertRaises(TypeError):
+            evidence.sample_counts[Split.TRAIN] = 0
         self.assertGreaterEqual(evidence.writer_counts[Split.TEST], 1)
         self.assertEqual(
             evidence.unique_image_counts[Split.TEST],

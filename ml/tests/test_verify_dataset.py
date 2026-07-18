@@ -57,6 +57,13 @@ class VerifyDatasetTest(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "not production"):
                 verify(manifest, archive)
 
+            excluded_value = {**value, "eligibility": "excluded"}
+            manifest.write_bytes(
+                DatasetSource.from_dict(excluded_value).canonical_bytes()
+            )
+            with self.assertRaisesRegex(ValueError, "excluded"):
+                verify(manifest, archive, require_production=False)
+
 
 if __name__ == "__main__":
     unittest.main()

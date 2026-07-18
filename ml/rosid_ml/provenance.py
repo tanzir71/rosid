@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import re
+import stat
 import unicodedata
 from dataclasses import dataclass
 from datetime import datetime
@@ -15,7 +17,17 @@ from urllib.parse import urlparse
 
 _SHA256 = re.compile(r"[0-9a-f]{64}\Z")
 _ARTIFACT_TOKEN = re.compile(r"[a-z0-9][a-z0-9_.-]*\Z")
+_OPAQUE_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9._:-]{0,127}\Z")
+_PORTABLE_FILE_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,127}\Z")
 _CANONICAL_UTC = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z\Z")
+_WINDOWS_RESERVED_NAMES = {
+    "aux",
+    "con",
+    "nul",
+    "prn",
+    *(f"com{index}" for index in range(1, 10)),
+    *(f"lpt{index}" for index in range(1, 10)),
+}
 
 
 class Eligibility(StrEnum):
@@ -53,6 +65,22 @@ def canonical_json_bytes(value: object) -> bytes:
     ).encode("utf-8")
 
 
+def canonical_json_line_bytes(value: object) -> bytes:
+    """Return one deterministic JSONL record, including its LF terminator."""
+
+    normalized = _normalize_json_unicode(value)
+    return (
+        json.dumps(
+            normalized,
+            ensure_ascii=False,
+            separators=(",", ":"),
+            sort_keys=True,
+            allow_nan=False,
+        )
+        + "\n"
+    ).encode("utf-8")
+
+
 def _normalize_json_unicode(value: object) -> object:
     if isinstance(value, str):
         return unicodedata.normalize("NFC", value)
@@ -80,6 +108,37 @@ def _sha256_bytes(content: bytes) -> str:
 def _validate_sha256(value: str, *, label: str) -> None:
     if not _SHA256.fullmatch(value):
         raise ValueError(f"{label} must be 64 lowercase hexadecimal digits")
+
+
+def _validate_portable_leaf(value: str, *, label: str) -> None:
+    if type(value) is not str or not value:
+        raise ValueError(f"{label} must be a nonempty string")
+    if value != unicodedata.normalize("NFC", value):
+        raise ValueError(f"{label} must be NFC-normalized")
+    candidate = Path(value)
+    stem = value.split(".", 1)[0].casefold()
+    if (
+        candidate.name != value
+        or candidate.is_absolute()
+        or value in {".", ".."}
+        or "/" in value
+        or "\\" in value
+        or re.match(r"^[A-Za-z]:", value)
+        or value.endswith((" ", "."))
+        or any(character in '<>:"|?*' for character in value)
+        or any(
+            unicodedata.category(character) in {"Cc", "Cf"}
+            for character in value
+        )
+        or stem in _WINDOWS_RESERVED_NAMES
+    ):
+        raise ValueError(f"{label} must be one portable leaf name")
+
+
+def validate_acquisition_record_id(value: str) -> None:
+    if not _PORTABLE_FILE_ID.fullmatch(value):
+        raise ValueError("record ID must be a portable filename-safe ID")
+    _validate_portable_leaf(value, label="record ID")
 
 
 def _strict_json_object(path: Path) -> tuple[dict[str, object], bytes]:
@@ -145,14 +204,14 @@ class SourceEvidence:
     rights_notes: str
 
     def __post_init__(self) -> None:
-        if self.schema_version != 2:
+        if type(self.schema_version) is not int or self.schema_version != 2:
             raise ValueError(
                 f"unsupported source-evidence schema: {self.schema_version}"
             )
-        if not self.evidence_id or any(
-            character.isspace() for character in self.evidence_id
-        ):
-            raise ValueError("evidence ID must be nonempty and contain no whitespace")
+        if not isinstance(self.eligibility, Eligibility):
+            raise ValueError("source-evidence eligibility must be an Eligibility")
+        if not _OPAQUE_ID.fullmatch(self.evidence_id):
+            raise ValueError("evidence ID must be a portable opaque ID")
         _validate_source_fields(
             source_url=self.source_url,
             version=self.version,
@@ -173,8 +232,10 @@ class SourceEvidence:
                     "dataset DOI/manifest commitment require a dataset ID"
                 )
         else:
-            if not self.dataset_id.strip():
-                raise ValueError("source-evidence dataset ID must be nonempty")
+            if not _ARTIFACT_TOKEN.fullmatch(self.dataset_id):
+                raise ValueError(
+                    "source-evidence dataset ID must be a portable lowercase token"
+                )
             if self.doi is not None and not self.doi.startswith("10."):
                 raise ValueError("source-evidence DOI must start with '10.' or be null")
             if self.source_manifest_sha256 is None:
@@ -186,7 +247,13 @@ class SourceEvidence:
                 label="source-manifest SHA-256",
             )
         if self.artifact_type == "dataset" and self.dataset_id is None:
-            raise ValueError("dataset source evidence requires structured dataset metadata")
+            raise ValueError(
+                "dataset source evidence requires structured dataset metadata"
+            )
+        if self.artifact_type != "dataset" and self.dataset_id is not None:
+            raise ValueError(
+                "non-dataset source evidence cannot claim dataset metadata"
+            )
 
     def to_dict(self) -> dict[str, object]:
         return {
@@ -280,6 +347,8 @@ class AcquisitionRecord:
     source_evidence_sha256: str
     content_sha256: str
     artifact_sha256: str
+    artifact_type: str
+    artifact_role: str
     inventory_sha256: str
     acquired_at_utc: str
     accepted_by: str
@@ -288,14 +357,13 @@ class AcquisitionRecord:
     eligibility: Eligibility
 
     def __post_init__(self) -> None:
-        if self.schema_version != 2:
+        if type(self.schema_version) is not int or self.schema_version != 3:
             raise ValueError(
                 f"unsupported acquisition schema: {self.schema_version}"
             )
-        if not self.record_id or any(
-            character.isspace() for character in self.record_id
-        ):
-            raise ValueError("record ID must be nonempty and contain no whitespace")
+        if not isinstance(self.eligibility, Eligibility):
+            raise ValueError("acquisition eligibility must be an Eligibility")
+        validate_acquisition_record_id(self.record_id)
         for value, label in (
             (self.source_evidence_sha256, "source-evidence SHA-256"),
             (self.content_sha256, "acquired content SHA-256"),
@@ -303,8 +371,35 @@ class AcquisitionRecord:
             (self.inventory_sha256, "inventory SHA-256"),
         ):
             _validate_sha256(value, label=label)
+        for value, label in (
+            (self.artifact_type, "acquired artifact type"),
+            (self.artifact_role, "acquired artifact role"),
+        ):
+            if not _ARTIFACT_TOKEN.fullmatch(value):
+                raise ValueError(f"{label} must be a portable lowercase token")
         if not self.accepted_by.strip() or not self.extractor.strip():
             raise ValueError("acquisition actor and extractor are required")
+        for value, label in (
+            (self.accepted_by, "acquisition actor"),
+            (self.extractor, "acquisition extractor"),
+        ):
+            if (
+                value != unicodedata.normalize("NFC", value)
+                or any(
+                    unicodedata.category(character) in {"Cc", "Cf"}
+                    for character in value
+                )
+            ):
+                raise ValueError(f"{label} must be NFC printable text")
+        if (
+            self.extractor.startswith(("/", "\\"))
+            or "\\" in self.extractor
+            or re.match(r"^[A-Za-z]:", self.extractor)
+            or ".." in self.extractor.split("/")
+        ):
+            raise ValueError(
+                "acquisition extractor must identify a tool/version, not a host path"
+            )
         if type(self.terms_accepted) is not bool:
             raise ValueError("terms_accepted must be a boolean")
         if not _CANONICAL_UTC.fullmatch(self.acquired_at_utc):
@@ -323,7 +418,9 @@ class AcquisitionRecord:
         return {
             "accepted_by": self.accepted_by,
             "acquired_at_utc": self.acquired_at_utc,
+            "artifact_role": self.artifact_role,
             "artifact_sha256": self.artifact_sha256,
+            "artifact_type": self.artifact_type,
             "content_sha256": self.content_sha256,
             "eligibility": self.eligibility.value,
             "extractor": self.extractor,
@@ -346,7 +443,9 @@ class AcquisitionRecord:
         expected = {
             "accepted_by",
             "acquired_at_utc",
+            "artifact_role",
             "artifact_sha256",
+            "artifact_type",
             "content_sha256",
             "eligibility",
             "extractor",
@@ -370,6 +469,8 @@ class AcquisitionRecord:
             source_evidence_sha256=value["source_evidence_sha256"],
             content_sha256=value["content_sha256"],
             artifact_sha256=value["artifact_sha256"],
+            artifact_type=value["artifact_type"],
+            artifact_role=value["artifact_role"],
             inventory_sha256=value["inventory_sha256"],
             acquired_at_utc=value["acquired_at_utc"],
             accepted_by=value["accepted_by"],
@@ -391,6 +492,22 @@ class AcquisitionRecord:
             raise ValueError("acquisition references different source evidence")
         if self.content_sha256 != source.content_sha256:
             raise ValueError("acquisition content differs from reviewed source")
+        if self.artifact_type != source.artifact_type:
+            raise ValueError("acquired artifact type differs from reviewed source")
+        if self.artifact_type == "dataset" and (
+            source.artifact_role != "source_archive"
+            or self.artifact_role != "extracted_dataset"
+        ):
+            raise ValueError(
+                "dataset acquisition must bind source_archive to extracted_dataset"
+            )
+        if (
+            self.artifact_type != "dataset"
+            and self.artifact_role != source.artifact_role
+        ):
+            raise ValueError(
+                "non-dataset acquisition role must match the reviewed source role"
+            )
         if (
             _ELIGIBILITY_RESTRICTIVENESS[self.eligibility]
             < _ELIGIBILITY_RESTRICTIVENESS[source.eligibility]
@@ -416,10 +533,16 @@ class DatasetSource:
     rights_notes: str
 
     def __post_init__(self) -> None:
-        if self.schema_version != 1:
-            raise ValueError(f"unsupported dataset manifest schema: {self.schema_version}")
-        if not self.dataset_id:
-            raise ValueError("dataset ID is required")
+        if type(self.schema_version) is not int or self.schema_version != 1:
+            raise ValueError(
+                f"unsupported dataset manifest schema: {self.schema_version}"
+            )
+        if not isinstance(self.eligibility, Eligibility):
+            raise ValueError("dataset eligibility must be an Eligibility")
+        if not _ARTIFACT_TOKEN.fullmatch(self.dataset_id):
+            raise ValueError("dataset ID must be a portable lowercase token")
+        if not _OPAQUE_ID.fullmatch(self.version):
+            raise ValueError("dataset version must be a portable opaque ID")
         _validate_source_fields(
             source_url=self.source_url,
             version=self.version,
@@ -429,16 +552,8 @@ class DatasetSource:
         )
         if self.doi is not None and not self.doi.startswith("10."):
             raise ValueError("DOI must start with '10.' or be null")
-        filename = Path(self.filename)
-        if (
-            filename.name != self.filename
-            or filename.is_absolute()
-            or "/" in self.filename
-            or "\\" in self.filename
-            or re.match(r"^[A-Za-z]:", self.filename)
-        ):
-            raise ValueError("filename must be one portable leaf name")
-        if self.bytes <= 0:
+        _validate_portable_leaf(self.filename, label="filename")
+        if type(self.bytes) is not int or self.bytes <= 0:
             raise ValueError("byte count must be positive")
         _validate_sha256(self.sha256, label="SHA-256")
 
@@ -468,7 +583,7 @@ class DatasetSource:
     def to_source_evidence(self) -> SourceEvidence:
         return SourceEvidence(
             schema_version=2,
-            evidence_id=f"dataset:{self.dataset_id}:{self.version}:{self.filename}",
+            evidence_id=f"dataset:{self.commitment_sha256}",
             dataset_id=self.dataset_id,
             doi=self.doi,
             source_manifest_sha256=self.commitment_sha256,
@@ -543,19 +658,94 @@ class DatasetSource:
         return source
 
     def verify_archive(self, path: Path) -> None:
-        if not path.is_file():
-            raise ValueError(f"dataset archive is not a file: {path}")
-        actual_bytes = path.stat().st_size
-        if actual_bytes != self.bytes:
-            raise ValueError(
-                f"dataset byte count is {actual_bytes}; expected {self.bytes}"
-            )
-        digest = hashlib.sha256()
-        with path.open("rb") as source:
-            for chunk in iter(lambda: source.read(1024 * 1024), b""):
-                digest.update(chunk)
-        actual_sha256 = digest.hexdigest()
+        actual_sha256, first_final = _hash_stable_archive(
+            path,
+            expected_bytes=self.bytes,
+        )
         if actual_sha256 != self.sha256:
             raise ValueError(
                 f"dataset SHA-256 is {actual_sha256}; expected {self.sha256}"
             )
+        confirmed_sha256, second_final = _hash_stable_archive(
+            path,
+            expected_bytes=self.bytes,
+        )
+        if (
+            confirmed_sha256 != actual_sha256
+            or not _same_file_snapshot(first_final, second_final)
+        ):
+            raise ValueError("dataset archive changed during confirmation")
+
+
+def _hash_stable_archive(
+    path: Path,
+    *,
+    expected_bytes: int,
+) -> tuple[str, os.stat_result]:
+    try:
+        initial = path.stat(follow_symlinks=False)
+    except OSError as error:
+        raise ValueError(f"cannot inspect dataset archive {path}: {error}") from error
+    reparse = getattr(initial, "st_file_attributes", 0) & getattr(
+        stat,
+        "FILE_ATTRIBUTE_REPARSE_POINT",
+        0,
+    )
+    if (
+        path.is_symlink()
+        or reparse
+        or not stat.S_ISREG(initial.st_mode)
+        or initial.st_nlink != 1
+    ):
+        raise ValueError(
+            f"dataset archive must be one unlinked regular file: {path}"
+        )
+    if initial.st_size != expected_bytes:
+        raise ValueError(
+            f"dataset byte count is {initial.st_size}; expected {expected_bytes}"
+        )
+    digest = hashlib.sha256()
+    observed_bytes = 0
+    try:
+        with path.open("rb") as source:
+            opened = os.fstat(source.fileno())
+            if not _same_file_identity(initial, opened):
+                raise ValueError("dataset archive changed before hashing")
+            for chunk in iter(lambda: source.read(1024 * 1024), b""):
+                observed_bytes += len(chunk)
+                digest.update(chunk)
+            finished = os.fstat(source.fileno())
+        final = path.stat(follow_symlinks=False)
+    except OSError as error:
+        raise ValueError(f"cannot hash dataset archive {path}: {error}") from error
+    if (
+        observed_bytes != expected_bytes
+        or not _same_file_snapshot(opened, finished)
+        or not _same_file_snapshot(initial, final)
+        or not _same_file_identity(finished, final)
+    ):
+        raise ValueError("dataset archive changed while hashing")
+    return digest.hexdigest(), final
+
+
+def _same_file_identity(first: os.stat_result, second: os.stat_result) -> bool:
+    identity_matches = (
+        first.st_dev == second.st_dev
+        and (first.st_ino == 0 or second.st_ino == 0 or first.st_ino == second.st_ino)
+    )
+    return (
+        identity_matches
+        and first.st_mode == second.st_mode
+        and first.st_size == second.st_size
+        and first.st_mtime_ns == second.st_mtime_ns
+        and first.st_nlink == second.st_nlink
+        and getattr(first, "st_file_attributes", 0)
+        == getattr(second, "st_file_attributes", 0)
+    )
+
+
+def _same_file_snapshot(first: os.stat_result, second: os.stat_result) -> bool:
+    return (
+        _same_file_identity(first, second)
+        and first.st_ctime_ns == second.st_ctime_ns
+    )
