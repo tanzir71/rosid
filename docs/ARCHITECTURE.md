@@ -6,7 +6,13 @@ checking `Platform.isIOS`.
 
 The capture pipeline is:
 
-`camera/gallery → private file store → crop/perspective/deskew → color + binary images → ML Kit Latin → optional Tesseract ben+eng → block merge → normalization/parser → editable review → Drift/FTS5`.
+`camera/gallery → private file store → crop/perspective/deskew → color + binary images → platform OCR route → normalization/parser → editable review → Drift/FTS5`.
+
+Android sends the color-corrected image through a native MethodChannel to the
+bundled ML Kit Latin recognizer, then optionally merges bundled Tesseract
+`ben+eng` output. iOS uses bundled Tesseract `ben+eng` for the first pass and
+does not link Google ML Kit or its telemetry/network support pods. CI audits the
+package graph and resolved CocoaPods lockfile to preserve that boundary.
 
 Images and SQLite live under the application documents directory. Exports are
 created with unique names under the app-private temporary directory, handed to

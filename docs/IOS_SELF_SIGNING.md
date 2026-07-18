@@ -12,6 +12,7 @@ device. See Apple's current
 
 ## Before proceeding
 
+- The target iPhone must run iOS 15.5 or later.
 - Only download the IPA from the project's official
   [GitHub Releases](https://github.com/tanzir-lameh/rosid/releases).
 - Compare the downloaded file's SHA-256 with
@@ -27,7 +28,13 @@ device. See Apple's current
 This is the most transparent route and requires a Mac with the Flutter SDK,
 Xcode, and CocoaPods.
 
-1. Clone the tagged release from GitHub.
+1. Clone the immutable V1 tag rather than the evolving `main` branch:
+
+   ```sh
+   git clone --branch v1.0.0 --single-branch https://github.com/tanzir-lameh/rosid.git
+   cd rosid
+   ```
+
 2. Run `flutter pub get` from the repository root.
 3. Run `cd ios && pod install && cd ..` to install the native plugin pods from
    the committed `Podfile.lock`.
@@ -58,16 +65,28 @@ model before entering Apple Account credentials.
 
 ## Verify the IPA on macOS or Linux
 
+On macOS:
+
 ```sh
 shasum -a 256 rosid-ios-unsigned.ipa
-cat rosid-ios-unsigned.ipa.sha256
+shasum -a 256 --check rosid-ios-unsigned.ipa.sha256
 ```
 
-The two SHA-256 values must match exactly. On Windows, use:
+On Linux:
+
+```sh
+sha256sum rosid-ios-unsigned.ipa
+sha256sum --check rosid-ios-unsigned.ipa.sha256
+```
+
+The check command must report `OK`. Hexadecimal SHA-256 values are
+case-insensitive. On Windows, normalize both values before comparing them:
 
 ```powershell
-Get-FileHash .\rosid-ios-unsigned.ipa -Algorithm SHA256
-Get-Content .\rosid-ios-unsigned.ipa.sha256
+$actual = (Get-FileHash .\rosid-ios-unsigned.ipa -Algorithm SHA256).Hash.ToUpperInvariant()
+$expected = ((Get-Content .\rosid-ios-unsigned.ipa.sha256).Split()[0]).ToUpperInvariant()
+if ($actual -ne $expected) { throw 'Rosid IPA SHA-256 mismatch.' }
+'Rosid IPA SHA-256: OK'
 ```
 
 The SHA-256 checksum identifies the exact app bundle published by the Rosid

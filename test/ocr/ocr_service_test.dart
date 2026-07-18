@@ -116,6 +116,35 @@ void main() {
     expect(bangla.calls, 0);
     expect(installer.calls, 1);
   });
+
+  test('non-Android Tesseract fallback installs data and runs once', () async {
+    final tesseract = _FakeEngine(
+      id: 'tesseract-ben-eng',
+      text: '\u09ae\u09cb\u099f 125',
+      confidence: 0.8,
+      top: 0,
+    );
+    final installer = _FakeInstaller(
+      const TessdataInstallResult(
+        installed: ['eng.traineddata', 'ben.traineddata'],
+        missing: [],
+      ),
+    );
+    final service = OcrService(
+      latinEngine: tesseract,
+      banglaEngine: tesseract,
+      handwritingEngine: tesseract,
+      tessdataInstaller: installer,
+      latinEngineRequiresTessdata: true,
+    );
+
+    final result = await service.recognize([pages.first]);
+
+    expect(result.engineIds, {'tesseract-ben-eng'});
+    expect(result.text, contains('125'));
+    expect(tesseract.calls, 1);
+    expect(installer.calls, 1);
+  });
 }
 
 OcrService _service(

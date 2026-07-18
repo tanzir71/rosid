@@ -19,56 +19,50 @@ void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets(
-    'ML Kit recognizes the English printed fixture',
+    'Android ML Kit recognizes the English printed fixture',
     (tester) async {
       final page = await _prepareFixture('assets/fixtures/english_receipt.png');
-      final engine = MlKitLatinEngine();
-      try {
-        final result = await engine.recognize(page);
-        final normalized = result.text.toLowerCase();
+      const engine = MlKitLatinEngine();
+      final result = await engine.recognize(page);
+      final normalized = result.text.toLowerCase();
 
-        expect(result.engineIds, contains('mlkit-latin'));
-        expect(normalized, contains('rice'));
-        expect(normalized, contains('vat'));
-        expect(normalized, contains('80.00'));
-      } finally {
-        await engine.close();
-      }
+      expect(result.engineIds, contains('mlkit-latin'));
+      expect(normalized, contains('rice'));
+      expect(normalized, contains('vat'));
+      expect(normalized, contains('80.00'));
     },
+    skip: !Platform.isAndroid,
     timeout: const Timeout(Duration(minutes: 3)),
   );
 
   testWidgets(
-    'mixed hint routes through ML Kit and bundled Bangla Tesseract',
+    'Android mixed hint routes through ML Kit and bundled Bangla Tesseract',
     (tester) async {
       final page = await _prepareFixture(
         'assets/fixtures/mixed_bangla_receipt.png',
       );
-      final latin = MlKitLatinEngine();
-      try {
-        final service = OcrService(
-          latinEngine: latin,
-          banglaEngine: const TesseractBanglaEngine(),
-          handwritingEngine: const TesseractBanglaEngine(),
-          tessdataInstaller: const TessdataInstaller(),
-        );
-        final result = await service.recognize([page], hint: ScriptHint.mixed);
-        final normalized = result.text.toLowerCase();
+      const latin = MlKitLatinEngine();
+      final service = OcrService(
+        latinEngine: latin,
+        banglaEngine: const TesseractBanglaEngine(),
+        handwritingEngine: const TesseractBanglaEngine(),
+        tessdataInstaller: const TessdataInstaller(),
+      );
+      final result = await service.recognize([page], hint: ScriptHint.mixed);
+      final normalized = result.text.toLowerCase();
 
-        expect(
-          result.engineIds,
-          containsAll(['mlkit-latin', 'tesseract-ben-eng']),
-        );
-        expect(normalized, contains('rosid'));
-        expect(
-          RegExp(r'[\u0980-\u09ff]').hasMatch(result.text),
-          isTrue,
-          reason: 'The mixed printed fixture must produce Bangla OCR text.',
-        );
-      } finally {
-        await latin.close();
-      }
+      expect(
+        result.engineIds,
+        containsAll(['mlkit-latin', 'tesseract-ben-eng']),
+      );
+      expect(normalized, contains('rosid'));
+      expect(
+        RegExp(r'[\u0980-\u09ff]').hasMatch(result.text),
+        isTrue,
+        reason: 'The mixed printed fixture must produce Bangla OCR text.',
+      );
     },
+    skip: !Platform.isAndroid,
     timeout: const Timeout(Duration(minutes: 3)),
   );
 

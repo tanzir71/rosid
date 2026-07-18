@@ -22,13 +22,20 @@ jobs:
           flutter-version: 3.44.6
           channel: stable
           cache: true
-      - run: flutter pub get
+      - name: Restore locked Flutter dependencies
+        run: |
+          flutter pub get --enforce-lockfile
+          git diff --exit-code -- pubspec.lock
       - run: flutter gen-l10n
       - run: dart run build_runner build
       - run: dart run tool/generate_ocr_fixture_bundle.dart
       - run: dart format --output=none --set-exit-if-changed lib test integration_test tool
       - run: flutter analyze
       - run: flutter test
+      - name: Audit iOS dependency privacy
+        run: |
+          python3 -m unittest tool.test_audit_ios_privacy
+          python3 tool/audit_ios_privacy.py
       - name: Validate static release site
         run: |
           python3 -m py_compile tool/prepare_site.py

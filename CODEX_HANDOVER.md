@@ -37,9 +37,9 @@ Both profiles share capture, preprocessing, OCR, search, and storage. The differ
 | Concern | Package | Notes |
 |---|---|---|
 | Camera | `camera` | Live preview + capture. Consider `camerawesome` only if `camera` proves insufficient. |
-| English/Latin OCR | `google_mlkit_text_recognition` | On-device, bundled Latin model. Verify it runs offline (it does when using the bundled model). |
+| English/Latin OCR | Android native MethodChannel + bundled ML Kit; iOS Tesseract fallback | ML Kit is Android-only. iOS uses the bundled `eng+ben` Tesseract data so the IPA contains no ML Kit telemetry/network pods. |
 | Bangla OCR | `flutter_tesseract_ocr` (Tesseract 5) | Ship `ben.traineddata` + `eng.traineddata` (tessdata_best) in assets, copy to app dir on first launch. |
-| Script detection | Custom: Unicode-range heuristic on ML Kit output + block-level classifier (see §6) | |
+| Script detection | Custom: Unicode-range heuristic on first-pass OCR output + block-level classifier (see §6) | |
 | Image preprocessing | `opencv_dart` (or `image` package fallback) | Deskew, crop, adaptive threshold. |
 | DB | `drift` | Type-safe SQLite, testable on desktop VM. |
 | State mgmt | `riverpod` (hooks optional) | |
@@ -95,14 +95,14 @@ image → preprocess → script detect → route to engine(s) → merge → norm
 ### 6.1 Preprocessing (before any OCR)
 - Document edge detection → perspective correction (quad warp).
 - Deskew (text-line angle estimate).
-- Grayscale → contrast normalization (CLAHE) → adaptive threshold (binarize). Keep both the color-corrected and binarized versions; Tesseract gets binarized, ML Kit gets color-corrected (ML Kit performs worse on binarized images).
+- Grayscale → contrast normalization (CLAHE) → adaptive threshold (binarize). Keep both the color-corrected and binarized versions; Tesseract gets binarized, while Android ML Kit gets color-corrected (ML Kit performs worse on binarized images).
 - Upscale if min dimension < 1000px.
 
 ### 6.2 Engine routing
-- Run **ML Kit (Latin)** first — it is fast and handles English printed + reasonable English handwriting.
-- Classify recognized blocks: compute the fraction of characters in the Bangla Unicode range (U+0980–U+09FF) vs Latin. ML Kit will output garbage for Bangla; detect this via low confidence / high non-word ratio.
+- On Android, run **ML Kit (Latin)** first. On iOS, run bundled **Tesseract `ben+eng`** as the first and only V1 engine so no telemetry-capable ML Kit pods enter the IPA.
+- Classify recognized blocks: compute the fraction of characters in the Bangla Unicode range (U+0980–U+09FF) vs Latin. Android ML Kit can output garbage for Bangla; detect this via low confidence / high non-word ratio.
 - If the image likely contains Bangla (garbage Latin output, or user's language hint, or explicit "Bangla" toggle on capture screen), run **Tesseract with `ben+eng`** on the binarized image.
-- **Merge strategy**: prefer ML Kit for Latin-dominant blocks, Tesseract for Bangla-dominant blocks, using block bounding boxes to avoid duplication. When in doubt, keep both and let the parser/user decide.
+- **Android merge strategy**: prefer ML Kit for Latin-dominant blocks and Tesseract for Bangla-dominant blocks, using block bounding boxes to avoid duplication. iOS keeps the single Tesseract result. When in doubt, keep the text and let the parser/user decide.
 
 ### 6.3 Normalization (critical for Bangla receipts)
 - Map Bangla numerals ০১২৩৪৫৬৭৮৯ → 0–9 for all numeric parsing (keep the original string for display).
@@ -111,7 +111,7 @@ image → preprocess → script detect → route to engine(s) → merge → norm
 - Unicode NFC normalization on all Bangla text (conjunct/matra ordering varies by engine).
 
 ### 6.4 Handwriting — honest expectations
-- English handwriting: ML Kit Latin does a passable job on neat print-style writing. Accept it.
+- English handwriting: Android ML Kit Latin does a passable job on neat print-style writing. The iOS Tesseract fallback remains best effort and requires review.
 - **Bangla handwriting: no production-grade fully-offline solution exists.** Tesseract `ben` is trained on printed text and will be poor on handwriting. Strategy:
   1. Run the pipeline anyway (best-effort).
   2. Surface confidence honestly: if mean confidence < threshold, show a banner: "Handwriting detected — please verify the text" and drop straight into the editable review screen.
@@ -172,13 +172,13 @@ Each milestone ends with: `flutter analyze` clean, all tests green, app builds (
 - **M0 — Scaffold**: Flutter project, packages, drift schema + migrations, riverpod + go_router shell, l10n (en/bn ARBs), theme. Empty screens navigable. CI-style check script `tool/check.sh` (analyze + test + build).
 - **M1 — Capture**: camera preview, capture, gallery import, mode toggle, save raw image to app dir, `scans` row created.
 - **M2 — Preprocess**: edge detect + crop UI with draggable corners, deskew, enhance. Unit tests on fixture images (run preprocessing as pure functions where possible).
-- **M3 — OCR core**: `OcrEngine` interface, ML Kit engine, Tesseract engine (assets shipped + first-launch copy verified), script detection, merge. Integration-tested on device/emulator against fixtures.
+- **M3 — OCR core**: `OcrEngine` interface, Android-only native ML Kit engine, Tesseract engine (assets shipped + first-launch copy verified), script detection, merge. Integration-tested on device/emulator against fixtures.
 - **M4 — Normalization + Parser**: Bangla numeral/date/currency normalizers + receipt parser. **≥ 40 unit tests** against the fixture corpus (§10). This milestone is pure Dart — no device needed.
 - **M5 — Review & Save**: both review screens, confidence flagging, editable everything, save to DB.
 - **M6 — History, Search, Detail**: FTS5 search, filters, detail view, edit/delete.
 - **M7 — Dashboard + Export + Settings**: monthly summary, category chart, CSV export via share sheet, settings (incl. Bangla UI verified).
 - **M8 — Android hardening**: airplane-mode manual test script, manifest permission audit, large-image memory handling, DB migration test, ProGuard/R8 rules for ML Kit + Tesseract, signed release APK builds.
-- **M9 — iOS profile**: `AppProfile` wiring (should already exist from M0; here it's verified end-to-end), documents-first home layout, expense toggle behavior, multi-page batch capture, document→PDF export, iOS build config (Podfile, Info.plist permissions with usage strings, Tesseract/ML Kit iOS pods), verify both OCR engines on iOS simulator + document behaviors via `--dart-define=APP_PROFILE=ios` on Android emulator if no macOS runner is available (record this limitation in `PROGRESS.md`).
+- **M9 — iOS profile**: `AppProfile` wiring (should already exist from M0; here it's verified end-to-end), documents-first home layout, expense toggle behavior, multi-page batch capture, document→PDF export, iOS build config (Podfile, Info.plist permissions with usage strings, Tesseract-only iOS pods), compile the Tesseract path on hosted macOS and verify document behaviors via `--dart-define=APP_PROFILE=ios` on Android emulator if no native test device is available (record this limitation in `PROGRESS.md`). The no-network/no-analytics invariant overrides the original cross-platform ML Kit assumption.
 - **M10 — Landing page + distribution** (see §15): GitHub Pages site, GitHub Releases pipeline for the signed Android APK and unsigned iPhone IPA, honest install constraints, and verification instructions.
 
 ## 10. Test Fixtures (create these in M0/M4)
@@ -311,7 +311,7 @@ Model training cannot happen inside the app build loop: it needs dataset downloa
 
 **P0 — Design decisions (Codex proposes, Tanzir approves, recorded in `ml/DECISIONS.md`)**
 - Architecture: default proposal = **line-level CRNN + CTC** (CNN backbone ≤ ~5M params), grapheme-aware charset (Bangla graphemes, not raw codepoints — conjuncts matter). Transformer decoders (TrOCR-style, or the grapheme-based decoder-only approach in GraDeT-HTR) are the fallback if CRNN plateaus, but size/latency budgets rule.
-- Scope: Bangla handwriting first; English handwriting stays on ML Kit.
+- Scope: Bangla handwriting first; English handwriting stays on Android ML Kit while iOS remains on the reviewed offline engine path unless a telemetry-free replacement is selected.
 - Budgets (hard): model ≤ 20 MB post-quantization, ≤ 1.5 s per receipt line-batch on a 2022 mid-range Android phone, works offline obviously.
 
 **P1 — Data assembly (NO manual data collection — Tanzir photographs and annotates nothing)**

@@ -17,11 +17,12 @@ deferred those real-device checks until after the initial early-access release.
   only `android.permission.CAMERA` and AndroidX's app-scoped signature
   compatibility permission; it contained no networking permission.
 - Five emulator captures were recorded under `site/screenshots/`. The landing
-  page displays `dashboard.png`, `crop-enhance.png`, `receipt-review.png`, and
-  `settings.png`; `enhanced.png` remains as an additional retained capture.
-- A locally served mobile Lighthouse run in Chromium scored 100 for
-  accessibility on the superseded landing-page design. The rebuilt page has not
-  yet been measured and needs a fresh run.
+  page displays optimized WebP derivatives of `dashboard.png`,
+  `crop-enhance.png`, `receipt-review.png`, and `settings.png`; `enhanced.png`
+  remains as an additional retained source capture.
+- The optimized rebuilt page scored 100 for Performance, Accessibility, Best
+  Practices, and SEO in Lighthouse 13.4 mobile mode. See the compact
+  [recorded metrics](audits/lighthouse-v1.json).
 
 ## Airplane-mode receipt flow
 

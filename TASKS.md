@@ -26,7 +26,7 @@ handover gate, not a pass.
 ## M3 - OCR core
 
 - [x] M3.1 Define OCR contracts, script detection, merge strategy, and disabled TFLite handwriting stub
-- [x] M3.2 Implement ML Kit and Tesseract adapters behind the common interface
+- [x] M3.2 Implement Android-only native ML Kit and cross-platform Tesseract adapters behind the common interface
 - [x] M3.3 Parse Tesseract hOCR geometry/confidence and preserve repeated blocks/pages
 - [x] M3.4 Implement atomic first-launch tessdata installation and routed OCR service
 - [x] M3.5 Bundle and pin `ben.traineddata` and `eng.traineddata` with hash verification
@@ -77,7 +77,7 @@ handover gate, not a pass.
 - [x] M9.1 Verify documents-first home, expense toggle, stable navigation, and route/surface gating via profile tests
 - [x] M9.2 Implement multi-page document persistence, pinned documents, and bounded local PDF export
 - [x] M9.3 Add iOS usage strings, tessdata bundle resources, backup exclusion, and iOS 15.5 configuration
-- [ ] M9.4 Resolve and commit `Podfile.lock`, then compile the unsigned iOS target on GitHub-hosted macOS (lock workflow passed and the exact artifact is staged for commit; compile pending)
+- [ ] M9.4 Resolve and commit `Podfile.lock`, then compile the unsigned iOS target on GitHub-hosted macOS (the first exact lock artifact is committed; privacy-safe lock refresh and compile pending)
 - [DEFERRED BY OWNER: physical-device testing will be completed later] M9.5 Verify native OCR, profile flow, multi-page PDF, and share sheet end to end
 
 ## M10 - Landing page and distribution
@@ -86,7 +86,7 @@ handover gate, not a pass.
 - [x] M10.2 Add Pages and multi-platform release workflows with repository-specific links and immutable metadata
 - [x] M10.3 Document Android signing, iPhone self-signing constraints, install, and manual verification steps
 - [x] M10.4 Replace landing-page mockups with four real emulator screenshots (five captures retained)
-- [ ] M10.5 Re-run local mobile browser and Lighthouse verification for the rebuilt landing page (the superseded design scored 100 for accessibility)
+- [x] M10.5 Re-run mobile Lighthouse for the rebuilt landing page (Performance, Accessibility, Best Practices, and SEO: 100 each)
 - [ ] M10.6 Publish Pages and a signed Android GitHub Release (Pages is configured; no public release deployment exists yet)
 - [DEFERRED: owner has no paid Apple distribution membership] M10.7 Publish an App Store/TestFlight build
 - [ ] M10.8 Compile and publish the explicitly unsigned iPhone IPA for advanced self-signing
@@ -94,7 +94,7 @@ handover gate, not a pass.
 
 ## Final V1 audit
 
-- [x] Run code generation, formatting check, analyze, all 183 automated tests, and the source offline audit
+- [x] Run code generation, formatting check, analyze, all 185 automated tests, and the source offline audit
 - [x] Audit and fix capture/save/delete lifecycle races, atomic FTS cleanup, formula-safe temporary exports, and desktop picker ownership
 - [x] Pin workflow actions and gate signing behind protected tags plus the tag-restricted `android-release` environment
 - [x] Enable immutable GitHub Releases and require the publish workflow to verify the release is locked before Pages deployment
@@ -107,5 +107,5 @@ handover gate, not a pass.
 - [ ] Compile the unsigned native iOS target on a hosted macOS runner
 - [DEFERRED: no Apple distribution membership] Sign and publish through App Store/TestFlight
 - [ ] Publish live Pages, the signed Android APK, and the unsigned iPhone IPA
-- [ ] Re-run local mobile Lighthouse against the rebuilt landing page (the previous design reached accessibility score 100)
+- [x] Re-run local mobile Lighthouse against the rebuilt landing page and record the four 100 scores
 - [ ] Preserve the released V1 commit on `release/v1` and generate `TASKS_V2.md` under the owner-amended section 17 gate

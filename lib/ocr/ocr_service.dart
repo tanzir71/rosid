@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rosid/ocr/engines/mlkit_latin.dart';
 import 'package:rosid/ocr/engines/ocr_engine.dart';
@@ -30,12 +32,14 @@ class OcrService {
     required this.banglaEngine,
     required this.handwritingEngine,
     required this.tessdataInstaller,
+    this.latinEngineRequiresTessdata = false,
   });
 
   final OcrEngine latinEngine;
   final OcrEngine banglaEngine;
   final OcrEngine handwritingEngine;
   final TessdataInstaller tessdataInstaller;
+  final bool latinEngineRequiresTessdata;
 
   Future<OcrResult> recognize(
     List<PreprocessedImage> pages, {
@@ -45,13 +49,21 @@ class OcrService {
     final engines = <String>{};
     TessdataInstallResult? tessdata;
     for (final page in pages) {
+      if (latinEngineRequiresTessdata) {
+        tessdata ??= await tessdataInstaller.install();
+        _requireCompleteTessdata(tessdata);
+      }
       final latin = await latinEngine.recognize(page, hint: hint);
       var pageResult = latin;
-      if (ScriptDetector.shouldRunBanglaEngine(latin, hint: hint)) {
+      final shouldRunBangla = ScriptDetector.shouldRunBanglaEngine(
+        latin,
+        hint: hint,
+      );
+      final latinAlreadyUsedBanglaEngine =
+          latinEngineRequiresTessdata && latinEngine.id == banglaEngine.id;
+      if (shouldRunBangla && !latinAlreadyUsedBanglaEngine) {
         tessdata ??= await tessdataInstaller.install();
-        if (!tessdata.isComplete) {
-          throw BanglaOcrUnavailableException(tessdata.missing);
-        }
+        _requireCompleteTessdata(tessdata);
         final bangla = await banglaEngine.recognize(page, hint: hint);
         pageResult = OcrMerger.merge(latin, bangla);
       }
@@ -65,12 +77,16 @@ class OcrService {
     });
     return OcrResult(blocks: blocks, engineIds: engines);
   }
+
+  void _requireCompleteTessdata(TessdataInstallResult result) {
+    if (!result.isComplete) {
+      throw BanglaOcrUnavailableException(result.missing);
+    }
+  }
 }
 
 final mlKitLatinEngineProvider = Provider<MlKitLatinEngine>((ref) {
-  final engine = MlKitLatinEngine();
-  ref.onDispose(engine.close);
-  return engine;
+  return const MlKitLatinEngine();
 });
 
 final tesseractBanglaEngineProvider = Provider<TesseractBanglaEngine>(
@@ -82,11 +98,17 @@ final tfliteBanglaHandwritingEngineProvider =
       (ref) => const TfliteBanglaHandwritingEngine(),
     );
 
-final ocrServiceProvider = Provider<OcrService>(
-  (ref) => OcrService(
-    latinEngine: ref.watch(mlKitLatinEngineProvider),
-    banglaEngine: ref.watch(tesseractBanglaEngineProvider),
+final ocrServiceProvider = Provider<OcrService>((ref) {
+  final usesAndroidMlKit = Platform.isAndroid;
+  final tesseract = ref.watch(tesseractBanglaEngineProvider);
+  final latinEngine = usesAndroidMlKit
+      ? ref.watch(mlKitLatinEngineProvider)
+      : tesseract;
+  return OcrService(
+    latinEngine: latinEngine,
+    banglaEngine: tesseract,
     handwritingEngine: ref.watch(tfliteBanglaHandwritingEngineProvider),
     tessdataInstaller: ref.watch(tessdataInstallerProvider),
-  ),
-);
+    latinEngineRequiresTessdata: !usesAndroidMlKit,
+  );
+});

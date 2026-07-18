@@ -117,6 +117,34 @@ void main() {
     );
   });
 
+  test('Android ML Kit channel lines retain geometry and page index', () async {
+    final engine = MlKitLatinEngine(
+      client: _FakeAndroidLatinOcrClient(const [
+        NativeOcrLine(
+          text: 'Grand Total',
+          boundingBox: OcrRect(left: 10, top: 20, right: 110, bottom: 50),
+          confidence: 0.92,
+        ),
+      ]),
+    );
+
+    final result = await engine.recognize(
+      const PreprocessedImage(
+        colorCorrectedPath: 'color.jpg',
+        binarizedPath: 'binary.jpg',
+        width: 200,
+        height: 100,
+        pageIndex: 2,
+      ),
+    );
+
+    expect(result.engineIds, {'mlkit-latin'});
+    expect(result.blocks.single.text, 'Grand Total');
+    expect(result.blocks.single.boundingBox.left, 10);
+    expect(result.blocks.single.confidence, 0.92);
+    expect(result.blocks.single.pageIndex, 2);
+  });
+
   test('merger prefers Bangla block at the same geometry', () {
     final latin = OcrResult(
       blocks: [block('nonsense', engine: 'ml')],
@@ -282,4 +310,13 @@ void main() {
       throwsUnimplementedError,
     );
   });
+}
+
+class _FakeAndroidLatinOcrClient implements AndroidLatinOcrClient {
+  const _FakeAndroidLatinOcrClient(this.lines);
+
+  final List<NativeOcrLine> lines;
+
+  @override
+  Future<List<NativeOcrLine>> recognize(String imagePath) async => lines;
 }

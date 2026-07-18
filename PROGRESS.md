@@ -4,13 +4,13 @@
 
 - Active milestone: V1 implementation is complete; Android emulator OCR and unsigned native-artifact gates are green. Release signing infrastructure is configured, while the signed Android build, unsigned iOS compile, release publication, and public Pages deployment remain pending. Physical-device QA is owner-deferred and Apple distribution is unavailable without a membership.
 - Flutter: 3.44.6 stable; Dart: 3.12.2.
-- Automated Windows gate: green on 2026-07-17 (`flutter analyze` clean; all 183 tests passed; offline source audit passed).
+- Automated Windows gate: green on 2026-07-18 (`flutter analyze` clean; all 185 tests passed; offline source audit passed).
 - Bundled OCR data: pinned `tessdata_best` English and Bangla models are checked in and hash-verified by the release workflow.
 - Native Android validation: debug and unsigned R8 release APKs built; the strict merged release-manifest audit passed; an airplane-mode emulator OCR run passed all three fixtures.
 - Landing page: five real emulator captures are retained under
   `site/screenshots/`; the site displays four of them in place of product
-  mockups. The prior page scored 100 for Lighthouse accessibility; the rebuilt
-  page has not yet been remeasured.
+  mockups. The optimized rebuilt page scored 100 in all four Lighthouse mobile
+  categories; compact evidence is recorded in `docs/audits/lighthouse-v1.json`.
 - V2 has not started. Under the owner-amended gate, it awaits a verified signed
   Android release, a verified unsigned iOS compile artifact, live Pages, and a
   preserved `release/v1` reference; deferred physical QA and unavailable Apple
@@ -41,9 +41,9 @@ active, immutable releases are enabled, and Pages is configured to use GitHub
 Actions. These are configuration checks, not release-artifact acceptance. The
 remaining gates are:
 
-- commit the inspected `ios/Podfile.lock` from successful hosted-macOS workflow
-  run `29621736516`, then verify the unsigned iOS compile in the release
-  workflow;
+- regenerate and commit a privacy-safe `ios/Podfile.lock` on hosted macOS after
+  removing the cross-platform ML Kit plugins, then verify the unsigned iOS
+  compile in the release workflow;
 - push the reviewed protected release tag and verify the signed APK signer,
   unsigned iPhone package, GitHub Release metadata, and public Pages deployment;
 - complete the camera, gallery, first-launch, search/export,
@@ -81,8 +81,10 @@ remaining gates are:
   locally; the release build remains an explicit separate command.
 - `image` replaces OpenCV for V1 preprocessing. Contrast normalization and
   adaptive thresholding are implemented in pure Dart rather than native CLAHE.
-- `google_mlkit_text_recognition` requires iOS 15.5, so the deployment target is
-  15.5 rather than the handover's 15.0 floor.
+- iOS retains a 15.5 deployment floor. V1 deliberately removes the Flutter ML
+  Kit plugins and routes iOS Latin/Bangla through bundled Tesseract; Android
+  keeps bundled Latin ML Kit behind an Android-only MethodChannel. This prevents
+  ML Kit telemetry/network support pods from entering the unsigned IPA.
 - The upstream Tesseract plugin does not implement hOCR on iOS. Android uses
   hOCR geometry/confidence; iOS uses the plugin's plain-text channel, synthesizes
   line boxes, and assigns conservative 0.4 confidence so review is mandatory.
@@ -202,12 +204,23 @@ remaining gates are:
 - Configured GitHub Pages to use Actions. No release-triggered public deployment
   has completed yet.
 - Added the GitHub-hosted macOS dependency-lock helper. Its first run
-  (`29621736516`) succeeded at commit `c65af86`; the downloaded lockfile matched
-  the artifact SHA-256 and is included in the release-candidate changes. The
-  unsigned iOS compile remains pending until the protected tag workflow.
-- Rebuilt the landing page after competitor research. The previous page's
-  Lighthouse accessibility score does not certify the rebuilt page, which still
-  needs browser and Lighthouse verification.
+  (`29621736516`) succeeded and the downloaded file matched its artifact, but
+  review found that it still contained Google ML Kit telemetry/network support
+  pods. That lock is superseded; a privacy-safe refresh is required before the
+  unsigned iOS compile can run in the protected tag workflow.
+- Removed the Flutter ML Kit plugins. Android now calls the same bundled Latin
+  ML Kit library through an Android-only MethodChannel; iOS and other platforms
+  use the bundled Tesseract `ben+eng` path. Analyze, all 185 tests, the debug APK,
+  all three airplane-mode emulator OCR fixtures, and the strict release manifest
+  audit passed after the routing change.
+- Rebuilt the post-routing minified/R8 APK: 150,028,058 bytes, SHA-256
+  `0B4B90069BF01391080FBFB6C0FBB1EA6A591A26B5744B22F91DEF72DCF4B0FA`.
+  The shrunk APK retains `MainActivity`, has no network permission, and is
+  intentionally unsigned until the protected release job.
+- Rebuilt the landing page after competitor research, replaced the heavy display
+  images with optimized WebP variants, and added the release favicon. Mobile
+  Lighthouse 13.4 scored Performance 100, Accessibility 100, Best Practices 100,
+  and SEO 100; the compact audited metrics are checked in.
 
 ### 2026-07-17 - Final automated and Android native gates
 
@@ -243,14 +256,13 @@ remaining gates are:
 - The unsigned release manifest has been produced and strictly audited. The
   keystore and environment secrets are now configured, but no signed APK has
   passed the protected tag workflow yet.
-- A GitHub-hosted macOS runner is available. The iOS lock workflow passed and
-  its exact `ios/Podfile.lock` artifact is included in the release candidate;
-  the unsigned compile is pending. Apple signing and TestFlight remain
+- A GitHub-hosted macOS runner is available. The first exact lock artifact was
+  superseded because it exposed ML Kit support pods in iOS; a privacy-safe lock
+  refresh and unsigned compile are pending. Apple signing and TestFlight remain
   unavailable without membership.
-- The displayed screenshots are real emulator captures. Lighthouse accessibility
-  was 100 for the superseded page; the rebuilt page still needs a fresh run.
-  Live Pages/Release publication and the post-deployment smoke check are also
-  pending.
+- The displayed screenshots are optimized versions of real emulator captures.
+  The rebuilt page's four mobile Lighthouse category scores are 100. Live
+  Pages/Release publication and the post-deployment smoke check are pending.
 - `TASKS_V2.md` is intentionally absent until the owner-amended V1 transition
   gate is met: verified release artifacts, live Pages, and a preserved
   `release/v1` reference. Physical-device QA and Apple distribution are

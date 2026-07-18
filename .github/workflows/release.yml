@@ -47,18 +47,17 @@ jobs:
         run: |
           set -euo pipefail
           pubspec_version="$(awk '$1 == "version:" { print $2; exit }' pubspec.yaml)"
-          test -n "$pubspec_version"
+          if [[ ! "$pubspec_version" =~ ^[0-9]+\.[0-9]+\.[0-9]+\+[0-9]+$ ]]; then
+            echo "::error::pubspec.yaml version must use numeric MAJOR.MINOR.PATCH+BUILD form."
+            exit 1
+          fi
+          if [[ ! "$GITHUB_REF_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(\+[0-9]+)?$ ]]; then
+            echo "::error::Release tag must use vMAJOR.MINOR.PATCH with optional numeric build metadata."
+            exit 1
+          fi
 
           build_name="${pubspec_version%%+*}"
-          if [ "$build_name" = "$pubspec_version" ]; then
-            echo "::error::pubspec.yaml must include a numeric build number."
-            exit 1
-          fi
           build_number="${pubspec_version##*+}"
-          if [[ ! "$build_number" =~ ^[0-9]+$ ]]; then
-            echo "::error::The pubspec build number must be numeric."
-            exit 1
-          fi
 
           tag_version="${GITHUB_REF_NAME#v}"
           tag_build_name="${tag_version%%+*}"
@@ -131,16 +130,22 @@ jobs:
             echo "keyAlias=$KEY_ALIAS"
             echo "keyPassword=$KEY_PASSWORD"
           } > android/key.properties
-      - run: flutter pub get
+      - name: Restore locked Flutter dependencies
+        run: |
+          flutter pub get --enforce-lockfile
+          git diff --exit-code -- pubspec.lock
       - run: flutter gen-l10n
       - run: dart run build_runner build
       - run: flutter analyze
       - run: flutter test
       - name: Build signed Android APK
-        run: >-
-          flutter build apk --release
-          --build-name "${{ needs.prepare.outputs.build_name }}"
-          --build-number "${{ needs.prepare.outputs.build_number }}"
+        env:
+          BUILD_NAME: ${{ needs.prepare.outputs.build_name }}
+          BUILD_NUMBER: ${{ needs.prepare.outputs.build_number }}
+        run: |
+          flutter build apk --release \
+            --build-name "$BUILD_NAME" \
+            --build-number "$BUILD_NUMBER"
       - name: Audit and verify Android release
         id: verify
         env:
@@ -202,7 +207,7 @@ jobs:
 
   ios:
     needs: prepare
-    runs-on: macos-latest
+    runs-on: macos-15
     outputs:
       ios_sha256: ${{ steps.package.outputs.ios_sha256 }}
       ios_size: ${{ steps.package.outputs.ios_size }}
@@ -213,7 +218,14 @@ jobs:
           flutter-version: 3.44.6
           channel: stable
           cache: true
-      - run: flutter pub get
+      - name: Pin CocoaPods
+        run: |
+          sudo gem install cocoapods -v 1.17.0 --no-document
+          test "$(pod --version)" = "1.17.0"
+      - name: Restore locked Flutter dependencies
+        run: |
+          flutter pub get --enforce-lockfile
+          git diff --exit-code -- pubspec.lock
       - run: flutter gen-l10n
       - run: dart run build_runner build
       - name: Verify committed CocoaPods resolution
@@ -223,11 +235,16 @@ jobs:
           pod install
           git diff --exit-code -- Podfile.lock
           test -z "$(git status --porcelain -- Podfile.lock)"
+      - name: Audit resolved iOS dependency privacy
+        run: python3 tool/audit_ios_privacy.py
       - name: Compile unsigned iPhone app
-        run: >-
-          flutter build ios --release --no-codesign
-          --build-name "${{ needs.prepare.outputs.build_name }}"
-          --build-number "${{ needs.prepare.outputs.build_number }}"
+        env:
+          BUILD_NAME: ${{ needs.prepare.outputs.build_name }}
+          BUILD_NUMBER: ${{ needs.prepare.outputs.build_number }}
+        run: |
+          flutter build ios --release --no-codesign \
+            --build-name "$BUILD_NAME" \
+            --build-number "$BUILD_NUMBER"
       - name: Package unsigned IPA
         id: package
         shell: bash
@@ -310,9 +327,9 @@ jobs:
 
           ### V1 status
 
-          Automated tests, release-manifest audits, matching clean local unsigned
-          R8 builds, and emulator OCR checks passed. Broad physical-device QA is
-          owner-deferred.
+          Automated tests and release-manifest audits passed in this tag workflow.
+          The tagged V1 baseline separately records local R8 and Android-emulator
+          OCR evidence. Broad physical-device QA is owner-deferred.
           Printed Bangla and English are the supported OCR focus; handwriting is
           best effort and should be reviewed before saving.
           EOF

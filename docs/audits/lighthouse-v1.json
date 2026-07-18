@@ -1,0 +1,23 @@
+{
+  "schema": "rosid-lighthouse-summary-v1",
+  "lighthouseVersion": "13.4.0",
+  "measuredAt": "2026-07-18T00:21:54.426Z",
+  "target": "locally served release-candidate site",
+  "formFactor": "mobile",
+  "scores": {
+    "performance": 100,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100
+  },
+  "metrics": {
+    "firstContentfulPaintMs": 1014.983,
+    "largestContentfulPaintMs": 1886.966,
+    "timeToInteractiveMs": 1894.466,
+    "cumulativeLayoutShift": 0,
+    "totalTransferBytes": 181084
+  },
+  "failedAccessibilityAudits": [],
+  "failedConsoleAudits": [],
+  "sourceReportSha256": "4F6083BEFF8328A899C0E04BD0710FE6070C07B6538C6A01A743B2563D93F920"
+}

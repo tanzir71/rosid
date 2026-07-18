@@ -59,14 +59,15 @@ network permission.
 
 The final unsigned local artifacts were:
 
-- debug: 254,530,293 bytes, SHA-256
-  `19A128607123662ACDF9A6166B3C76F8AD79CDA0E7B14CDEDD731DFD39BC14CE`;
-- minified release: 150,077,194 bytes, SHA-256
-  `DA858408D6AC3CC82D647ECD485B35A35BB6312BAD12C319339F7D95F9680A0C`.
+- debug: 254,529,846 bytes, SHA-256
+  `463BD471886671FA3D349E35B5FD7B52C87C12B37A3994563FDFC3092991F340`;
+- minified release: 150,028,058 bytes, SHA-256
+  `0B4B90069BF01391080FBFB6C0FBB1EA6A591A26B5744B22F91DEF72DCF4B0FA`.
 
-The release value was reproduced by two clean ordinary-entrypoint R8 builds.
-An APK emitted by the integration-test runner is deliberately excluded from
-these artifact records.
+These post-routing-change artifacts use the Android-only native ML Kit channel.
+The shrunk release contains `MainActivity`, and its merged manifest passed the
+strict allowlist. An APK emitted by the integration-test runner is deliberately
+excluded from these artifact records.
 
 These hashes identify this local verification run, not a distributable release.
 The release APK intentionally fails `apksigner verify` until signing inputs are
@@ -128,8 +129,10 @@ readiness evidence; the signed release workflow itself is still unverified.
    for it to succeed. Download the `ios-podfile-lock` workflow artifact, place
    its `Podfile.lock` at `ios/Podfile.lock`, inspect the resolved dependencies,
    commit the lockfile to `main`, and rerun the checks. Do not tag a revision
-   without the committed lockfile. The first helper run (`29621736516`) passed;
-   its inspected artifact is the checked-in `ios/Podfile.lock` baseline.
+   without the committed lockfile. The first helper run (`29621736516`) exposed
+   ML Kit telemetry/network support pods and is superseded. The replacement lock
+   must pass `tool/audit_ios_privacy.py`, which forbids those package and pod
+   names before upload and again before the unsigned compile.
 4. A trusted release maintainer creates and pushes a protected semantic tag,
    such as `v1.0.0`, pointing at that reviewed `main` commit.
 5. Verify the tag target, version, and workflow revision. If the environment has
