@@ -164,16 +164,27 @@ jobs:
           verify_output="$("$apksigner_path" verify --verbose --print-certs rosid.apk)"
           printf '%s\n' "$verify_output"
 
-          signer_count="$(printf '%s\n' "$verify_output" | awk '/^Signer #[0-9]+ certificate SHA-256 digest:/{count++} END{print count+0}')"
+          signer_count="$(
+            printf '%s\n' "$verify_output" |
+              awk -F ': ' '/^Number of signers:/{print $NF; exit}'
+          )"
+          if [[ ! "$signer_count" =~ ^[0-9]+$ ]]; then
+            echo "::error::Unable to parse APK signer count from apksigner output."
+            exit 1
+          fi
           if [ "$signer_count" -ne 1 ]; then
             echo "::error::Expected exactly one APK signing certificate, found $signer_count."
             exit 1
           fi
           apk_certificate_sha256="$(
             printf '%s\n' "$verify_output" |
-              awk -F ': ' '/^Signer #[0-9]+ certificate SHA-256 digest:/{print $2; exit}' |
+              awk -F ': ' '/Signer.*certificate SHA-256 digest:/{print $NF; exit}' |
               tr '[:lower:]' '[:upper:]' | tr -d '[:space:]:'
           )"
+          if [[ ! "$apk_certificate_sha256" =~ ^[0-9A-F]{64}$ ]]; then
+            echo "::error::Unable to parse the APK signing certificate SHA-256."
+            exit 1
+          fi
           keystore_certificate_sha256="$(
             keytool -list -v -keystore android/app/rosid-release.jks \
               -storepass "$STORE_PASSWORD" -alias "$KEY_ALIAS" |
