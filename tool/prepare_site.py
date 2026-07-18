@@ -14,6 +14,7 @@ from urllib.parse import urlparse
 
 PLACEHOLDERS = {
     "OWNER/REPO": "repository",
+    "ROSID_TAG_PLACEHOLDER": "release_tag",
     "ROSID_VERSION_PLACEHOLDER": "version",
     "ROSID_RELEASE_DATE_PLACEHOLDER": "release_date",
     "ROSID_APK_SIZE_PLACEHOLDER": "apk_size",

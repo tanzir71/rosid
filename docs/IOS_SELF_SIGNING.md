@@ -70,5 +70,6 @@ Get-FileHash .\rosid-ios-unsigned.ipa -Algorithm SHA256
 Get-Content .\rosid-ios-unsigned.ipa.sha256
 ```
 
-The unsigned artifact proves which app bundle the Rosid release workflow built;
-it does not replace the personal signature required for installation.
+The SHA-256 checksum identifies the exact app bundle published by the Rosid
+release workflow; it does not replace the personal signature required for
+installation.

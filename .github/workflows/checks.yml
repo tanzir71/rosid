@@ -46,4 +46,7 @@ jobs:
       - run: flutter build apk --debug
       # Debug builds add INTERNET for the Flutter VM service. The release job
       # performs the strict merged-manifest audit on the distributable variant.
-      - run: tool/audit_offline.sh
+      - name: Run portable offline audit without ripgrep
+        env:
+          ROSID_FORCE_GREP: '1'
+        run: tool/audit_offline.sh

@@ -2,10 +2,11 @@
 
 The Windows workspace has successfully built a debug APK and an unsigned,
 minified R8 release APK. The strict merged release-manifest audit also passed.
-A signed release has not been built because the release keystore and passwords
-are external secrets and were not provided; the tag workflow is the repeatable
-signed-build path once the protected release environment and its secrets are
-configured.
+A release keystore has been created and backed up outside the repository, and
+all four signing secrets are configured in the `android-release` environment.
+The enforced `v*` tag ruleset, environment tag policy, and GitHub Actions Pages
+source are also configured. A signed APK, unsigned iPhone package, GitHub
+Release, and public Pages deployment have not yet been produced or verified.
 
 ## Local verification
 
@@ -83,21 +84,23 @@ administrator-approved temporary trust configuration.
 1. The canonical public repository is
    `https://github.com/tanzir-lameh/rosid`. Enable Pages with **GitHub Actions**
    as the source.
-2. Before provisioning signing secrets, add an enforced repository tag ruleset
+2. Enable repository-level immutable releases. This makes each published
+   release, its assets, and its associated tag read-only after publication.
+3. Before provisioning signing secrets, add an enforced repository tag ruleset
    for `v*`. Restrict creation, update, and deletion of matching tags to trusted
    release maintainers. Release tags must point to a reviewed commit on `main`;
    do not tag an unreviewed commit or a contributor branch.
-3. Create an `android-release` GitHub environment and restrict deployment tags
+4. Create an `android-release` GitHub environment and restrict deployment tags
    to the protected `v*` pattern. Add a required reviewer when the repository
    has a second trusted maintainer; GitHub cannot use the sole maintainer as an
    independent reviewer.
-4. Create a release keystore on a secure machine:
+5. Create a release keystore on a secure machine:
 
    ```sh
    keytool -genkeypair -v -keystore rosid-release.jks -keyalg RSA -keysize 4096 -validity 10000 -alias rosid
    ```
 
-5. Base64-encode it and add these four secrets to the **`android-release`
+6. Base64-encode it and add these four secrets to the **`android-release`
    environment**, not as repository-wide Actions secrets:
 
    - `ANDROID_KEYSTORE_BASE64`
@@ -105,27 +108,41 @@ administrator-approved temporary trust configuration.
    - `ANDROID_KEY_PASSWORD`
    - `ANDROID_STORE_PASSWORD`
 
-6. Keep the original keystore and passwords in a secure, backed-up location.
+7. Keep the original keystore and passwords in a secure, backed-up location.
    Losing them prevents users from upgrading an existing sideloaded install.
+
+As of 2026-07-18, these one-time steps are complete: immutable releases are
+enabled, the keystore backup and four environment secrets exist, the `v*` tag
+ruleset is enforced, the `android-release` environment accepts only `v*` tags,
+and Pages uses GitHub Actions. The sole maintainer cannot provide an independent
+environment review, so no required reviewer is configured yet. This setup is
+readiness evidence; the signed release workflow itself is still unverified.
 
 ## Signed Android release
 
 1. Update `version:` in `pubspec.yaml`, append the changelog to `PROGRESS.md`,
    and merge the reviewed release commit to `main`.
 2. Run the appropriate local check command above on a provisioned machine.
-3. A trusted release maintainer creates and pushes a protected semantic tag,
+3. Before creating the first release tag, run **Refresh iOS dependency lock**
+   (`.github/workflows/ios-lock.yml`) on the intended `main` revision and wait
+   for it to succeed. Download the `ios-podfile-lock` workflow artifact, place
+   its `Podfile.lock` at `ios/Podfile.lock`, inspect the resolved dependencies,
+   commit the lockfile to `main`, and rerun the checks. Do not tag a revision
+   without the committed lockfile. The first helper run (`29621736516`) passed;
+   its inspected artifact is the checked-in `ios/Podfile.lock` baseline.
+4. A trusted release maintainer creates and pushes a protected semantic tag,
    such as `v1.0.0`, pointing at that reviewed `main` commit.
-4. Verify the tag target, version, and workflow revision. If the environment has
+5. Verify the tag target, version, and workflow revision. If the environment has
    a required reviewer, that reviewer approves the waiting Android job before
    its scoped signing secrets become available.
-5. The release workflow verifies the checked-in `tessdata_best` English/Bangla
+6. The release workflow verifies the checked-in `tessdata_best` English/Bangla
    files against their pinned SHA-256 values. It does not download OCR models.
    The workflow then runs tests, builds/signs `rosid.apk`, and audits the merged
    manifest. Before publishing, `apksigner` verifies the emitted APK and the
    workflow compares its normalized signer SHA-256 with the configured release
    keystore. A missing, invalid, multi-signer, or mismatched artifact fails the
    release.
-6. In parallel, a GitHub-hosted macOS runner compiles the iOS target without
+7. In parallel, a GitHub-hosted macOS runner compiles the iOS target without
    code signing and packages it as an explicitly unsigned IPA. After both jobs
    succeed, the workflow publishes:
 
@@ -135,11 +152,11 @@ administrator-approved temporary trust configuration.
    - `rosid-ios-unsigned.ipa` and its SHA-256
    - an unsigned-iOS warning and machine-readable release metadata
 
-   Once the GitHub Release succeeds, the same tag workflow deploys `site/` to the
-   `github-pages` environment. Pages deployments share the repository's `pages`
-   concurrency group so overlapping site deployments are serialized/cancelled
-   consistently.
-7. Physical-device QA is owner-deferred for the initial V1 early-access
+   Publication fails unless GitHub reports the release as immutable. Once that
+   check succeeds, the same tag workflow deploys `site/` to the `github-pages`
+   environment. Pages deployments share the repository's `pages` concurrency
+   group so overlapping site deployments are serialized/cancelled consistently.
+8. Physical-device QA is owner-deferred for the initial V1 early-access
    release. Complete [MANUAL_QA.md](MANUAL_QA.md) before removing that label.
 
 The model files are already checked in. To build manually after creating
@@ -155,9 +172,9 @@ apksigner verify --print-certs build/app/outputs/flutter-apk/app-release.apk
 
 On Windows, use `.\tool\check.ps1` and
 `.\tool\audit_offline.ps1 -RequireMerged` in the equivalent sequence. Never
-commit `android/key.properties`, the keystore, or passwords. Until those signing
-inputs are supplied, the unsigned build and merged-manifest audit are the
-furthest reproducible local release gates.
+commit `android/key.properties`, the keystore, or passwords. The configured
+environment secrets are available only to the protected tag job; a successful
+workflow signer check is still required before treating the APK as released.
 
 ## Unsigned iPhone package
 

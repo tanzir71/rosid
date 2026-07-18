@@ -4,7 +4,8 @@ The native OCR fixture subset below is verified. Run the remaining checklist on
 a clean physical Android device with the eventual signed release APK. Repeat the
 profile section with `--dart-define=APP_PROFILE=ios` on Android when an iOS
 runner is unavailable. The recorded emulator subset does not by itself complete
-the full section 13 physical-device or native iOS acceptance gate.
+the full section 13 physical-device or native iOS acceptance gate. The owner has
+deferred those real-device checks until after the initial early-access release.
 
 ## Recorded Android validation (2026-07-17)
 
@@ -19,7 +20,8 @@ the full section 13 physical-device or native iOS acceptance gate.
   page displays `dashboard.png`, `crop-enhance.png`, `receipt-review.png`, and
   `settings.png`; `enhanced.png` remains as an additional retained capture.
 - A locally served mobile Lighthouse run in Chromium scored 100 for
-  accessibility.
+  accessibility on the superseded landing-page design. The rebuilt page has not
+  yet been measured and needs a fresh run.
 
 ## Airplane-mode receipt flow
 
@@ -72,13 +74,15 @@ verifies that a larger document is rejected before any page file is read.
 
 ## Remaining distribution checks
 
-1. Install and verify the signed Android GitHub Release asset. This is
-   owner-deferred for the initial early-access publication.
+1. After the tag workflow produces it, install and verify the signed Android
+   GitHub Release asset. This physical-device check is owner-deferred for the
+   initial early-access publication; the signed build itself is still pending.
 2. Verify that Pages links to `rosid.apk` and the explicitly unsigned
    `rosid-ios-unsigned.ipa`, and that the displayed file hashes match the latest
    GitHub Release metadata.
 3. If testing iPhone self-signing, follow `IOS_SELF_SIGNING.md` and verify that
    the 7-day free-provisioning limitation is shown before download.
-4. Smoke-test the public Pages URL on mobile after deployment and confirm the
-   published page matches the locally audited build (local Lighthouse
-   accessibility: 100).
+4. Smoke-test the public Pages URL on mobile after deployment, confirm the
+   published page matches the intended release, and run Lighthouse against the
+   rebuilt page. Record the new result rather than carrying forward the prior
+   design's accessibility score.

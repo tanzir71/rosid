@@ -21,6 +21,26 @@ jobs:
       release_date: ${{ steps.version.outputs.release_date }}
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          fetch-depth: 0
+      - name: Verify release commit is on origin/main
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --force --no-tags origin \
+            "+refs/tags/${GITHUB_REF_NAME}:refs/tags/${GITHUB_REF_NAME}" \
+            "+refs/heads/main:refs/remotes/origin/main"
+
+          tag_commit="$(git rev-parse --verify "refs/tags/${GITHUB_REF_NAME}^{commit}")"
+          checked_out_commit="$(git rev-parse --verify HEAD)"
+          if [ "$checked_out_commit" != "$tag_commit" ]; then
+            echo "::error::Checked-out commit $checked_out_commit does not match tag $GITHUB_REF_NAME ($tag_commit)."
+            exit 1
+          fi
+          if ! git merge-base --is-ancestor "$tag_commit" refs/remotes/origin/main; then
+            echo "::error::Tag $GITHUB_REF_NAME points to $tag_commit, which is not contained in origin/main."
+            exit 1
+          fi
       - name: Verify release tag matches pubspec version
         id: version
         shell: bash
@@ -290,8 +310,9 @@ jobs:
 
           ### V1 status
 
-          Automated tests, release-manifest audits, reproducible Android builds,
-          and emulator OCR checks passed. Broad physical-device QA is owner-deferred.
+          Automated tests, release-manifest audits, matching clean local unsigned
+          R8 builds, and emulator OCR checks passed. Broad physical-device QA is
+          owner-deferred.
           Printed Bangla and English are the supported OCR focus; handwriting is
           best effort and should be reviewed before saving.
           EOF
@@ -325,6 +346,21 @@ jobs:
             --verify-tag \
             --title "Rosid ${GITHUB_REF_NAME}" \
             --notes-file release-notes.md
+      - name: Verify GitHub Release is immutable
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          immutable="$(gh api \
+            -H 'Accept: application/vnd.github+json' \
+            -H 'X-GitHub-Api-Version: 2026-03-10' \
+            "repos/${GITHUB_REPOSITORY}/releases/tags/${GITHUB_REF_NAME}" \
+            --jq '.immutable')"
+          if [ "$immutable" != "true" ]; then
+            echo "::error::Published release ${GITHUB_REF_NAME} is not immutable."
+            exit 1
+          fi
 
   deploy-pages:
     needs: [prepare, android, ios, publish]

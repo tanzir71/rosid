@@ -69,16 +69,16 @@ handover gate, not a pass.
 - [x] M8.3 Add a release workflow that verifies model hashes, the emitted APK signer, and keystore fingerprint before publishing
 - [x] M8.4 Build the debug APK and inspect native plugin packaging
 - [x] M8.5a Build the unsigned R8 release APK and pass the strict merged release-manifest audit
-- [BLOCKED: release keystore/secrets are unavailable] M8.5b Build and verify the signed release APK
-- [BLOCKED: requires a physical Android device] M8.6 Run the full airplane-mode English/Bangla receipt and handwritten-document script
+- [ ] M8.5b Build and verify the signed release APK (keystore and all four protected environment secrets are configured; tag workflow verification is pending)
+- [DEFERRED BY OWNER: physical-device testing will be completed later] M8.6 Run the full airplane-mode English/Bangla receipt and handwritten-document script
 
 ## M9 - iOS profile
 
 - [x] M9.1 Verify documents-first home, expense toggle, stable navigation, and route/surface gating via profile tests
 - [x] M9.2 Implement multi-page document persistence, pinned documents, and bounded local PDF export
 - [x] M9.3 Add iOS usage strings, tessdata bundle resources, backup exclusion, and iOS 15.5 configuration
-- [BLOCKED: no macOS/Xcode/Apple signing credentials] M9.4 Run Pod installation and compile/sign the iOS target
-- [BLOCKED: no iOS simulator/device] M9.5 Verify native OCR, profile flow, multi-page PDF, and share sheet end to end
+- [ ] M9.4 Resolve and commit `Podfile.lock`, then compile the unsigned iOS target on GitHub-hosted macOS (lock workflow passed and the exact artifact is staged for commit; compile pending)
+- [DEFERRED BY OWNER: physical-device testing will be completed later] M9.5 Verify native OCR, profile flow, multi-page PDF, and share sheet end to end
 
 ## M10 - Landing page and distribution
 
@@ -86,8 +86,8 @@ handover gate, not a pass.
 - [x] M10.2 Add Pages and multi-platform release workflows with repository-specific links and immutable metadata
 - [x] M10.3 Document Android signing, iPhone self-signing constraints, install, and manual verification steps
 - [x] M10.4 Replace landing-page mockups with four real emulator screenshots (five captures retained)
-- [x] M10.5 Verify the local mobile page in a Chromium browser and reach Lighthouse accessibility 100
-- [ ] M10.6 Publish Pages and a signed Android GitHub Release
+- [ ] M10.5 Re-run local mobile browser and Lighthouse verification for the rebuilt landing page (the superseded design scored 100 for accessibility)
+- [ ] M10.6 Publish Pages and a signed Android GitHub Release (Pages is configured; no public release deployment exists yet)
 - [DEFERRED: owner has no paid Apple distribution membership] M10.7 Publish an App Store/TestFlight build
 - [ ] M10.8 Compile and publish the explicitly unsigned iPhone IPA for advanced self-signing
 - [x] M10.9 Research direct-download competitors and rebuild the landing page around outcome, trust, and release integrity
@@ -96,7 +96,8 @@ handover gate, not a pass.
 
 - [x] Run code generation, formatting check, analyze, all 183 automated tests, and the source offline audit
 - [x] Audit and fix capture/save/delete lifecycle races, atomic FTS cleanup, formula-safe temporary exports, and desktop picker ownership
-- [x] Pin workflow actions and gate signing behind protected tags plus a reviewer-protected release environment
+- [x] Pin workflow actions and gate signing behind protected tags plus the tag-restricted `android-release` environment
+- [x] Enable immutable GitHub Releases and require the publish workflow to verify the release is locked before Pages deployment
 - [x] Confirm the source Android manifest has no `INTERNET` or `ACCESS_NETWORK_STATE` permission
 - [x] Build debug and unsigned R8 release APKs
 - [x] Audit the merged Android release manifest (only `CAMERA` and AndroidX's app-scoped signature permission)
@@ -106,5 +107,5 @@ handover gate, not a pass.
 - [ ] Compile the unsigned native iOS target on a hosted macOS runner
 - [DEFERRED: no Apple distribution membership] Sign and publish through App Store/TestFlight
 - [ ] Publish live Pages, the signed Android APK, and the unsigned iPhone IPA
-- [x] Run local mobile Lighthouse and reach accessibility score 100
+- [ ] Re-run local mobile Lighthouse against the rebuilt landing page (the previous design reached accessibility score 100)
 - [ ] Preserve the released V1 commit on `release/v1` and generate `TASKS_V2.md` under the owner-amended section 17 gate

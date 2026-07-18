@@ -514,7 +514,7 @@ summary:focus-visible {
 }
 
 .trust-grid span:not([lang]) {
-  color: #69756d;
+  color: #536158;
   font-size: 0.77rem;
   font-weight: 650;
 }
@@ -714,7 +714,7 @@ h2 {
 }
 
 .mode-card small {
-  color: #6a776e;
+  color: #536158;
   font-weight: 700;
 }
 
@@ -904,7 +904,7 @@ h2 {
 
 .card-label {
   margin: 0;
-  color: rgba(255, 255, 255, 0.68);
+  color: #eef7f1;
   font-size: 0.66rem;
   font-weight: 850;
   letter-spacing: 0.08em;
@@ -934,7 +934,7 @@ h2 {
 
 .download-card > p {
   margin: 24px 0;
-  color: rgba(255, 255, 255, 0.76);
+  color: #eef7f1;
 }
 
 .button-light {
@@ -971,7 +971,7 @@ h2 {
 }
 
 .release-meta dt {
-  color: rgba(255, 255, 255, 0.56);
+  color: #eef7f1;
   font-size: 0.67rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -989,7 +989,7 @@ h2 {
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 12px;
   background: rgba(0, 0, 0, 0.08);
-  color: rgba(255, 255, 255, 0.72) !important;
+  color: #eef7f1 !important;
   font-size: 0.72rem;
 }
 
@@ -1022,7 +1022,7 @@ h2 {
 .install-guide ol {
   margin: 16px 0 0;
   padding-left: 22px;
-  color: rgba(255, 255, 255, 0.75);
+  color: #eef7f1;
   font-size: 0.78rem;
 }
 

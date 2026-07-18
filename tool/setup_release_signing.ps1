@@ -7,6 +7,19 @@ $ErrorActionPreference = 'Stop'
 
 $keytool = (Get-Command keytool -ErrorAction Stop).Source
 $gh = (Get-Command gh -ErrorAction Stop).Source
+
+& $gh api --method PUT "repos/$Repository/environments/android-release" | Out-Null
+if ($LASTEXITCODE -ne 0) {
+  throw 'Could not create or verify the android-release GitHub environment.'
+}
+
+$completionSecretName = 'ANDROID_KEYSTORE_BASE64'
+$expectedSecretNames = @(
+  $completionSecretName,
+  'ANDROID_KEY_ALIAS',
+  'ANDROID_KEY_PASSWORD',
+  'ANDROID_STORE_PASSWORD'
+)
 $secretListArguments = @(
   'secret', 'list',
   '--env', 'android-release',
@@ -14,9 +27,29 @@ $secretListArguments = @(
   '--json', 'name',
   '--jq', '.[].name'
 )
-$existingSecretNames = & $gh @secretListArguments 2>$null
-if ($LASTEXITCODE -eq 0 -and $existingSecretNames -contains 'ANDROID_KEYSTORE_BASE64') {
-  throw 'Android release secrets already exist. Refusing to rotate the signing key.'
+$existingSecretNames = @(& $gh @secretListArguments)
+if ($LASTEXITCODE -ne 0) {
+  throw 'Could not enumerate android-release environment secrets. Refusing to continue.'
+}
+$existingReleaseSecretNames = @(
+  $expectedSecretNames | Where-Object { $existingSecretNames -contains $_ }
+)
+if ($existingReleaseSecretNames.Count -ne 0) {
+  $existingReleaseSecretList = $existingReleaseSecretNames -join ', '
+  if ($existingReleaseSecretNames.Count -eq $expectedSecretNames.Count) {
+    throw "Android release secrets already exist ($existingReleaseSecretList). Refusing to rotate the signing key."
+  }
+
+  $missingReleaseSecretNames = @(
+    $expectedSecretNames | Where-Object { $existingSecretNames -notcontains $_ }
+  )
+  $missingReleaseSecretList = $missingReleaseSecretNames -join ', '
+  $completionState = if ($existingSecretNames -contains $completionSecretName) {
+    'present unexpectedly'
+  } else {
+    'missing'
+  }
+  throw "Partial Android release secret set detected (present: $existingReleaseSecretList; missing: $missingReleaseSecretList; completion sentinel: $completionState). Refusing to rotate the signing key. Reconcile the partial secrets using the existing backup before retrying."
 }
 
 if (Test-Path -LiteralPath $BackupDirectory) {
@@ -26,6 +59,27 @@ if (Test-Path -LiteralPath $BackupDirectory) {
 } else {
   New-Item -ItemType Directory -Force -Path $BackupDirectory | Out-Null
 }
+
+$acl = New-Object System.Security.AccessControl.DirectorySecurity
+$identity = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
+$userRule = New-Object System.Security.AccessControl.FileSystemAccessRule(
+  $identity,
+  'FullControl',
+  'ContainerInherit,ObjectInherit',
+  'None',
+  'Allow'
+)
+$systemRule = New-Object System.Security.AccessControl.FileSystemAccessRule(
+  'NT AUTHORITY\SYSTEM',
+  'FullControl',
+  'ContainerInherit,ObjectInherit',
+  'None',
+  'Allow'
+)
+$acl.SetAccessRuleProtection($true, $false)
+$acl.AddAccessRule($userRule)
+$acl.AddAccessRule($systemRule)
+Set-Acl -LiteralPath $BackupDirectory -AclObject $acl
 
 $keystorePath = Join-Path $BackupDirectory 'rosid-release.jks'
 $keyAlias = 'rosid'
@@ -38,8 +92,6 @@ try {
   $random.Dispose()
 }
 $releasePassword = ([System.BitConverter]::ToString($passwordBytes)).Replace('-', '')
-$env:ROSID_RELEASE_STORE_PASSWORD = $releasePassword
-$env:ROSID_RELEASE_KEY_PASSWORD = $releasePassword
 
 $generateOutput = Join-Path $BackupDirectory 'keytool-generation.log'
 $generateError = Join-Path $BackupDirectory 'keytool-generation-error.log'
@@ -66,7 +118,14 @@ $generateProcessArguments = @{
   RedirectStandardOutput = $generateOutput
   RedirectStandardError = $generateError
 }
-$keytoolProcess = Start-Process @generateProcessArguments
+try {
+  $env:ROSID_RELEASE_STORE_PASSWORD = $releasePassword
+  $env:ROSID_RELEASE_KEY_PASSWORD = $releasePassword
+  $keytoolProcess = Start-Process @generateProcessArguments
+} finally {
+  Remove-Item Env:\ROSID_RELEASE_STORE_PASSWORD -ErrorAction SilentlyContinue
+  Remove-Item Env:\ROSID_RELEASE_KEY_PASSWORD -ErrorAction SilentlyContinue
+}
 if ($keytoolProcess.ExitCode -ne 0 -or -not (Test-Path -LiteralPath $keystorePath)) {
   throw "keytool failed. Inspect $generateError"
 }
@@ -89,35 +148,48 @@ existing Android installs from accepting future updates.
   (New-Object System.Text.UTF8Encoding($false))
 )
 
-$acl = New-Object System.Security.AccessControl.DirectorySecurity
-$identity = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
-$userRule = New-Object System.Security.AccessControl.FileSystemAccessRule(
-  $identity,
-  'FullControl',
-  'ContainerInherit,ObjectInherit',
-  'None',
-  'Allow'
+$listOutput = Join-Path $BackupDirectory 'keytool-list.log'
+$listError = Join-Path $BackupDirectory 'keytool-list-error.log'
+$listArguments = @(
+  '-list',
+  '-v',
+  '-keystore', "`"$keystorePath`"",
+  '-storepass:env', 'ROSID_RELEASE_STORE_PASSWORD',
+  '-alias', $keyAlias
 )
-$systemRule = New-Object System.Security.AccessControl.FileSystemAccessRule(
-  'NT AUTHORITY\SYSTEM',
-  'FullControl',
-  'ContainerInherit,ObjectInherit',
-  'None',
-  'Allow'
-)
-$acl.SetAccessRuleProtection($true, $false)
-$acl.AddAccessRule($userRule)
-$acl.AddAccessRule($systemRule)
-Set-Acl -LiteralPath $BackupDirectory -AclObject $acl
+$listProcessArguments = @{
+  FilePath = $keytool
+  ArgumentList = $listArguments
+  Wait = $true
+  PassThru = $true
+  NoNewWindow = $true
+  RedirectStandardOutput = $listOutput
+  RedirectStandardError = $listError
+}
+try {
+  $env:ROSID_RELEASE_STORE_PASSWORD = $releasePassword
+  $env:ROSID_RELEASE_KEY_PASSWORD = $releasePassword
+  $listProcess = Start-Process @listProcessArguments
+} finally {
+  Remove-Item Env:\ROSID_RELEASE_STORE_PASSWORD -ErrorAction SilentlyContinue
+  Remove-Item Env:\ROSID_RELEASE_KEY_PASSWORD -ErrorAction SilentlyContinue
+}
+if ($listProcess.ExitCode -ne 0) {
+  throw "Could not inspect the generated key. Inspect $listError"
+}
+
+$fingerprintLine = Get-Content -LiteralPath $listOutput |
+  Select-String -Pattern 'SHA256:' |
+  Select-Object -First 1
+$fingerprint = ($fingerprintLine.Line -replace '^.*SHA256:\s*', '')
+$fingerprint = $fingerprint.Replace(':', '').Trim().ToUpperInvariant()
+if ($fingerprint -notmatch '^[0-9A-F]{64}$') {
+  throw 'The generated signing-certificate fingerprint is malformed.'
+}
 
 $keystoreBase64 = [Convert]::ToBase64String(
   [System.IO.File]::ReadAllBytes($keystorePath)
 )
-
-& $gh api --method PUT "repos/$Repository/environments/android-release" | Out-Null
-if ($LASTEXITCODE -ne 0) {
-  throw 'Could not create the android-release GitHub environment.'
-}
 
 $environmentPolicy = '{"deployment_branch_policy":{"protected_branches":false,"custom_branch_policies":true}}'
 $environmentPolicyArguments = @(
@@ -149,54 +221,20 @@ if (-not $hasReleaseTagPolicy) {
   }
 }
 
-$secrets = @{
-  ANDROID_KEYSTORE_BASE64 = $keystoreBase64
-  ANDROID_KEY_ALIAS = $keyAlias
-  ANDROID_KEY_PASSWORD = $releasePassword
-  ANDROID_STORE_PASSWORD = $releasePassword
-}
-foreach ($entry in $secrets.GetEnumerator()) {
-  $entry.Value | & $gh secret set $entry.Key --env android-release --repo $Repository | Out-Null
-  if ($LASTEXITCODE -ne 0) {
-    throw "Could not configure GitHub environment secret $($entry.Key)."
-  }
-}
-
-$listOutput = Join-Path $BackupDirectory 'keytool-list.log'
-$listError = Join-Path $BackupDirectory 'keytool-list-error.log'
-$listArguments = @(
-  '-list',
-  '-v',
-  '-keystore', "`"$keystorePath`"",
-  '-storepass:env', 'ROSID_RELEASE_STORE_PASSWORD',
-  '-alias', $keyAlias
+$secrets = @(
+  @{ Name = 'ANDROID_KEY_ALIAS'; Value = $keyAlias },
+  @{ Name = 'ANDROID_KEY_PASSWORD'; Value = $releasePassword },
+  @{ Name = 'ANDROID_STORE_PASSWORD'; Value = $releasePassword },
+  # Upload the keystore last so a failed upload does not publish the completion sentinel.
+  @{ Name = 'ANDROID_KEYSTORE_BASE64'; Value = $keystoreBase64 }
 )
-$listProcessArguments = @{
-  FilePath = $keytool
-  ArgumentList = $listArguments
-  Wait = $true
-  PassThru = $true
-  NoNewWindow = $true
-  RedirectStandardOutput = $listOutput
-  RedirectStandardError = $listError
-}
-$listProcess = Start-Process @listProcessArguments
-if ($listProcess.ExitCode -ne 0) {
-  throw "Could not inspect the generated key. Inspect $listError"
-}
-
-$fingerprintLine = Get-Content -LiteralPath $listOutput |
-  Select-String -Pattern 'SHA256:' |
-  Select-Object -First 1
-$fingerprint = ($fingerprintLine.Line -replace '^.*SHA256:\s*', '')
-$fingerprint = $fingerprint.Replace(':', '').Trim().ToUpperInvariant()
-if ($fingerprint -notmatch '^[0-9A-F]{64}$') {
-  throw 'The generated signing-certificate fingerprint is malformed.'
+foreach ($entry in $secrets) {
+  $entry.Value | & $gh secret set $entry.Name --env android-release --repo $Repository | Out-Null
+  if ($LASTEXITCODE -ne 0) {
+    throw "Could not configure GitHub environment secret $($entry.Name). Partial remote secrets may remain; reconcile them using $BackupDirectory before retrying."
+  }
 }
 
 Write-Output "Release key backup: $BackupDirectory"
 Write-Output "Certificate SHA-256: $fingerprint"
 Write-Output 'GitHub android-release environment secrets configured.'
-
-Remove-Item Env:\ROSID_RELEASE_STORE_PASSWORD -ErrorAction SilentlyContinue
-Remove-Item Env:\ROSID_RELEASE_KEY_PASSWORD -ErrorAction SilentlyContinue

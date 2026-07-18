@@ -6,6 +6,16 @@ SOURCE_MANIFEST="$PROJECT_DIR/android/app/src/main/AndroidManifest.xml"
 DATA_EXTRACTION_RULES="$PROJECT_DIR/android/app/src/main/res/xml/data_extraction_rules.xml"
 REQUIRE_MERGED="${ROSID_REQUIRE_MERGED_MANIFEST:-0}"
 
+if [[ "${ROSID_FORCE_GREP:-0}" != "1" ]] && command -v rg >/dev/null 2>&1; then
+  search_quiet() { rg --quiet -- "$1" "$2"; }
+  search_count() { rg --count -- "$1" "$2"; }
+  search_lines() { rg -n -- "$1" "$2"; }
+else
+  search_quiet() { grep -Eq -- "$1" "$2"; }
+  search_count() { grep -Ec -- "$1" "$2"; }
+  search_lines() { grep -En -- "$1" "$2"; }
+fi
+
 for argument in "$@"; do
   case "$argument" in
     --require-merged) REQUIRE_MERGED=1 ;;
@@ -44,7 +54,8 @@ audit_manifest_permissions() {
   local camera_found=0
   local rejected=0
 
-  if [[ ! -s "$manifest" ]] || ! rg --quiet '<manifest\b' "$manifest"; then
+  if [[ ! -s "$manifest" ]] ||
+    ! search_quiet '<manifest([[:space:]]|>)' "$manifest"; then
     echo "$label manifest is missing or invalid: $manifest" >&2
     return 1
   fi
@@ -78,9 +89,9 @@ audit_manifest_permissions() {
 audit_manifest_backup_policy() {
   local manifest="$1"
   local label="$2"
-  if ! rg --quiet 'android:allowBackup="false"' "$manifest" ||
-    ! rg --quiet 'android:fullBackupContent="false"' "$manifest" ||
-    ! rg --quiet 'android:dataExtractionRules="@xml/data_extraction_rules"' "$manifest"; then
+  if ! search_quiet 'android:allowBackup="false"' "$manifest" ||
+    ! search_quiet 'android:fullBackupContent="false"' "$manifest" ||
+    ! search_quiet 'android:dataExtractionRules="@xml/data_extraction_rules"' "$manifest"; then
     echo "Android backup/data-extraction protection is incomplete in $label manifest." >&2
     return 1
   fi
@@ -90,8 +101,8 @@ audit_manifest_permissions "$SOURCE_MANIFEST" "Android source"
 audit_manifest_backup_policy "$SOURCE_MANIFEST" "Android source"
 
 if [[ ! -s "$DATA_EXTRACTION_RULES" ]] ||
-  ! rg --quiet '<cloud-backup>' "$DATA_EXTRACTION_RULES" ||
-  ! rg --quiet '<device-transfer>' "$DATA_EXTRACTION_RULES"; then
+  ! search_quiet '<cloud-backup>' "$DATA_EXTRACTION_RULES" ||
+  ! search_quiet '<device-transfer>' "$DATA_EXTRACTION_RULES"; then
   echo "Android data extraction rules are missing or incomplete." >&2
   exit 1
 fi
@@ -109,7 +120,7 @@ required_backup_domains=(
 )
 for domain in "${required_backup_domains[@]}"; do
   exclusion_count="$(
-    rg --count "<exclude[[:space:]]+domain=\"$domain\"[[:space:]]+path=\"\\.\"[[:space:]]*/>" \
+    search_count "<exclude[[:space:]]+domain=\"$domain\"[[:space:]]+path=\"\\.\"[[:space:]]*/>" \
       "$DATA_EXTRACTION_RULES" || true
   )"
   if [[ "$exclusion_count" != "2" ]]; then
@@ -118,7 +129,7 @@ for domain in "${required_backup_domains[@]}"; do
   fi
 done
 
-if rg -n '^\s+(firebase_|sentry|http:|dio:|amplitude_|mixpanel_)' \
+if search_lines '^[[:space:]]+(firebase_|sentry|http:|dio:|amplitude_|mixpanel_)' \
   "$PROJECT_DIR/pubspec.yaml"; then
   echo "Banned network/analytics dependency found in pubspec.yaml." >&2
   exit 1
