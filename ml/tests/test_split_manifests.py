@@ -21,11 +21,6 @@ from ml.rosid_ml.adapter_evidence import (
     create_adapter_evidence,
     verify_adapter_evidence,
 )
-from ml.rosid_ml.code_bundles import (
-    REQUIRED_CORE_CODE_ROLES,
-    CodeRole,
-    build_code_bundle,
-)
 from ml.rosid_ml.provenance import (
     AcquisitionRecord,
     DatasetSource,
@@ -41,7 +36,6 @@ from ml.rosid_ml.split_approvals import (
 )
 from ml.rosid_ml.split_manifests import (
     AcquisitionBinding,
-    PrivateSplitRecord,
     PublicSplitCommitment,
     UnsplitSample,
     VerifiedSplitEvidence,
@@ -57,6 +51,10 @@ from ml.rosid_ml.split_manifests import (
     verify_split_evidence,
 )
 from ml.rosid_ml.splits import Split
+from ml.tests.code_bundle_fixtures import (
+    build_p1_code_fixture_bundle,
+    write_p1_code_fixture,
+)
 from ml.tests.approval_fixtures import fake_verified_split_approval
 from ml.verify_split_manifest import main as verify_split_main
 
@@ -718,12 +716,7 @@ class SplitManifestTest(unittest.TestCase):
                 ),
             )
 
-            core_files: dict[str, Path] = {}
-            for relative in REQUIRED_CORE_CODE_ROLES:
-                core_file = repository / relative
-                core_file.parent.mkdir(parents=True, exist_ok=True)
-                core_file.write_bytes(f"# {relative}\n".encode())
-                core_files[relative] = core_file
+            core_files = write_p1_code_fixture(repository)
             adapter_code = (
                 repository
                 / "ml"
@@ -733,19 +726,10 @@ class SplitManifestTest(unittest.TestCase):
             )
             adapter_code.parent.mkdir(parents=True)
             adapter_code.write_bytes(b"def adapt():\n    return 2\n")
-            code_bundle = build_code_bundle(
+            code_bundle = build_p1_code_fixture_bundle(
                 repository,
-                splitter_files=tuple(
-                    core_files[path]
-                    for path, role in REQUIRED_CORE_CODE_ROLES.items()
-                    if role == CodeRole.SPLITTER.value
-                ),
+                core_files=core_files,
                 adapter_files=(adapter_code,),
-                shared_files=tuple(
-                    core_files[path]
-                    for path, role in REQUIRED_CORE_CODE_ROLES.items()
-                    if role == CodeRole.SHARED.value
-                ),
             )
             config = default_split_config(
                 seed_id="seed-v1",

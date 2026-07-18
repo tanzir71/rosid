@@ -195,11 +195,16 @@ private key into the repository--including `ml/manifests/private/`--or pass it t
 repository Python. This guide does not imply that Tanzir has approved a policy
 or split.
 
-After policy activation, prepare the exact code bundle and split config. Core
-executable ML code is included automatically. Repeat only `--adapter-code-file`
-for every adapter implementation file; missing, stale, extra, or mis-roled core
-or adapter code fails exact-closure verification. Replace the illustrative
-minimums with the approved release values:
+After policy activation, prepare the exact code bundle and split config. The
+fixed P1 CLI entrypoints are followed recursively through every static local
+import and package initializer. Repeat `--adapter-code-file` for every Python
+file anywhere below `ml/rosid_ml/adapters/`; future adapters must later load
+with that same repository-qualified module identity, not direct-path/spec
+execution.
+A reachable unreviewed source, a reviewed but unreachable stale source, and a
+missing, extra, or mis-roled bundle entry all fail exact-closure verification.
+Unreachable future P2 training/export modules remain outside the P1 bundle.
+Replace the illustrative minimums with the approved release values:
 
 ```powershell
 python -m ml.prepare_split_approval `
@@ -219,12 +224,16 @@ python -m ml.prepare_split_approval `
   --config-output ml/manifests/splits/global-split-v1.config.json
 ```
 
-The command accepts only tracked, `HEAD`-identical code. The retained
-`splitter_code_sha256` config field commits to the full required core/adapter
-code closure. Commit the active policy, generated config and bundle, approved
-adapter configs, public adapter commitments, source manifests/evidence,
-acquisition records, and all implementation files. This is commit A: the exact
-public tree the approval will bind.
+The command requires a complete materialized checkout whose stage-0 index
+matches `HEAD` by path, object ID, and regular Git mode (`100644`/`100755`). It
+rejects sparse/skip-worktree/assume-unchanged entries, conflicts, staged path or
+mode drift, symlinks, submodules, and path-component case/NFKC aliases. Every
+approved file is separately required to be tracked and byte-identical to
+`HEAD`. The retained `splitter_code_sha256` config field commits to the full
+required core/adapter code closure. Commit the active policy, generated config
+and bundle, approved adapter configs, public adapter commitments, source
+manifests/evidence, acquisition records, and all implementation files. This is
+commit A: the exact public tree the approval will bind.
 
 Create two different 32-byte split keys in an ignored directory or outside the
 repository. These are the private deterministic-assignment and HMAC keys, not
@@ -360,11 +369,12 @@ each corpus is not release evidence.
 Build and verify derive seed/key IDs, weights, minimums, and the complete code
 commitment from the committed approved config/bundle and reject caller-supplied
 substitutes. Every public input and bundled code file must be tracked,
-`HEAD`-identical, and canonical. Private inventories, adapter evidence, JSONL,
-sample/reference hashes, writer groups, object keys, detached signature, and
-both split keys remain ignored/untracked or outside the repository and require
-an encrypted backup. The owner Ed25519 private key remains outside the repository
-entirely.
+regular-mode, `HEAD`-identical, and canonical; verification repeats the mode
+check against the historical approved commit. Private inventories, adapter
+evidence, JSONL, sample/reference hashes, writer groups, object keys, detached
+signature, and both split keys remain ignored/untracked or outside the
+repository and require an encrypted backup. The owner Ed25519 private key
+remains outside the repository entirely.
 
 Successful verification yields `VerifiedSplitEvidence`, not just a parsed
 `PublicSplitCommitment`. Lineage requires that trusted-process marker and
@@ -378,10 +388,13 @@ global split remain pending.
 
 The verification objects are constructor-gated markers inside a trusted Python
 process, not a sandbox against arbitrary code already running in that
-interpreter. The qualifying adversarial boundary is the fixed CLI flow above.
-Lineage enforces the signed scope: `production` maps to production eligibility,
-while `quarantined_research` maps to research-only approval and split nodes and
-cannot support production metrics.
+interpreter. Run qualifying commands in a clean, cache-sanitized environment
+with no untrusted `PYTHONPATH`, site hook, preloaded module, or unchecked
+bytecode; after P2 dependency approval, use the pinned runtime/container. The
+qualifying adversarial boundary is the fixed CLI flow above. Lineage enforces
+the signed scope: `production` maps to production eligibility, while
+`quarantined_research` maps to research-only approval and split nodes and cannot
+support production metrics.
 
 ## First verification command
 

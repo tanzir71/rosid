@@ -15,6 +15,7 @@ from ml.rosid_ml.code_bundles import (
     CodeRole,
 )
 from ml.rosid_ml.split_manifests import SplitConfig
+from ml.tests.code_bundle_fixtures import write_p1_code_fixture
 
 
 class PrepareSplitApprovalTest(unittest.TestCase):
@@ -42,13 +43,12 @@ class PrepareSplitApprovalTest(unittest.TestCase):
                 "user.email",
                 "approval-test@example.invalid",
             )
-            for relative in REQUIRED_CORE_CODE_ROLES:
-                core_file = root / relative
-                core_file.parent.mkdir(parents=True, exist_ok=True)
-                core_file.write_bytes(f"# {relative}\n".encode())
+            write_p1_code_fixture(root)
             adapter = root / "ml" / "rosid_ml" / "adapters" / "fixture.py"
             adapter.parent.mkdir(parents=True)
             adapter.write_bytes(b"def adapt():\n    return 2\n")
+            unrelated = root / "ml" / "rosid_ml" / "training.py"
+            unrelated.write_bytes(b"VALUE = 1\n")
             (root / ".gitattributes").write_bytes(b"* -text\n")
             self.run_git(root, "add", "--", ".gitattributes", "ml")
             self.run_git(root, "commit", "--quiet", "-m", "code")
@@ -80,8 +80,21 @@ class PrepareSplitApprovalTest(unittest.TestCase):
             bundle = CodeBundleManifest.from_json_file(bundle_path)
             config = SplitConfig.from_json_file(config_path)
             self.assertEqual(
-                {entry.role for entry in bundle.files},
-                {CodeRole.SPLITTER, CodeRole.ADAPTER, CodeRole.SHARED},
+                {
+                    entry.path: entry.role
+                    for entry in bundle.files
+                },
+                {
+                    **{
+                        path: CodeRole(role)
+                        for path, role in REQUIRED_CORE_CODE_ROLES.items()
+                    },
+                    "ml/rosid_ml/adapters/fixture.py": CodeRole.ADAPTER,
+                },
+            )
+            self.assertNotIn(
+                "ml/rosid_ml/training.py",
+                {entry.path for entry in bundle.files},
             )
             self.assertEqual(
                 config.splitter_code_sha256,
@@ -113,6 +126,31 @@ class PrepareSplitApprovalTest(unittest.TestCase):
                         str(output_root / "dirty.code.json"),
                         "--config-output",
                         str(output_root / "dirty.config.json"),
+                    ]
+                )
+            self.assertIn("unchanged at Git HEAD", stderr.getvalue())
+
+            adapter.write_bytes(b"def adapt():\n    return 2\n")
+            reviewed_core = root / "ml" / "rosid_ml" / "provenance.py"
+            reviewed_core.write_bytes(reviewed_core.read_bytes() + b"# dirty\n")
+            stderr = io.StringIO()
+            with (
+                contextlib.chdir(root),
+                contextlib.redirect_stderr(stderr),
+                self.assertRaises(SystemExit),
+            ):
+                prepare_split_approval_main(
+                    [
+                        "--adapter-code-file",
+                        str(adapter),
+                        "--seed-id",
+                        "seed-v3",
+                        "--key-id",
+                        "hmac-v3",
+                        "--code-bundle-output",
+                        str(output_root / "dirty-core.code.json"),
+                        "--config-output",
+                        str(output_root / "dirty-core.config.json"),
                     ]
                 )
             self.assertIn("unchanged at Git HEAD", stderr.getvalue())

@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 import stat
 import subprocess
+import unicodedata
 from pathlib import Path
 from typing import TypeAlias
 
@@ -16,6 +17,7 @@ _PUBLIC_ADAPTER_DIRECTORY = Path("ml/manifests/adapters")
 _PUBLIC_DATASET_DIRECTORY = Path("ml/manifests/datasets")
 _PUBLIC_SPLIT_DIRECTORY = Path("ml/manifests/splits")
 _PRIVATE_MANIFEST_DIRECTORY = Path("ml/manifests/private")
+_REGULAR_GIT_FILE_MODES = frozenset({b"100644", b"100755"})
 
 
 def normalize_path(path: PathLike, *, base: PathLike | None = None) -> Path:
@@ -169,6 +171,7 @@ def require_private_path(
         root,
         "--literal-pathspecs",
         "ls-files",
+        "--sparse",
         "--error-unmatch",
         "--",
         relative,
@@ -310,6 +313,7 @@ def require_tracked_unchanged_path(
         root,
         "--literal-pathspecs",
         "ls-files",
+        "--sparse",
         "--error-unmatch",
         "--",
         relative,
@@ -320,6 +324,7 @@ def require_tracked_unchanged_path(
         detail = os.fsdecode(tracked.stderr).strip() or "git ls-files failed"
         raise ValueError(f"cannot determine whether public input is tracked: {detail}")
 
+    _require_regular_head_and_index_entry(root, relative)
     head = _run_git(root, "cat-file", "blob", f"HEAD:{relative}")
     if head.returncode != 0:
         raise ValueError(f"public input must exist in Git HEAD: {normalized}")
@@ -341,6 +346,95 @@ def require_tracked_unchanged_path(
             f"parsed public input bytes differ from Git HEAD: {normalized}"
         )
     return normalized
+
+
+def require_complete_git_checkout(
+    expected_worktree: PathLike,
+) -> Path:
+    """Require a fully materialized, ordinary stage-0 checkout of ``HEAD``.
+
+    P1 import discovery walks materialized repository files. Sparse checkout,
+    skip-worktree/assume-unchanged entries, staged path changes, symlinks, and
+    submodules can otherwise make that graph differ from the same signed Git
+    commit on another platform. Worktree bytes may still be dirty here; every
+    approved input is rebound to ``HEAD`` separately before signing.
+    """
+
+    root = _validated_expected_worktree(expected_worktree)
+    head_result = _run_git(root, "ls-tree", "-r", "-z", "--full-tree", "HEAD")
+    if head_result.returncode != 0:
+        detail = os.fsdecode(head_result.stderr).strip() or "git ls-tree failed"
+        raise ValueError(f"cannot inspect Git HEAD tree: {detail}")
+    index_result = _run_git(
+        root,
+        "ls-files",
+        "--sparse",
+        "-v",
+        "--stage",
+        "-z",
+    )
+    if index_result.returncode != 0:
+        detail = os.fsdecode(index_result.stderr).strip() or "git ls-files failed"
+        raise ValueError(f"cannot inspect Git index: {detail}")
+
+    head_entries = _parse_git_tree_entries(head_result.stdout)
+    index_entries = _parse_git_index_entries(index_result.stdout)
+    if head_entries != index_entries:
+        missing = sorted(set(head_entries) - set(index_entries))
+        extra = sorted(set(index_entries) - set(head_entries))
+        changed = sorted(
+            path
+            for path in set(head_entries) & set(index_entries)
+            if head_entries[path] != index_entries[path]
+        )
+        raise ValueError(
+            "Git index must exactly match HEAD for P1 code discovery; "
+            f"missing={missing}, extra={extra}, changed={changed}"
+        )
+
+    folded: dict[str, set[str]] = {}
+    for path, (mode, _object_id) in head_entries.items():
+        if mode not in _REGULAR_GIT_FILE_MODES:
+            raise ValueError(
+                "P1 code discovery requires ordinary Git file modes "
+                f"100644/100755: path={path}, mode={os.fsdecode(mode)}"
+            )
+        parts = path.split("/")
+        for count in range(1, len(parts) + 1):
+            prefix = "/".join(parts[:count])
+            folded.setdefault(
+                unicodedata.normalize("NFKC", prefix).casefold(),
+                set(),
+            ).add(prefix)
+        candidate = normalize_path(path, base=root)
+        try:
+            metadata = candidate.stat(follow_symlinks=False)
+        except FileNotFoundError as error:
+            raise ValueError(
+                f"Git checkout is incomplete; tracked path is absent: {path}"
+            ) from error
+        except OSError as error:
+            raise ValueError(f"cannot inspect tracked path {path}: {error}") from error
+        if (
+            _is_reparse(candidate, metadata)
+            or not stat.S_ISREG(metadata.st_mode)
+            or metadata.st_nlink != 1
+        ):
+            raise ValueError(
+                f"Git checkout path must be one unlinked regular file: {path}"
+            )
+
+    collisions = sorted(
+        sorted(paths, key=lambda value: value.encode("utf-8"))
+        for paths in folded.values()
+        if len(paths) > 1
+    )
+    if collisions:
+        raise ValueError(
+            "Git paths collide after Unicode normalization/case folding: "
+            f"{collisions}"
+        )
+    return root
 
 
 def _require_public_path(
@@ -385,6 +479,148 @@ def _validated_expected_worktree(path: PathLike) -> Path:
     if discovered is None or not paths_equal(discovered, expected):
         raise ValueError(f"expected Git worktree root is invalid: {expected}")
     return expected
+
+
+def _require_regular_head_and_index_entry(root: Path, relative: str) -> None:
+    head_result = _run_git(
+        root,
+        "--literal-pathspecs",
+        "ls-tree",
+        "-z",
+        "--full-tree",
+        "HEAD",
+        "--",
+        relative,
+    )
+    if head_result.returncode != 0:
+        detail = os.fsdecode(head_result.stderr).strip() or "git ls-tree failed"
+        raise ValueError(f"cannot inspect public input mode in Git HEAD: {detail}")
+    head_entries = _parse_git_tree_entries(head_result.stdout)
+    if set(head_entries) != {relative}:
+        raise ValueError(f"public input must be one Git HEAD file: {root / relative}")
+    head_mode, _head_object = head_entries[relative]
+    if head_mode not in _REGULAR_GIT_FILE_MODES:
+        raise ValueError(
+            "public input must use regular Git file mode 100644/100755 in HEAD: "
+            f"{root / relative}"
+        )
+
+    index_result = _run_git(
+        root,
+        "--literal-pathspecs",
+        "ls-files",
+        "--sparse",
+        "--error-unmatch",
+        "-v",
+        "--stage",
+        "-z",
+        "--",
+        relative,
+    )
+    if index_result.returncode != 0:
+        detail = os.fsdecode(index_result.stderr).strip() or "git ls-files failed"
+        raise ValueError(f"cannot inspect public input mode in Git index: {detail}")
+    index_entries = _parse_git_index_entries(index_result.stdout)
+    if set(index_entries) != {relative}:
+        raise ValueError(
+            f"public input must be one stage-0 Git index file: {root / relative}"
+        )
+    index_mode, _index_object = index_entries[relative]
+    if index_mode not in _REGULAR_GIT_FILE_MODES:
+        raise ValueError(
+            "public input must use regular Git file mode 100644/100755 in index: "
+            f"{root / relative}"
+        )
+    if (index_mode, _index_object) != (head_mode, _head_object):
+        raise ValueError(
+            "public input index entry must be unchanged from Git HEAD: "
+            f"{root / relative}"
+        )
+
+
+def _parse_git_tree_entries(payload: bytes) -> dict[str, tuple[bytes, bytes]]:
+    entries: dict[str, tuple[bytes, bytes]] = {}
+    for record in _nul_records(payload, label="Git tree"):
+        try:
+            metadata, raw_path = record.split(b"\t", 1)
+            mode, object_type, object_id = metadata.split(b" ")
+        except ValueError as error:
+            raise ValueError("Git tree contains a malformed entry") from error
+        if object_type not in {
+            b"blob",
+            b"commit",
+            b"tree",
+        } or not _valid_git_object_id(object_id):
+            raise ValueError("Git tree contains an invalid entry")
+        path = _decode_git_path(raw_path)
+        if path in entries:
+            raise ValueError(f"Git tree contains a duplicate path: {path}")
+        entries[path] = (mode, object_id)
+    return entries
+
+
+def _parse_git_index_entries(payload: bytes) -> dict[str, tuple[bytes, bytes]]:
+    entries: dict[str, tuple[bytes, bytes]] = {}
+    for record in _nul_records(payload, label="Git index"):
+        try:
+            tagged_metadata, raw_path = record.split(b"\t", 1)
+            tag, mode, object_id, stage = tagged_metadata.split(b" ")
+        except ValueError as error:
+            raise ValueError("Git index contains a malformed entry") from error
+        if (
+            len(tag) != 1
+            or tag != b"H"
+            or stage != b"0"
+            or not _valid_git_object_id(object_id)
+        ):
+            path = _decode_git_path(raw_path, allow_trailing_slash=True)
+            raise ValueError(
+                "Git index must contain only ordinary stage-0 entries; "
+                f"path={path}, tag={os.fsdecode(tag)}, stage={os.fsdecode(stage)}"
+            )
+        path = _decode_git_path(raw_path)
+        if path in entries:
+            raise ValueError(f"Git index contains a duplicate path: {path}")
+        entries[path] = (mode, object_id)
+    return entries
+
+
+def _nul_records(payload: bytes, *, label: str) -> tuple[bytes, ...]:
+    if not payload:
+        return ()
+    if not payload.endswith(b"\0"):
+        raise ValueError(f"{label} output is not NUL-terminated")
+    records = tuple(payload[:-1].split(b"\0"))
+    if any(not record for record in records):
+        raise ValueError(f"{label} output contains an empty entry")
+    return records
+
+
+def _decode_git_path(
+    value: bytes,
+    *,
+    allow_trailing_slash: bool = False,
+) -> str:
+    try:
+        path = value.decode("utf-8", errors="strict")
+    except UnicodeError as error:
+        raise ValueError("Git path is not canonical UTF-8") from error
+    checked = path[:-1] if allow_trailing_slash and path.endswith("/") else path
+    parts = checked.split("/")
+    if (
+        not checked
+        or checked.startswith("/")
+        or "\\" in checked
+        or any(part in {"", ".", ".."} for part in parts)
+    ):
+        raise ValueError(f"Git path is not a safe repository-relative path: {path!r}")
+    return path
+
+
+def _valid_git_object_id(value: bytes) -> bool:
+    return len(value) in {40, 64} and all(
+        character in b"0123456789abcdef" for character in value
+    )
 
 
 def _require_clean_git_diff(root: Path, relative: str, *, cached: bool) -> None:

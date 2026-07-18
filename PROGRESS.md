@@ -382,6 +382,23 @@ are intentionally deferred rather than release blockers:
   owner signs it externally with OpenSSH. Repository Python never accepts the
   owner private signing key; `finalize_split_approval` verifies the detached
   SSHSIG and approved commit tree before emitting the public approval to commit.
+- Hardened that bundle from a hand-maintained broad file list into a reviewed
+  static transitive graph: the current core is 19 files rooted at the fixed P1
+  CLIs, plus every explicitly configured source in the fixed adapter subtree.
+  Local absolute/relative imports, executable
+  package initializers, cycles, and case/NFKC resolution are followed; reachable
+  unreviewed code, stale reviewed code, ambiguous/nonportable/native/bytecode
+  loaders, star imports, and recognized dynamic execution fail closed.
+  Unreachable future P2 modules are intentionally outside the P1 approval.
+- Qualifying discovery now requires a complete materialized Git checkout whose
+  ordinary stage-0 index exactly matches `HEAD` paths, object IDs, and
+  `100644`/`100755` modes. Sparse/skip-worktree/assume-unchanged states,
+  conflicts, staged drift, Git symlinks/submodules, missing tracked files, and
+  path-component case/NFKC aliases are rejected. Individual current inputs and
+  historical approved-commit files repeat the regular-mode check, closing the
+  Windows `core.symlinks=false` target-text to Linux symlink transition.
+  Documentation keeps the separate trusted/cache-sanitized interpreter and
+  canonical repository-qualified adapter-import preconditions explicit.
 - The fixed `ml/APPROVAL_POLICY.json` remains `pending`, so no qualifying split
   exists. Tanzir must create an external Ed25519 key, activate and commit the
   policy, distribute and independently verify its canonical SHA out of band,
@@ -413,6 +430,13 @@ are intentionally deferred rather than release blockers:
   audit.
   Mobile dependencies, model assets, app routing defaults, and V1 behavior
   remain unchanged.
+- After code-closure hardening, the complete local ML suite passed 148 tests in
+  191.107 seconds with one POSIX-only skip on Windows; all 15 structural model
+  audit tests also passed. Flutter generation wrote no changes, Dart formatting
+  changed no files, `flutter analyze` was clean, all Flutter tests passed, and
+  the iOS privacy and offline manifest audits were green. Two independent
+  adversarial reviews found no remaining concrete false-complete source-graph
+  path within the documented trusted-runtime boundary.
 
 ## Known limitations
 

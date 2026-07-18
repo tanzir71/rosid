@@ -45,6 +45,7 @@ _GIT_COMMIT = re.compile(r"(?:[0-9a-f]{40}|[0-9a-f]{64})\Z")
 _OPAQUE_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9._:@/-]{0,127}\Z")
 _SEED_KEY_DOMAIN = b"rosid-v2-split-seed-key-fingerprint-v1\0"
 _COMMITMENT_KEY_DOMAIN = b"rosid-v2-split-hmac-key-fingerprint-v1\0"
+_REGULAR_GIT_FILE_MODES = frozenset({b"100644", b"100755"})
 
 
 class ApprovalStatus(StrEnum):
@@ -968,6 +969,52 @@ def _require_files_at_commit(
     files: Iterable[ApprovedFile],
 ) -> None:
     for item in files:
+        tree_result = _run_git(
+            root,
+            "--literal-pathspecs",
+            "ls-tree",
+            "-z",
+            "--full-tree",
+            approved_commit,
+            "--",
+            item.path,
+        )
+        if tree_result.returncode != 0:
+            raise ValueError(
+                f"cannot inspect approved file mode at the approved commit: "
+                f"{item.path}"
+            )
+        records = (
+            tuple(tree_result.stdout[:-1].split(b"\0"))
+            if tree_result.stdout.endswith(b"\0")
+            else ()
+        )
+        expected_path = item.path.encode("utf-8")
+        if len(records) != 1 or b"\t" not in records[0]:
+            raise ValueError(
+                f"approved file did not exist at the approved commit: {item.path}"
+            )
+        metadata, actual_path = records[0].split(b"\t", 1)
+        try:
+            mode, object_type, object_id = metadata.split(b" ")
+        except ValueError as error:
+            raise ValueError(
+                f"approved file has a malformed Git tree entry: {item.path}"
+            ) from error
+        if (
+            actual_path != expected_path
+            or object_type != b"blob"
+            or mode not in _REGULAR_GIT_FILE_MODES
+            or len(object_id) not in {40, 64}
+            or any(
+                character not in b"0123456789abcdef"
+                for character in object_id
+            )
+        ):
+            raise ValueError(
+                "approved file must use regular Git file mode 100644/100755 "
+                f"at the approved commit: {item.path}"
+            )
         result = _run_git(
             root,
             "--literal-pathspecs",

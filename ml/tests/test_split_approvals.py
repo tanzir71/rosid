@@ -612,6 +612,72 @@ class SplitApprovalsTest(unittest.TestCase):
                 **self._verify_public_arguments(approved_files=later_files),
             )
 
+    def test_approved_commit_rejects_symlink_mode_materialized_as_text(self) -> None:
+        implementation = next(
+            item
+            for item in self.approved_files
+            if item.role == ApprovalFileRole.IMPLEMENTATION_CODE
+        )
+        self._git("config", "core.symlinks", "false")
+        object_id = self._git(
+            "hash-object",
+            "--",
+            implementation.path,
+        ).stdout.decode("ascii").strip()
+        self._git(
+            "update-index",
+            "--cacheinfo",
+            f"120000,{object_id},{implementation.path}",
+        )
+        self._git("commit", "-m", "materialized symlink mode")
+        linked_commit = git_head_commit(self.repo)
+        self.assertTrue((self.repo / implementation.path).is_file())
+
+        request = replace(self.request, approved_git_commit=linked_commit)
+        signature = self._sign(request.canonical_bytes(), self.private_key)
+        approval = finalize_split_approval(
+            request,
+            signature,
+            policy=self.policy,
+            trusted_policy_sha256=self.policy.commitment_sha256,
+        )
+        with self.assertRaisesRegex(ValueError, "regular Git file mode"):
+            verify_split_approval_public(
+                approval,
+                **self._verify_public_arguments(),
+            )
+
+    def test_approved_commit_rejects_submodule_mode_materialized_as_text(
+        self,
+    ) -> None:
+        implementation = next(
+            item
+            for item in self.approved_files
+            if item.role == ApprovalFileRole.IMPLEMENTATION_CODE
+        )
+        self._git(
+            "update-index",
+            "--cacheinfo",
+            f"160000,{self.approved_head},{implementation.path}",
+        )
+        self._git("commit", "-m", "materialized submodule mode")
+        linked_commit = git_head_commit(self.repo)
+        self.assertTrue((self.repo / implementation.path).is_file())
+
+        request = replace(self.request, approved_git_commit=linked_commit)
+        signature = self._sign(request.canonical_bytes(), self.private_key)
+        approval = finalize_split_approval(
+            request,
+            signature,
+            policy=self.policy,
+            trusted_policy_sha256=self.policy.commitment_sha256,
+        )
+        with self.assertRaisesRegex(ValueError, "regular Git file mode"):
+            verify_split_approval_public(
+                approval,
+                **self._verify_public_arguments(),
+            )
+
     def test_wrong_repository_origin_is_rejected(self) -> None:
         self._git(
             "remote",

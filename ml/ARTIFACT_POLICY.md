@@ -20,7 +20,7 @@ in `research/DATASETS.md` apply before this storage policy.
 | Split seed/HMAC keys | Random binary | `ml/manifests/private/` or outside the repository | Ignored or out of repository; never print or commit; keep an encrypted backup separate from the working copy |
 | Owner split-approval policy | Canonical JSON | fixed `ml/APPROVAL_POLICY.json` | Commit the active Ed25519 public key, signer identity, and generation; distribute and independently verify its canonical SHA out of band. `pending` or `revoked` fails closed |
 | Owner approval private key | External Ed25519 private key | Outside the repository | Never passed to repository Python, copied into the private-manifest subtree, committed, or released; owner uses `ssh-keygen -Y sign` externally |
-| Approved split config and complete code bundle | Canonical JSON | `ml/manifests/splits/` | Commit and review before approval; preparation auto-includes the exact required core ML code closure and explicitly listed adapter implementation files |
+| Approved split config and complete code bundle | Canonical JSON | `ml/manifests/splits/` | Commit and review before approval; preparation follows the fixed P1 entrypoints through their complete static local-import graph and requires every Python source under the fixed adapter subtree to be listed explicitly |
 | Split approval request and approval | Canonical JSON | `ml/manifests/splits/` | Commit the request before external signing, then commit the finalized approval containing the verified SSHSIG; both are immutable public evidence |
 | Detached approval signature | OpenSSH SSHSIG | Outside Git or strict `ml/manifests/private/` subtree | Temporary private input to finalization; never tracked. The verified signature is embedded as base64 in the public canonical approval |
 | Public split commitment | Canonical summary JSON | `ml/manifests/splits/` | Commit schema V3 binding the trusted policy SHA, external approval SHA/scope, domain-separated split-key fingerprints, exact adapter commitments, config/counts, and private HMAC; never raw per-sample hashes or either key |
@@ -171,14 +171,29 @@ trusting only the policy found in the local Git tree is insufficient. The owner
 private signing key never enters the repository or any repository Python
 process.
 
-`prepare_split_approval` auto-includes every required executable core ML file
-and accepts repeatable adapter implementation files, then emits the canonical
-complete code-bundle manifest and matching `SplitConfig`. Exact-implementation
-verification rejects a missing, stale, extra, or mis-roled executable ML or
-adapter file. The retained `SplitConfig.splitter_code_sha256` field commits to
-that entire closure, not splitter code alone. Commit the policy, bundle, config,
+`prepare_split_approval` starts from the fixed P1 CLI entrypoint/role table and
+every explicitly configured adapter source, then recursively includes each
+statically imported local module and executable package initializer. The
+reviewed core-role table must equal that discovered graph exactly: a reachable
+unreviewed file and a reviewed but unreachable stale file both fail. Future P2
+training/export code that is not reachable from P1 remains outside this bundle,
+while every Python file below `ml/rosid_ml/adapters/` must be attributed
+explicitly. Star imports, recognized dynamic import/execution paths,
+unresolvable or ambiguous modules, import-name normalization/case collisions,
+native/bytecode-only loaders, links, and nonportable sources fail closed.
+
+Discovery requires a complete materialized checkout. The full stage-0 index
+must match `HEAD` by path, regular mode (`100644` or `100755`), and object ID;
+skip-worktree, assume-unchanged, sparse, unmerged, staged, symlink (`120000`),
+submodule (`160000`), and case/NFKC-aliased path states are rejected. The
+retained `SplitConfig.splitter_code_sha256` field commits to the entire
+resulting closure, not splitter code alone. Commit the policy, bundle, config,
 source manifests/evidence, acquisitions, public adapter commitments/configs,
 and all bound implementation files as commit A before requesting approval.
+Future adapter execution must import these files under the same canonical
+repository-qualified module names and repository-root semantics used during
+analysis; arbitrary direct-path or `spec_from_file_location` identities are not
+part of the approved import contract.
 
 `request_split_approval` verifies the out-of-band policy SHA, canonical
 repository origin, stable commit A, canonical public relationships, full code
@@ -201,10 +216,19 @@ inputs are trusted; private verification then checks the actual seed and HMAC
 keys against the approved fingerprints and reverifies the canonical
 source/acquisition/inventory/adapter relationships, assignment, minimums,
 leakage, and HMACs. The builder does not rehash a live extracted directory.
-Every public input and bundled file must be tracked, exist in `HEAD`, and be
-byte-identical to `HEAD` in the index and worktree. Private inventories, adapter
+Every public input and bundled file must be tracked, use Git mode `100644` or
+`100755`, exist in `HEAD`, and be byte-identical to `HEAD` in the index and
+worktree. Historical approved-commit verification repeats the regular-mode
+check, so a symlink materialized as target-text on one platform cannot become
+executable linked content on another. Private inventories, adapter
 evidence, sample/split manifests, detached signatures, and split keys inside the
 repository must be untracked and ignored, or may be outside the repository.
+
+The import graph is a source-commitment proof, not a Python sandbox. Qualifying
+execution therefore also requires the documented trusted clean process and,
+once P2 dependencies exist, the approved pinned runtime/container with no
+attacker-controlled import path, hooks, or bytecode cache. Code already able to
+execute inside that interpreter is outside what a source manifest can contain.
 
 Possession of either split key proves consistency with held private bytes, not
 approval. A valid split approval authorizes only its exact commit-A files,
