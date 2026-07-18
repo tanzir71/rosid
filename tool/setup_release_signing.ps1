@@ -1,5 +1,5 @@
 param(
-  [string]$Repository = 'tanzir-lameh/rosid',
+  [string]$Repository = 'tanzir71/rosid',
   [string]$BackupDirectory = (Join-Path ([Environment]::GetFolderPath('LocalApplicationData')) 'Rosid\ReleaseKey')
 )
 

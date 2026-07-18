@@ -87,7 +87,7 @@ handover gate, not a pass.
 - [x] M10.3 Document Android signing, iPhone self-signing constraints, install, and manual verification steps
 - [x] M10.4 Replace landing-page mockups with four real emulator screenshots (five captures retained)
 - [x] M10.5 Re-run mobile Lighthouse for the rebuilt landing page (Performance, Accessibility, Best Practices, and SEO: 100 each)
-- [x] M10.6 Publish Pages and a signed Android GitHub Release (immutable `v1.0.0`; `https://tanzir-lameh.github.io/rosid/`)
+- [x] M10.6 Publish Pages and a signed Android GitHub Release (immutable `v1.0.0`; `https://tanzir71.github.io/rosid/`)
 - [DEFERRED: owner has no paid Apple distribution membership] M10.7 Publish an App Store/TestFlight build
 - [x] M10.8 Compile and publish the explicitly unsigned iPhone IPA for advanced self-signing (SHA-256 `2D90BA2C8F863F641B9A4A410770E3842958627EE1F131EB1FB311541C05621C`)
 - [x] M10.9 Research direct-download competitors and rebuild the landing page around outcome, trust, and release integrity

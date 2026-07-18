@@ -53,7 +53,7 @@ verifies that a larger document is rejected before any page file is read.
 
 1. Open Settings and confirm About shows the installed version and build number.
 2. Confirm the displayed update location is
-   `https://github.com/tanzir-lameh/rosid/releases/latest` in both UI languages.
+   `https://github.com/tanzir71/rosid/releases/latest` in both UI languages.
 3. Repeat in airplane mode; Settings must render without a network request.
 
 ## iOS profile flow

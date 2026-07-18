@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://tanzir-lameh.github.io/rosid/sitemap.xml
+Sitemap: https://tanzir71.github.io/rosid/sitemap.xml
