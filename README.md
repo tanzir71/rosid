@@ -11,6 +11,20 @@ hosts every version, checksum, and Android signing-certificate fingerprint.
 The iPhone package requires user-managed self-signing; it is not an App Store or
 TestFlight build.
 
+## Features
+
+- Fully offline: no HTTP client, analytics, crash reporter, account, or Android internet permission.
+- Capture from the camera or gallery, then crop, perspective-correct, and enhance the page.
+- On-device OCR for Bangla and English. Android uses ML Kit Latin plus bundled Tesseract `ben+eng`; iOS uses bundled Tesseract only.
+- Editable review screens for receipts (with line items) and for documents, with per-field confidence.
+- Searchable local history stored in SQLite (Drift, FTS5).
+- Export to CSV and PDF through the system share sheet; temporary export files are deleted afterwards.
+- English and Bangla UI.
+
+## Tech stack
+
+Flutter and Dart, Riverpod, go_router, Drift/SQLite, Tesseract (`flutter_tesseract_ocr`), Google ML Kit on Android.
+
 ## Local development
 
 ```sh
@@ -41,3 +55,5 @@ pinned SHA-256 values before building.
 See [PROGRESS.md](PROGRESS.md), [TASKS.md](TASKS.md),
 [docs/RELEASING.md](docs/RELEASING.md), and the recorded
 [landing-page research](docs/WEBSITE_RESEARCH.md).
+
+Architecture notes are in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
