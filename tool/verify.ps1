@@ -189,6 +189,7 @@ try {
     }
     Invoke-Step 'Code generation (build_runner)' {
         Invoke-Checked $dartBin @('run', 'build_runner', 'build', '--delete-conflicting-outputs') | Out-Null
+        Invoke-Checked $dartBin @('format', 'lib/data/database/app_database.g.dart') | Out-Null
     }
     Invoke-Step 'Generate OCR fixture bundle' {
         Invoke-Checked $dartBin @('run', 'tool/generate_ocr_fixture_bundle.dart') | Out-Null

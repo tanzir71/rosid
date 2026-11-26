@@ -1,11 +1,15 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter_tesseract_ocr/flutter_tesseract_ocr.dart';
+import 'package:flutter/services.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:rosid/ocr/engines/ocr_engine.dart';
 import 'package:rosid/ocr/engines/tesseract_hocr_parser.dart';
 import 'package:rosid/ocr/models/ocr_models.dart';
 import 'package:rosid/ocr/script_detect.dart';
+import 'package:rosid/ocr/tessdata_installer.dart';
+import 'package:tesseract_ocr/ocr_engine_config.dart';
+import 'package:tesseract_ocr/tesseract_ocr.dart';
 
 abstract interface class TesseractOcrClient {
   Future<String> extractHocr(
@@ -24,26 +28,38 @@ abstract interface class TesseractOcrClient {
 class FlutterTesseractOcrClient implements TesseractOcrClient {
   const FlutterTesseractOcrClient();
 
+  static const MethodChannel _channel = MethodChannel('tesseract_ocr');
+
   @override
   Future<String> extractHocr(
     String imagePath, {
     required String language,
     required Map<String, String> args,
-  }) => FlutterTesseractOcr.extractHocr(
-    imagePath,
-    language: language,
-    args: args,
-  );
+  }) async {
+    await const TessdataInstaller().install();
+    final root = await getApplicationDocumentsDirectory();
+    final hocr = await _channel.invokeMethod<String>('extractHocr', {
+      'imagePath': imagePath,
+      'tessData': root.path,
+      'language': language,
+      'engine': 'tesseract',
+      'options': args,
+    });
+    return hocr ?? '';
+  }
 
   @override
   Future<String> extractText(
     String imagePath, {
     required String language,
     required Map<String, String> args,
-  }) => FlutterTesseractOcr.extractText(
+  }) => TesseractOcr.extractText(
     imagePath,
-    language: language,
-    args: args,
+    config: OCRConfig(
+      language: language,
+      engine: OCREngine.tesseract,
+      options: args,
+    ),
   );
 }
 

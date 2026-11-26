@@ -40,7 +40,6 @@ Future<void> main() async {
     output.writeln('  ].join(),');
   }
   output.writeln('};');
-  await File(
-    'integration_test/ocr_fixture_bytes.g.dart',
-  ).writeAsString(output.toString(), flush: true);
+  await File('integration_test/ocr_fixture_bytes.g.dart')
+      .writeAsString(output.toString(), flush: true);
 }

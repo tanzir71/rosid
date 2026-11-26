@@ -100,7 +100,7 @@ cd "$PROJECT_DIR"
 
 # Level A
 run_step "Generate localizations (gen-l10n)" "$FLUTTER_BIN" --no-version-check gen-l10n
-run_step "Code generation (build_runner)" "$DART_BIN" run build_runner build --delete-conflicting-outputs
+run_step "Code generation (build_runner)" bash -c '"$1" run build_runner build --delete-conflicting-outputs && "$1" format lib/data/database/app_database.g.dart' _ "$DART_BIN"
 run_step "Generate OCR fixture bundle" "$DART_BIN" run tool/generate_ocr_fixture_bundle.dart
 run_step "Format check" "$DART_BIN" format --output=none --set-exit-if-changed lib test integration_test tool
 run_step "Static analysis" "$FLUTTER_BIN" --no-version-check analyze
