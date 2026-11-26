@@ -133,7 +133,6 @@ void main() {
     final service = OcrService(
       latinEngine: tesseract,
       banglaEngine: tesseract,
-      handwritingEngine: tesseract,
       tessdataInstaller: installer,
       latinEngineRequiresTessdata: true,
     );
@@ -155,12 +154,6 @@ OcrService _service(
   return OcrService(
     latinEngine: latin,
     banglaEngine: bangla,
-    handwritingEngine: _FakeEngine(
-      id: 'handwriting',
-      text: '',
-      confidence: 0,
-      top: 0,
-    ),
     tessdataInstaller: installer,
   );
 }

@@ -1,0 +1,31 @@
+{
+  "id": "receipt_002",
+  "image": "receipt_002.jpg",
+  "kind": "receipt",
+  "script": "en",
+  "font": "AnekBangla",
+  "is_photo_like": false,
+  "is_synthetic_handwriting": false,
+  "text": "Agora Gulshan\nBIN: 001245691-0101\nDate: 02/02/2026\nMineral Water 2L   40.00\nCotton Panjabi   1450.00\nChicken Biryani   260.00\nSubtotal   1750.00\nVAT 5%   87.50\nGrand Total   1837.50\nPaid via Nagad",
+  "lines": [
+    "Agora Gulshan",
+    "BIN: 001245691-0101",
+    "Date: 02/02/2026",
+    "Mineral Water 2L   40.00",
+    "Cotton Panjabi   1450.00",
+    "Chicken Biryani   260.00",
+    "Subtotal   1750.00",
+    "VAT 5%   87.50",
+    "Grand Total   1837.50",
+    "Paid via Nagad"
+  ],
+  "details": {
+    "shop": "Agora Gulshan",
+    "date": "2026-02-02",
+    "total": 1837.5,
+    "vat": 87.5,
+    "payment_method": "Nagad",
+    "bin": "001245691-0101",
+    "category": "groceries"
+  }
+}

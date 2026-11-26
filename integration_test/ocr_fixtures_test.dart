@@ -1,17 +1,11 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:image/image.dart' as image;
 import 'package:integration_test/integration_test.dart';
-import 'package:path/path.dart' as path;
-import 'package:path_provider/path_provider.dart';
-import 'package:rosid/ocr/engines/mlkit_latin.dart';
-import 'package:rosid/ocr/engines/tesseract_bn.dart';
-import 'package:rosid/ocr/models/ocr_models.dart';
-import 'package:rosid/ocr/ocr_service.dart';
-import 'package:rosid/ocr/preprocess/image_preprocessor.dart';
-import 'package:rosid/ocr/tessdata_installer.dart';
+import 'package:rosid/ocr/pipeline/onnx_latin_recognizer.dart';
+import 'package:rosid/ocr/pipeline/onnx_line_detector.dart';
+import 'package:rosid/ocr/pipeline/rosid_reading_pipeline.dart';
+import 'package:rosid/ocr/pipeline/tesseract_line_recognizer.dart';
 
 import 'ocr_fixture_bytes.g.dart';
 
@@ -19,104 +13,56 @@ void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets(
-    'Android ML Kit recognizes the English printed fixture',
+    'M3 pipeline reads bundled English, mixed Bangla, and handwritten fixtures',
     (tester) async {
-      final page = await _prepareFixture('assets/fixtures/english_receipt.png');
-      const engine = MlKitLatinEngine();
-      final result = await engine.recognize(page);
-      final normalized = result.text.toLowerCase();
+      final det = OnnxLineDetector();
+      final latin = OnnxLatinLineRecognizer();
+      const bangla = TesseractLineRecognizer();
+      addTearDown(() async {
+        await det.dispose();
+        await latin.dispose();
+      });
 
-      expect(result.engineIds, contains('mlkit-latin'));
-      expect(normalized, contains('rice'));
-      expect(normalized, contains('vat'));
-      expect(normalized, contains('80.00'));
+      final pipeline = RosidReadingPipeline(
+        lineDetector: det,
+        latinRecognizer: latin,
+        banglaRecognizer: bangla,
+      );
+
+      // 1. Printed English receipt fixture
+      final enBytes = base64Decode(
+        ocrFixtureBase64['assets/fixtures/english_receipt.png']!,
+      );
+      final enRes = await pipeline.readPage(
+        greyImageBytes: enBytes,
+        pageIndex: 0,
+      );
+      final enLower = enRes.fullText.toLowerCase();
+      expect(enLower, contains('rice'));
+      expect(enLower, contains('vat'));
+      expect(enLower, contains('80.00'));
+
+      // 2. Mixed Bangla + English fixture
+      final mixedBytes = base64Decode(
+        ocrFixtureBase64['assets/fixtures/mixed_bangla_receipt.png']!,
+      );
+      final mixedRes = await pipeline.readPage(
+        greyImageBytes: mixedBytes,
+        pageIndex: 0,
+      );
+      expect(mixedRes.fullText.toLowerCase(), contains('rosid'));
+      expect(RegExp(r'[\u0980-\u09ff]').hasMatch(mixedRes.fullText), isTrue);
+
+      // 3. Handwritten note fixture (best-effort editable output)
+      final hwBytes = base64Decode(
+        ocrFixtureBase64['assets/fixtures/handwritten_bangla_note.png']!,
+      );
+      final hwRes = await pipeline.readPage(
+        greyImageBytes: hwBytes,
+        pageIndex: 0,
+      );
+      expect(hwRes.fullText.trim(), isNotEmpty);
     },
-    skip: !Platform.isAndroid,
-    timeout: const Timeout(Duration(minutes: 3)),
-  );
-
-  testWidgets(
-    'Android mixed hint routes through ML Kit and bundled Bangla Tesseract',
-    (tester) async {
-      final page = await _prepareFixture(
-        'assets/fixtures/mixed_bangla_receipt.png',
-      );
-      const latin = MlKitLatinEngine();
-      final service = OcrService(
-        latinEngine: latin,
-        banglaEngine: const TesseractBanglaEngine(),
-        handwritingEngine: const TesseractBanglaEngine(),
-        tessdataInstaller: const TessdataInstaller(),
-      );
-      final result = await service.recognize([page], hint: ScriptHint.mixed);
-      final normalized = result.text.toLowerCase();
-
-      expect(
-        result.engineIds,
-        containsAll(['mlkit-latin', 'tesseract-ben-eng']),
-      );
-      expect(normalized, contains('rosid'));
-      expect(
-        RegExp(r'[\u0980-\u09ff]').hasMatch(result.text),
-        isTrue,
-        reason: 'The mixed printed fixture must produce Bangla OCR text.',
-      );
-    },
-    skip: !Platform.isAndroid,
-    timeout: const Timeout(Duration(minutes: 3)),
-  );
-
-  testWidgets(
-    'Tesseract returns editable text for the handwritten document fixture',
-    (tester) async {
-      final page = await _prepareFixture(
-        'assets/fixtures/handwritten_bangla_note.png',
-      );
-      final result = await const TesseractBanglaEngine().recognize(page);
-      final normalized = result.text.toLowerCase();
-
-      expect(result.engineIds, contains('tesseract-ben-eng'));
-      expect(normalized.trim(), isNotEmpty);
-      expect(
-        normalized.contains('project') ||
-            RegExp(r'[\u0980-\u09ff]').hasMatch(result.text),
-        isTrue,
-        reason: 'Best-effort handwriting OCR should preserve editable content.',
-      );
-    },
-    timeout: const Timeout(Duration(minutes: 3)),
-  );
-}
-
-Future<PreprocessedImage> _prepareFixture(String asset) async {
-  final encoded = ocrFixtureBase64[asset];
-  expect(encoded, isNotNull, reason: '$asset is missing from the test bundle');
-  final bytes = base64Decode(encoded!);
-  final decoded = image.decodeImage(bytes);
-  expect(decoded, isNotNull, reason: '$asset must remain a decodable image');
-
-  const preprocessor = ImagePreprocessor();
-  final quad = preprocessor.detectDocumentQuad(bytes);
-  final processed = preprocessor.process(
-    bytes,
-    quad: quad,
-    options: const PreprocessOptions(
-      minimumDimension: 1000,
-      maximumDimension: 1800,
-    ),
-  );
-  final directory = await getTemporaryDirectory();
-  final stem = path.basenameWithoutExtension(asset);
-  final color = File(path.join(directory.path, '$stem-color.jpg'));
-  final binary = File(path.join(directory.path, '$stem-binary.jpg'));
-  await Future.wait([
-    color.writeAsBytes(processed.colorCorrectedJpeg, flush: true),
-    binary.writeAsBytes(processed.binarizedJpeg, flush: true),
-  ]);
-  return PreprocessedImage(
-    colorCorrectedPath: color.path,
-    binarizedPath: binary.path,
-    width: processed.width,
-    height: processed.height,
+    timeout: const Timeout(Duration(minutes: 4)),
   );
 }

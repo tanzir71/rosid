@@ -1,6 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:rosid/ocr/engines/mlkit_latin.dart';
-import 'package:rosid/ocr/engines/tflite_bn_stub.dart';
 import 'package:rosid/ocr/merge.dart';
 import 'package:rosid/ocr/models/ocr_models.dart';
 import 'package:rosid/ocr/script_detect.dart';
@@ -94,55 +92,6 @@ void main() {
       ScriptDetector.shouldRunBanglaEngine(result, hint: ScriptHint.automatic),
       isFalse,
     );
-  });
-
-  test('missing ML Kit confidence uses a verification-safe fallback', () {
-    expect(mlKitConfidenceOrFallback(null), 0.55);
-    expect(mlKitConfidenceOrFallback(1.4), 1);
-    final cleanLatin = OcrResult(
-      blocks: [
-        block(
-          'Clean English receipt',
-          confidence: mlKitConfidenceOrFallback(null),
-        ),
-      ],
-      engineIds: const {'ml'},
-    );
-    expect(
-      ScriptDetector.shouldRunBanglaEngine(
-        cleanLatin,
-        hint: ScriptHint.automatic,
-      ),
-      isFalse,
-    );
-  });
-
-  test('Android ML Kit channel lines retain geometry and page index', () async {
-    final engine = MlKitLatinEngine(
-      client: _FakeAndroidLatinOcrClient(const [
-        NativeOcrLine(
-          text: 'Grand Total',
-          boundingBox: OcrRect(left: 10, top: 20, right: 110, bottom: 50),
-          confidence: 0.92,
-        ),
-      ]),
-    );
-
-    final result = await engine.recognize(
-      const PreprocessedImage(
-        colorCorrectedPath: 'color.jpg',
-        binarizedPath: 'binary.jpg',
-        width: 200,
-        height: 100,
-        pageIndex: 2,
-      ),
-    );
-
-    expect(result.engineIds, {'mlkit-latin'});
-    expect(result.blocks.single.text, 'Grand Total');
-    expect(result.blocks.single.boundingBox.left, 10);
-    expect(result.blocks.single.confidence, 0.92);
-    expect(result.blocks.single.pageIndex, 2);
   });
 
   test('merger prefers Bangla block at the same geometry', () {
@@ -294,29 +243,4 @@ void main() {
       expect(result.blocks.single.text, contains('\u09ae\u09cb\u099f'));
     },
   );
-
-  test('TFLite handwriting seam is registered but disabled', () {
-    const engine = TfliteBanglaHandwritingEngine();
-    expect(engine.enabled, isFalse);
-    expect(
-      () => engine.recognize(
-        const PreprocessedImage(
-          colorCorrectedPath: 'color',
-          binarizedPath: 'binary',
-          width: 10,
-          height: 10,
-        ),
-      ),
-      throwsUnimplementedError,
-    );
-  });
-}
-
-class _FakeAndroidLatinOcrClient implements AndroidLatinOcrClient {
-  const _FakeAndroidLatinOcrClient(this.lines);
-
-  final List<NativeOcrLine> lines;
-
-  @override
-  Future<List<NativeOcrLine>> recognize(String imagePath) async => lines;
 }

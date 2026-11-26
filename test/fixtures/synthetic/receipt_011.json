@@ -1,0 +1,31 @@
+{
+  "id": "receipt_011",
+  "image": "receipt_011.jpg",
+  "kind": "receipt",
+  "script": "en",
+  "font": "TiroBangla",
+  "is_photo_like": false,
+  "is_synthetic_handwriting": false,
+  "text": "Lazz Pharma Mirpur\nBIN: 001245808-0101\nDate: 11/11/2026\nSoybean Oil 2L   340.00\nFresh Milk 1L   95.00\nGreen Tea Box   180.00\nSubtotal   615.00\nVAT 5%   30.75\nGrand Total   645.75\nPaid via bKash",
+  "lines": [
+    "Lazz Pharma Mirpur",
+    "BIN: 001245808-0101",
+    "Date: 11/11/2026",
+    "Soybean Oil 2L   340.00",
+    "Fresh Milk 1L   95.00",
+    "Green Tea Box   180.00",
+    "Subtotal   615.00",
+    "VAT 5%   30.75",
+    "Grand Total   645.75",
+    "Paid via bKash"
+  ],
+  "details": {
+    "shop": "Lazz Pharma Mirpur",
+    "date": "2026-11-11",
+    "total": 645.75,
+    "vat": 30.75,
+    "payment_method": "bKash",
+    "bin": "001245808-0101",
+    "category": "health"
+  }
+}

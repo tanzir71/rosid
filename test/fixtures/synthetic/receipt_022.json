@@ -1,0 +1,30 @@
+{
+  "id": "receipt_022",
+  "image": "receipt_022.jpg",
+  "kind": "receipt",
+  "script": "mixed",
+  "font": "AnekBangla",
+  "is_photo_like": false,
+  "is_synthetic_handwriting": false,
+  "text": "Shwapno Super Shop\nBIN: 001245951-0101\nDate: 22/11/2026\nBrown Sugar 1kg   135.00\nGreen Tea Box   180.00\nচা পাতা ৫০০ গ্রাম   210.00\nVAT   26.25\nTotal   551.25\nPaid via Nagad",
+  "lines": [
+    "Shwapno Super Shop",
+    "BIN: 001245951-0101",
+    "Date: 22/11/2026",
+    "Brown Sugar 1kg   135.00",
+    "Green Tea Box   180.00",
+    "চা পাতা ৫০০ গ্রাম   210.00",
+    "VAT   26.25",
+    "Total   551.25",
+    "Paid via Nagad"
+  ],
+  "details": {
+    "shop": "Shwapno Super Shop",
+    "date": "2026-11-22",
+    "total": 551.25,
+    "vat": 26.25,
+    "payment_method": "Nagad",
+    "bin": "001245951-0101",
+    "category": "groceries"
+  }
+}

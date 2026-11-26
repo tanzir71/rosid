@@ -1,0 +1,31 @@
+{
+  "id": "receipt_009",
+  "image": "receipt_009.jpg",
+  "kind": "receipt",
+  "script": "en",
+  "font": "NotoSansBengali",
+  "is_photo_like": false,
+  "is_synthetic_handwriting": false,
+  "text": "Agora Gulshan\nBIN: 001245782-0101\nDate: 09/09/2026\nChicken Biryani   260.00\nSoybean Oil 2L   340.00\nMineral Water 2L   40.00\nSubtotal   640.00\nVAT 5%   32.00\nGrand Total   672.00\nPaid by Cash",
+  "lines": [
+    "Agora Gulshan",
+    "BIN: 001245782-0101",
+    "Date: 09/09/2026",
+    "Chicken Biryani   260.00",
+    "Soybean Oil 2L   340.00",
+    "Mineral Water 2L   40.00",
+    "Subtotal   640.00",
+    "VAT 5%   32.00",
+    "Grand Total   672.00",
+    "Paid by Cash"
+  ],
+  "details": {
+    "shop": "Agora Gulshan",
+    "date": "2026-09-09",
+    "total": 672.0,
+    "vat": 32.0,
+    "payment_method": "Cash",
+    "bin": "001245782-0101",
+    "category": "groceries"
+  }
+}

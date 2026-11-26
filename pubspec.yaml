@@ -59,6 +59,7 @@ dependencies:
   uuid: ^4.6.0
   unorm_dart: ^0.3.2
   flutter_svg: ^2.5.1
+  flutter_onnxruntime: ^1.9.1
 
 dev_dependencies:
   flutter_test:
@@ -93,6 +94,9 @@ flutter:
     - assets/tessdata/
     - assets/tessdata_config.json
     - assets/icons/
+    - assets/models/ocr/ppocr_v5_mobile_det.onnx
+    - assets/models/ocr/ppocr_v5_en_mobile_rec.onnx
+    - assets/models/ocr/ppocr_v5_en_dict.txt
 
   fonts:
     - family: Anek Bangla

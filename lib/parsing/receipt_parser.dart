@@ -115,10 +115,16 @@ class ReceiptParser {
     );
   }
 
+  static final RegExp _binKeyword = RegExp(
+    r'\bbin\b|মূসক\s*নিবন্ধন|vat\s*reg',
+    caseSensitive: false,
+  );
+
   ParsedField<String> _merchant(List<String> lines) {
     final candidates = lines.take(4).where((line) {
       if (_totalKeyword.hasMatch(line) ||
           _taxKeyword.hasMatch(line) ||
+          _binKeyword.hasMatch(line) ||
           DateNormalizer.find(line) != null) {
         return false;
       }
@@ -157,14 +163,20 @@ class ReceiptParser {
 
   ParsedField<String?> _paymentMethod(List<String> lines) {
     const methods = <String, String>{
-      'cash': 'Cash',
       'নগদ টাকা': 'Cash',
-      'card': 'Card',
-      'visa': 'Card',
-      'mastercard': 'Card',
+      'cash': 'Cash',
       'bkash': 'bKash',
       'বিকাশ': 'bKash',
       'nagad': 'Nagad',
+      'নগদ': 'Nagad',
+      'rocket': 'Rocket',
+      'রকেট': 'Rocket',
+      'upay': 'Upay',
+      'উপায়': 'Upay',
+      'card': 'Card',
+      'visa': 'Card',
+      'mastercard': 'Card',
+      'amex': 'Card',
     };
     for (final line in lines) {
       final lower = line.toLowerCase();

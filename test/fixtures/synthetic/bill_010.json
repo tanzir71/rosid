@@ -1,0 +1,24 @@
+{
+  "id": "bill_010",
+  "image": "bill_010.jpg",
+  "kind": "bill",
+  "script": "mixed",
+  "font": "HindSiliguri",
+  "is_photo_like": false,
+  "is_synthetic_handwriting": false,
+  "text": "ঢাকা ইলেকট্রিক সাপ্লাই কোম্পানি (DESCO)\nAccount No: DESCO-550163\nগ্রাহকের নাম: মোসাঃ ফাতেমা বেগম\nবিল মাস: নভেম্বর ২০২৬\nমোট বিল: 2335.00 BDT\nDue Date: 24/12/2026\nPay via bKash or Nagad",
+  "lines": [
+    "ঢাকা ইলেকট্রিক সাপ্লাই কোম্পানি (DESCO)",
+    "Account No: DESCO-550163",
+    "গ্রাহকের নাম: মোসাঃ ফাতেমা বেগম",
+    "বিল মাস: নভেম্বর ২০২৬",
+    "মোট বিল: 2335.00 BDT",
+    "Due Date: 24/12/2026",
+    "Pay via bKash or Nagad"
+  ],
+  "details": {
+    "account": "DESCO-550163",
+    "total": 2335.0,
+    "due_date": "24/12/2026"
+  }
+}

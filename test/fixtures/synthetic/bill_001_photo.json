@@ -1,0 +1,42 @@
+{
+  "id": "bill_001_photo",
+  "image": "bill_001_photo.jpg",
+  "kind": "bill",
+  "script": "mixed",
+  "font": "TiroBangla",
+  "is_photo_like": true,
+  "is_synthetic_handwriting": false,
+  "ground_truth_quad": [
+    [
+      0.09314173460006714,
+      0.11390171945095062
+    ],
+    [
+      0.9378505349159241,
+      0.07415316253900528
+    ],
+    [
+      0.9124826788902283,
+      0.9194856286048889
+    ],
+    [
+      0.07979414612054825,
+      0.8874413371086121
+    ]
+  ],
+  "text": "ঢাকা ইলেকট্রিক সাপ্লাই কোম্পানি (DESCO)\nAccount No: DESCO-550100\nগ্রাহকের নাম: মোঃ আব্দুর রহমান\nবিল মাস: নভেম্বর ২০২৬\nমোট বিল: 1120.00 BDT\nDue Date: 15/12/2026\nPay via bKash or Nagad",
+  "lines": [
+    "ঢাকা ইলেকট্রিক সাপ্লাই কোম্পানি (DESCO)",
+    "Account No: DESCO-550100",
+    "গ্রাহকের নাম: মোঃ আব্দুর রহমান",
+    "বিল মাস: নভেম্বর ২০২৬",
+    "মোট বিল: 1120.00 BDT",
+    "Due Date: 15/12/2026",
+    "Pay via bKash or Nagad"
+  ],
+  "details": {
+    "account": "DESCO-550100",
+    "total": 1120.0,
+    "due_date": "15/12/2026"
+  }
+}

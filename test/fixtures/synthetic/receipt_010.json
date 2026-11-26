@@ -1,0 +1,31 @@
+{
+  "id": "receipt_010",
+  "image": "receipt_010.jpg",
+  "kind": "receipt",
+  "script": "en",
+  "font": "HindSiliguri",
+  "is_photo_like": false,
+  "is_synthetic_handwriting": false,
+  "text": "Meena Bazar Dhanmondi\nBIN: 001245795-0101\nDate: 10/10/2026\nRed Lentil 1kg   145.00\nBrown Sugar 1kg   135.00\nChicken Biryani   260.00\nSubtotal   540.00\nVAT 5%   27.00\nGrand Total   567.00\nPaid by Visa Card",
+  "lines": [
+    "Meena Bazar Dhanmondi",
+    "BIN: 001245795-0101",
+    "Date: 10/10/2026",
+    "Red Lentil 1kg   145.00",
+    "Brown Sugar 1kg   135.00",
+    "Chicken Biryani   260.00",
+    "Subtotal   540.00",
+    "VAT 5%   27.00",
+    "Grand Total   567.00",
+    "Paid by Visa Card"
+  ],
+  "details": {
+    "shop": "Meena Bazar Dhanmondi",
+    "date": "2026-10-10",
+    "total": 567.0,
+    "vat": 27.0,
+    "payment_method": "Card",
+    "bin": "001245795-0101",
+    "category": "groceries"
+  }
+}

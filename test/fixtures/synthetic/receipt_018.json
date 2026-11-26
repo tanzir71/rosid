@@ -1,0 +1,30 @@
+{
+  "id": "receipt_018",
+  "image": "receipt_018.jpg",
+  "kind": "receipt",
+  "script": "mixed",
+  "font": "NotoSerifBengali",
+  "is_photo_like": false,
+  "is_synthetic_handwriting": false,
+  "text": "Lazz Pharma Mirpur\nBIN: 001245899-0101\nDate: 18/07/2026\nRed Lentil 1kg   145.00\nSoybean Oil 2L   340.00\nসয়াবিন তেল ২ লিটার   340.00\nVAT   41.25\nTotal   866.25\nPaid via Rocket",
+  "lines": [
+    "Lazz Pharma Mirpur",
+    "BIN: 001245899-0101",
+    "Date: 18/07/2026",
+    "Red Lentil 1kg   145.00",
+    "Soybean Oil 2L   340.00",
+    "সয়াবিন তেল ২ লিটার   340.00",
+    "VAT   41.25",
+    "Total   866.25",
+    "Paid via Rocket"
+  ],
+  "details": {
+    "shop": "Lazz Pharma Mirpur",
+    "date": "2026-07-18",
+    "total": 866.25,
+    "vat": 41.25,
+    "payment_method": "Rocket",
+    "bin": "001245899-0101",
+    "category": "health"
+  }
+}

@@ -2,7 +2,7 @@
 
 The implementing agent keeps this file true. Update it in the same push as the work.
 
-Last updated: 2026-11-27 (M2 completed and verified to Level B)
+Last updated: 2026-11-27 (M3 completed and verified to Level B)
 
 ## Milestones
 
@@ -11,8 +11,8 @@ Last updated: 2026-11-27 (M2 completed and verified to Level B)
 | M0 | Ground rules and baseline | done | B | `evidence/M0/summary.md` |
 | M1 | Design system and app shell | done | B | `evidence/M1/summary.md` |
 | M2 | Capture and image | done | B | `evidence/M2/summary.md` |
-| M3 | Reading text | in progress | | |
-| M4 | Read and fix | not started | | |
+| M3 | Reading text | done | B | `evidence/M3/summary.md` |
+| M4 | Read and fix | in progress | | |
 | M5 | English draft | not started | | |
 | M6 | Export | not started | | |
 | M7 | Library and bundles | not started | | |
@@ -24,7 +24,7 @@ State is one of: not started, in progress, done, done with gaps.
 
 ## In progress
 
-Starting M3: Reading text.
+Starting M4: Read and fix.
 
 ## Measured numbers
 
@@ -32,13 +32,13 @@ Fill in as they are measured. Never write a number you did not measure.
 
 | What | Target | Measured | Where |
 |---|---|---|---|
-| Printed English character error, synthetic set | 5% or less | | |
-| Printed Bangla character error, synthetic set | 30% lower than the M3 baseline | | |
-| Receipt total read exactly, synthetic set | 85% or more | | |
-| Time for one page, emulator | 4 s or less | | |
+| Printed English character error, synthetic set | 5% or less | 0.09% (baseline 0.18%, n=54) | `evidence/M3/final.json` |
+| Printed Bangla character error, synthetic set | 30% lower than the M3 baseline | 2.22% vs 4.75% baseline (-53.3%, n=62) | `evidence/M3/final.json` |
+| Receipt total read exactly, synthetic set | 85% or more | 35/36 (97.2%) | `evidence/M3/final.json` |
+| Time for one page, emulator | 4 s or less | 3.60 s median (`rosid_test`, debug JIT) | `evidence/M3/summary.md` |
 | Cold start, emulator | 3 s or less | 2.66 s (M0 v1 release baseline on `rosid_test`) | `evidence/M0/summary.md` |
-| Peak memory while reading, 2 GB emulator | 600 MB or less | | |
-| arm64 APK size | 90 MB target, 110 MB limit | 136.56 MB universal baseline (M0, pre-split) | `evidence/M0/baseline-release.txt` |
+| Peak memory while reading, 2 GB emulator | 600 MB or less | 248.7 MB RSS (`rosid_low`) | `evidence/M3/summary.md` |
+| arm64 APK size | 90 MB target, 110 MB limit | 91.92 MB split arm64-v8a release APK (M3) | `evidence/M3/summary.md` |
 | Random-input test, 5,000 events | no crash | | |
 
 ## Decisions taken
@@ -54,6 +54,7 @@ Record every choice the handover left to you: which Bangla recogniser won, which
 | 2026-11-27 | Bundled subsetted Anek Bangla (instantiated at weights 400/500/600/700 from Google Fonts variable TTF) and Tiro Bangla (400), plus `flutter_svg: ^2.5.1` for the 56 stroke icons | Keeps total bundled fonts to ~1.1 MB while matching Mohor typography and line heights (`tokens.g.dart` generated from `design/tokens.json`). `flutter_svg` adds zero Android permissions. |
 | 2026-11-27 | Added Schema v3 migration (`scans` additions, `scan_pages` additions, 8 new tables) and built empty states for Library, Bundles, Expenses, and shell routes | Preserves all v1/v2 rows (verified by v2→v3 SQLite migration test). Empty states use Mohor cards and primary actions as specified in `design/screens.md` "States not drawn". |
 | 2026-11-27 | M2 fallback: removed `opencv_dart: 2.3.3` and implemented pure-Dart 320 px live edge/quality analyzer (`FrameAnalyzerIsolate`) plus <= 2,000 px `ImageCleaner` (perspective warp, 1/8-scale bright-dilation lighting division, 8x8 CLAHE clip 2.0, edge-preserving denoise, deskew) | `dartcv4`'s native build hook failed during `flutter build apk` while compiling OpenCV 4.13 from source via CMake/Ninja (`The paging file is too small for this operation to complete`). Per `M2-capture-and-image.md` Fallbacks, pure Dart met every M2 gate: 23/24 (95.8%) corners within 2% of frame diagonal on synthetic photo-like set, 3 ms median luma frame time (21 ms encoded JPEG) in `FrameAnalyzerIsolate` on `rosid_test`, and zero native size/alignment bloat. |
+| 2026-11-27 | M3 OCR engine choice: bundled official Apache-2.0 PP-OCRv5 mobile det (4.60 MB) + PP-OCRv5 English mobile rec (7.48 MB) via `flutter_onnxruntime: 1.9.1` (ONNX Runtime 1.28.0) + per-line Tesseract `psm 7` with `tessdata_best` for Bangla; retired ML Kit (`com.google.mlkit:text-recognition`) and `tflite_bn_stub.dart`; skipped EasyOCR 54 MB Bengali ONNX | Benchmark on 168 synthetic fixtures (`evidence/M3/baseline.json` vs `final.json`): Baseline v1 whole-page Tesseract got 0.18% EN CER, 4.75% BN CER, 3.94% mixed CER. Per-line `tessdata_fast` got 17.58% BN CER (rejected). Per-line `tessdata_best` + PP-OCRv5 ONNX achieved **0.09% EN CER**, **2.22% BN CER (-53.3% vs baseline)**, **2.30% mixed CER**, **97.2% exact receipt totals**, **3.60 s/page** on `rosid_test`, **248.7 MB RSS** on `rosid_low`, and **91.92 MB** arm64 APK with zero Play Services classes. EasyOCR 54 MB ONNX would break the 110 MB arm64 APK limit (91.9 + 54 > 110 MB) and is slower. Handwriting detection tested using synthetic OFL `Galada` calligraphy fixtures (flagged `is_synthetic_handwriting: true`). |
 
 ## Not done, needs a person
 

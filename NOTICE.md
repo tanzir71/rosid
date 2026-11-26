@@ -9,7 +9,9 @@ Rosid bundles the following openly licensed fonts, models, and libraries inside 
 
 ## OCR & Language Data
 
-- **Tesseract traineddata (`eng.traineddata`, `ben.traineddata`)** — Apache License 2.0. Source: `tesseract-ocr/tessdata_best` / `tesseract-ocr/tessdata_fast`.
+- **PaddleOCR PP-OCRv5 Mobile Detection & English Mobile Recognition (`ppocr_v5_mobile_det.onnx`, `ppocr_v5_en_mobile_rec.onnx`, `ppocr_v5_en_dict.txt`)** — Apache License 2.0. Source: PaddlePaddle on Hugging Face (`PaddlePaddle/PP-OCRv5_mobile_det_onnx`, `PaddlePaddle/en_PP-OCRv5_mobile_rec_onnx`). See `assets/models/README.md` for SHA-256 checksums.
+- **ONNX Runtime (`flutter_onnxruntime`)** — MIT License.
+- **Tesseract traineddata (`eng.traineddata`, `ben.traineddata`)** — Apache License 2.0. Source: `tesseract-ocr/tessdata_best`.
 - **Tesseract4Android** (`cz.adaptech.tesseract4android:tesseract4android:4.8.0`) — Apache License 2.0.
 
 ## Core Libraries

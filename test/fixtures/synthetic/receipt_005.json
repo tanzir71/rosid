@@ -1,0 +1,31 @@
+{
+  "id": "receipt_005",
+  "image": "receipt_005.jpg",
+  "kind": "receipt",
+  "script": "en",
+  "font": "HindSiliguri",
+  "is_photo_like": false,
+  "is_synthetic_handwriting": false,
+  "text": "Star Kabab Banani\nBIN: 001245730-0101\nDate: 05/05/2026\nMiniket Rice 5kg   380.00\nMineral Water 2L   40.00\nRed Lentil 1kg   145.00\nSubtotal   565.00\nVAT 5%   28.25\nGrand Total   593.25\nPaid by Visa Card",
+  "lines": [
+    "Star Kabab Banani",
+    "BIN: 001245730-0101",
+    "Date: 05/05/2026",
+    "Miniket Rice 5kg   380.00",
+    "Mineral Water 2L   40.00",
+    "Red Lentil 1kg   145.00",
+    "Subtotal   565.00",
+    "VAT 5%   28.25",
+    "Grand Total   593.25",
+    "Paid by Visa Card"
+  ],
+  "details": {
+    "shop": "Star Kabab Banani",
+    "date": "2026-05-05",
+    "total": 593.25,
+    "vat": 28.25,
+    "payment_method": "Card",
+    "bin": "001245730-0101",
+    "category": "food"
+  }
+}

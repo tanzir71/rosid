@@ -1,0 +1,26 @@
+{
+  "id": "cert_005",
+  "image": "cert_005.jpg",
+  "kind": "certificate",
+  "script": "en",
+  "font": "HindSiliguri",
+  "is_photo_like": false,
+  "is_synthetic_handwriting": false,
+  "text": "Government of the People's Republic of Bangladesh\nBirth Registration Certificate\nRegistration No: 19942610108493\nName: Sadia Afrin\nDate of Birth: 05/05/1999\nFather: Md. Habibur Rahman\nMother: Monowara Begum\nPlace of Birth: Dhaka, Bangladesh\nStatus: Verified Record",
+  "lines": [
+    "Government of the People's Republic of Bangladesh",
+    "Birth Registration Certificate",
+    "Registration No: 19942610108493",
+    "Name: Sadia Afrin",
+    "Date of Birth: 05/05/1999",
+    "Father: Md. Habibur Rahman",
+    "Mother: Monowara Begum",
+    "Place of Birth: Dhaka, Bangladesh",
+    "Status: Verified Record"
+  ],
+  "details": {
+    "registration_no": "19942610108493",
+    "name_en": "Sadia Afrin",
+    "dob": "05/05/1999"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "id": "bill_016",
+  "image": "bill_016.jpg",
+  "kind": "bill",
+  "script": "mixed",
+  "font": "TiroBangla",
+  "is_photo_like": false,
+  "is_synthetic_handwriting": false,
+  "text": "ঢাকা ইলেকট্রিক সাপ্লাই কোম্পানি (DESCO)\nAccount No: DESCO-550205\nগ্রাহকের নাম: তানভীর আহমেদ\nবিল মাস: নভেম্বর ২০২৬\nমোট বিল: 3145.00 BDT\nDue Date: 18/12/2026\nPay via bKash or Nagad",
+  "lines": [
+    "ঢাকা ইলেকট্রিক সাপ্লাই কোম্পানি (DESCO)",
+    "Account No: DESCO-550205",
+    "গ্রাহকের নাম: তানভীর আহমেদ",
+    "বিল মাস: নভেম্বর ২০২৬",
+    "মোট বিল: 3145.00 BDT",
+    "Due Date: 18/12/2026",
+    "Pay via bKash or Nagad"
+  ],
+  "details": {
+    "account": "DESCO-550205",
+    "total": 3145.0,
+    "due_date": "18/12/2026"
+  }
+}

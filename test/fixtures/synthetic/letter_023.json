@@ -1,0 +1,24 @@
+{
+  "id": "letter_023",
+  "image": "letter_023.jpg",
+  "kind": "letter",
+  "script": "en",
+  "font": "NotoSerifBengali",
+  "is_photo_like": false,
+  "is_synthetic_handwriting": false,
+  "text": "Office of the Registrar\nReference: REF/2026/432\nDate: 17 November 2026\nTo: Sadia Afrin\nSubject: Confirmation of Academic Transcript\nThis letter confirms that all course records are verified.\nPlease present this notice at counter 4 before 15 December.\nSincerely,\nAcademic Records Officer",
+  "lines": [
+    "Office of the Registrar",
+    "Reference: REF/2026/432",
+    "Date: 17 November 2026",
+    "To: Sadia Afrin",
+    "Subject: Confirmation of Academic Transcript",
+    "This letter confirms that all course records are verified.",
+    "Please present this notice at counter 4 before 15 December.",
+    "Sincerely,",
+    "Academic Records Officer"
+  ],
+  "details": {
+    "reference": "REF/2026/432"
+  }
+}

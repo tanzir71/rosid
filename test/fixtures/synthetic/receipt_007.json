@@ -1,0 +1,31 @@
+{
+  "id": "receipt_007",
+  "image": "receipt_007.jpg",
+  "kind": "receipt",
+  "script": "en",
+  "font": "AnekBangla",
+  "is_photo_like": false,
+  "is_synthetic_handwriting": false,
+  "text": "Dhaka Books Nilkhet\nBIN: 001245756-0101\nDate: 07/07/2026\nFresh Milk 1L   95.00\nChicken Biryani   260.00\nMineral Water 2L   40.00\nSubtotal   395.00\nVAT 5%   19.75\nGrand Total   414.75\nPaid via Nagad",
+  "lines": [
+    "Dhaka Books Nilkhet",
+    "BIN: 001245756-0101",
+    "Date: 07/07/2026",
+    "Fresh Milk 1L   95.00",
+    "Chicken Biryani   260.00",
+    "Mineral Water 2L   40.00",
+    "Subtotal   395.00",
+    "VAT 5%   19.75",
+    "Grand Total   414.75",
+    "Paid via Nagad"
+  ],
+  "details": {
+    "shop": "Dhaka Books Nilkhet",
+    "date": "2026-07-07",
+    "total": 414.75,
+    "vat": 19.75,
+    "payment_method": "Nagad",
+    "bin": "001245756-0101",
+    "category": "shopping"
+  }
+}

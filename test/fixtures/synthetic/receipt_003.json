@@ -1,0 +1,31 @@
+{
+  "id": "receipt_003",
+  "image": "receipt_003.jpg",
+  "kind": "receipt",
+  "script": "en",
+  "font": "NotoSerifBengali",
+  "is_photo_like": false,
+  "is_synthetic_handwriting": false,
+  "text": "Meena Bazar Dhanmondi\nBIN: 001245704-0101\nDate: 03/03/2026\nMineral Water 2L   40.00\nChicken Biryani   260.00\nCotton Panjabi   1450.00\nSubtotal   1750.00\nVAT 5%   87.50\nGrand Total   1837.50\nPaid via Rocket",
+  "lines": [
+    "Meena Bazar Dhanmondi",
+    "BIN: 001245704-0101",
+    "Date: 03/03/2026",
+    "Mineral Water 2L   40.00",
+    "Chicken Biryani   260.00",
+    "Cotton Panjabi   1450.00",
+    "Subtotal   1750.00",
+    "VAT 5%   87.50",
+    "Grand Total   1837.50",
+    "Paid via Rocket"
+  ],
+  "details": {
+    "shop": "Meena Bazar Dhanmondi",
+    "date": "2026-03-03",
+    "total": 1837.5,
+    "vat": 87.5,
+    "payment_method": "Rocket",
+    "bin": "001245704-0101",
+    "category": "groceries"
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "id": "bill_006_photo",
+  "image": "bill_006_photo.jpg",
+  "kind": "bill",
+  "script": "mixed",
+  "font": "TiroBangla",
+  "is_photo_like": true,
+  "is_synthetic_handwriting": false,
+  "ground_truth_quad": [
+    [
+      0.06972202658653259,
+      0.1148352101445198
+    ],
+    [
+      0.9407766461372375,
+      0.08609823882579803
+    ],
+    [
+      0.9235556721687317,
+      0.8976010680198669
+    ],
+    [
+      0.06893564015626907,
+      0.9047208428382874
+    ]
+  ],
+  "text": "ঢাকা ইলেকট্রিক সাপ্লাই কোম্পানি (DESCO)\nAccount No: DESCO-550135\nগ্রাহকের নাম: নাসরিন সুলতানা\nবিল মাস: নভেম্বর ২০২৬\nমোট বিল: 1795.00 BDT\nDue Date: 20/12/2026\nPay via bKash or Nagad",
+  "lines": [
+    "ঢাকা ইলেকট্রিক সাপ্লাই কোম্পানি (DESCO)",
+    "Account No: DESCO-550135",
+    "গ্রাহকের নাম: নাসরিন সুলতানা",
+    "বিল মাস: নভেম্বর ২০২৬",
+    "মোট বিল: 1795.00 BDT",
+    "Due Date: 20/12/2026",
+    "Pay via bKash or Nagad"
+  ],
+  "details": {
+    "account": "DESCO-550135",
+    "total": 1795.0,
+    "due_date": "20/12/2026"
+  }
+}

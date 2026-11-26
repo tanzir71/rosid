@@ -1,0 +1,26 @@
+{
+  "id": "cert_012",
+  "image": "cert_012.jpg",
+  "kind": "certificate",
+  "script": "en",
+  "font": "AnekBangla",
+  "is_photo_like": false,
+  "is_synthetic_handwriting": false,
+  "text": "Government of the People's Republic of Bangladesh\nBirth Registration Certificate\nRegistration No: 19922610152450\nName: Imran Kabir\nDate of Birth: 12/12/1996\nFather: Md. Lutfur Rahman\nMother: Rehana Parvin\nPlace of Birth: Dhaka, Bangladesh\nStatus: Verified Record",
+  "lines": [
+    "Government of the People's Republic of Bangladesh",
+    "Birth Registration Certificate",
+    "Registration No: 19922610152450",
+    "Name: Imran Kabir",
+    "Date of Birth: 12/12/1996",
+    "Father: Md. Lutfur Rahman",
+    "Mother: Rehana Parvin",
+    "Place of Birth: Dhaka, Bangladesh",
+    "Status: Verified Record"
+  ],
+  "details": {
+    "registration_no": "19922610152450",
+    "name_en": "Imran Kabir",
+    "dob": "12/12/1996"
+  }
+}

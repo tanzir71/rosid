@@ -1,0 +1,24 @@
+{
+  "id": "bill_007",
+  "image": "bill_007.jpg",
+  "kind": "bill",
+  "script": "mixed",
+  "font": "AnekBangla",
+  "is_photo_like": false,
+  "is_synthetic_handwriting": false,
+  "text": "ঢাকা ইলেকট্রিক সাপ্লাই কোম্পানি (DESCO)\nAccount No: DESCO-550142\nগ্রাহকের নাম: আবুল কালাম আজাদ\nবিল মাস: নভেম্বর ২০২৬\nমোট বিল: 1930.00 BDT\nDue Date: 21/12/2026\nPay via bKash or Nagad",
+  "lines": [
+    "ঢাকা ইলেকট্রিক সাপ্লাই কোম্পানি (DESCO)",
+    "Account No: DESCO-550142",
+    "গ্রাহকের নাম: আবুল কালাম আজাদ",
+    "বিল মাস: নভেম্বর ২০২৬",
+    "মোট বিল: 1930.00 BDT",
+    "Due Date: 21/12/2026",
+    "Pay via bKash or Nagad"
+  ],
+  "details": {
+    "account": "DESCO-550142",
+    "total": 1930.0,
+    "due_date": "21/12/2026"
+  }
+}

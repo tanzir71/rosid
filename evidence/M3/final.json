@@ -1,0 +1,82 @@
+{
+  "mode": "v2_tess_best",
+  "engine_description": "M2 cleaner + PP-OCRv5 mobile det + PP-OCRv5 en rec + matra router + per-line Tesseract ben+eng (tessdata_best, psm 7)",
+  "timestamp": "2026-11-27T02:02:20.750332",
+  "fixture_count": 168,
+  "by_script": {
+    "mixed": {
+      "count": 44,
+      "cer": 0.023,
+      "wer": 0.074
+    },
+    "en": {
+      "count": 54,
+      "cer": 0.0009,
+      "wer": 0.0033
+    },
+    "bn": {
+      "count": 62,
+      "cer": 0.0222,
+      "wer": 0.1088
+    }
+  },
+  "by_kind": {
+    "bill": {
+      "count": 24,
+      "cer": 0.03,
+      "wer": 0.0757
+    },
+    "certificate": {
+      "count": 32,
+      "cer": 0.0061,
+      "wer": 0.0309
+    },
+    "synthetic_handwriting": {
+      "count": 8,
+      "cer": 0.015,
+      "wer": 0.0284
+    },
+    "land": {
+      "count": 36,
+      "cer": 0.0237,
+      "wer": 0.1157
+    },
+    "letter": {
+      "count": 32,
+      "cer": 0.0128,
+      "wer": 0.0608
+    },
+    "receipt": {
+      "count": 36,
+      "cer": 0.0051,
+      "wer": 0.0242
+    }
+  },
+  "by_surface": {
+    "clean": {
+      "count": 120,
+      "cer": 0.0152,
+      "wer": 0.0648
+    },
+    "photo_like": {
+      "count": 40,
+      "cer": 0.012,
+      "wer": 0.0579
+    }
+  },
+  "key_details": {
+    "receipts_total": 36,
+    "receipt_total_exact": 35,
+    "receipt_total_exact_rate": 0.9722,
+    "receipt_date_exact_rate": 0.9722,
+    "receipt_shop_hit_rate": 1.0,
+    "land_total": 36,
+    "land_khatian_exact_rate": 0.8611,
+    "land_plot_exact_rate": 0.9444,
+    "land_area_exact_rate": 0.8056
+  },
+  "timing_ms": {
+    "median": 4935.3,
+    "p90": 5636.5
+  }
+}

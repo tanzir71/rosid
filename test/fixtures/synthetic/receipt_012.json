@@ -1,0 +1,31 @@
+{
+  "id": "receipt_012",
+  "image": "receipt_012.jpg",
+  "kind": "receipt",
+  "script": "en",
+  "font": "AnekBangla",
+  "is_photo_like": false,
+  "is_synthetic_handwriting": false,
+  "text": "Star Kabab Banani\nBIN: 001245821-0101\nDate: 12/01/2026\nMineral Water 2L   40.00\nChicken Biryani   260.00\nBrown Sugar 1kg   135.00\nSubtotal   435.00\nVAT 5%   21.75\nGrand Total   456.75\nPaid via Nagad",
+  "lines": [
+    "Star Kabab Banani",
+    "BIN: 001245821-0101",
+    "Date: 12/01/2026",
+    "Mineral Water 2L   40.00",
+    "Chicken Biryani   260.00",
+    "Brown Sugar 1kg   135.00",
+    "Subtotal   435.00",
+    "VAT 5%   21.75",
+    "Grand Total   456.75",
+    "Paid via Nagad"
+  ],
+  "details": {
+    "shop": "Star Kabab Banani",
+    "date": "2026-01-12",
+    "total": 456.75,
+    "vat": 21.75,
+    "payment_method": "Nagad",
+    "bin": "001245821-0101",
+    "category": "food"
+  }
+}

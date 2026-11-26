@@ -1,0 +1,30 @@
+{
+  "id": "receipt_020",
+  "image": "receipt_020.jpg",
+  "kind": "receipt",
+  "script": "mixed",
+  "font": "HindSiliguri",
+  "is_photo_like": false,
+  "is_synthetic_handwriting": false,
+  "text": "Aarong Uttara\nBIN: 001245925-0101\nDate: 20/09/2026\nMineral Water 2L   40.00\nCotton Panjabi   1450.00\nতরল দুধ ১ লিটার   95.00\nVAT   79.25\nTotal   1664.25\nPaid by Visa Card",
+  "lines": [
+    "Aarong Uttara",
+    "BIN: 001245925-0101",
+    "Date: 20/09/2026",
+    "Mineral Water 2L   40.00",
+    "Cotton Panjabi   1450.00",
+    "তরল দুধ ১ লিটার   95.00",
+    "VAT   79.25",
+    "Total   1664.25",
+    "Paid by Visa Card"
+  ],
+  "details": {
+    "shop": "Aarong Uttara",
+    "date": "2026-09-20",
+    "total": 1664.25,
+    "vat": 79.25,
+    "payment_method": "Card",
+    "bin": "001245925-0101",
+    "category": "shopping"
+  }
+}

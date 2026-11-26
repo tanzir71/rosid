@@ -1,0 +1,44 @@
+{
+  "id": "cert_004_photo",
+  "image": "cert_004_photo.jpg",
+  "kind": "certificate",
+  "script": "en",
+  "font": "NotoSansBengali",
+  "is_photo_like": true,
+  "is_synthetic_handwriting": false,
+  "ground_truth_quad": [
+    [
+      0.08043352514505386,
+      0.09692785888910294
+    ],
+    [
+      0.905144453048706,
+      0.11171979457139969
+    ],
+    [
+      0.9189800024032593,
+      0.8903864026069641
+    ],
+    [
+      0.06058744713664055,
+      0.8864461183547974
+    ]
+  ],
+  "text": "Government of the People's Republic of Bangladesh\nBirth Registration Certificate\nRegistration No: 19932610163127\nName: Mahmudul Hasan\nDate of Birth: 04/04/1998\nFather: Md. Delwar Hossain\nMother: Shirin Akter\nPlace of Birth: Dhaka, Bangladesh\nStatus: Verified Record",
+  "lines": [
+    "Government of the People's Republic of Bangladesh",
+    "Birth Registration Certificate",
+    "Registration No: 19932610163127",
+    "Name: Mahmudul Hasan",
+    "Date of Birth: 04/04/1998",
+    "Father: Md. Delwar Hossain",
+    "Mother: Shirin Akter",
+    "Place of Birth: Dhaka, Bangladesh",
+    "Status: Verified Record"
+  ],
+  "details": {
+    "registration_no": "19932610163127",
+    "name_en": "Mahmudul Hasan",
+    "dob": "04/04/1998"
+  }
+}

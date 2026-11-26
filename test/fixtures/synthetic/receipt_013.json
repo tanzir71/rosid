@@ -1,0 +1,31 @@
+{
+  "id": "receipt_013",
+  "image": "receipt_013.jpg",
+  "kind": "receipt",
+  "script": "en",
+  "font": "NotoSerifBengali",
+  "is_photo_like": false,
+  "is_synthetic_handwriting": false,
+  "text": "Aarong Uttara\nBIN: 001245834-0101\nDate: 13/02/2026\nGreen Tea Box   180.00\nChicken Biryani   260.00\nNapa Extra Strip   25.00\nSubtotal   465.00\nVAT 5%   23.25\nGrand Total   488.25\nPaid via Rocket",
+  "lines": [
+    "Aarong Uttara",
+    "BIN: 001245834-0101",
+    "Date: 13/02/2026",
+    "Green Tea Box   180.00",
+    "Chicken Biryani   260.00",
+    "Napa Extra Strip   25.00",
+    "Subtotal   465.00",
+    "VAT 5%   23.25",
+    "Grand Total   488.25",
+    "Paid via Rocket"
+  ],
+  "details": {
+    "shop": "Aarong Uttara",
+    "date": "2026-02-13",
+    "total": 488.25,
+    "vat": 23.25,
+    "payment_method": "Rocket",
+    "bin": "001245834-0101",
+    "category": "shopping"
+  }
+}

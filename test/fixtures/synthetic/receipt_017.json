@@ -1,0 +1,30 @@
+{
+  "id": "receipt_017",
+  "image": "receipt_017.jpg",
+  "kind": "receipt",
+  "script": "mixed",
+  "font": "AnekBangla",
+  "is_photo_like": false,
+  "is_synthetic_handwriting": false,
+  "text": "Meena Bazar Dhanmondi\nBIN: 001245886-0101\nDate: 17/06/2026\nRed Lentil 1kg   145.00\nCotton Panjabi   1450.00\nমিনিকেট চাল ৫ কেজি   380.00\nVAT   98.75\nTotal   2073.75\nPaid via Nagad",
+  "lines": [
+    "Meena Bazar Dhanmondi",
+    "BIN: 001245886-0101",
+    "Date: 17/06/2026",
+    "Red Lentil 1kg   145.00",
+    "Cotton Panjabi   1450.00",
+    "মিনিকেট চাল ৫ কেজি   380.00",
+    "VAT   98.75",
+    "Total   2073.75",
+    "Paid via Nagad"
+  ],
+  "details": {
+    "shop": "Meena Bazar Dhanmondi",
+    "date": "2026-06-17",
+    "total": 2073.75,
+    "vat": 98.75,
+    "payment_method": "Nagad",
+    "bin": "001245886-0101",
+    "category": "groceries"
+  }
+}

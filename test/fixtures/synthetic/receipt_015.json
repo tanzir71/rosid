@@ -1,0 +1,30 @@
+{
+  "id": "receipt_015",
+  "image": "receipt_015.jpg",
+  "kind": "receipt",
+  "script": "mixed",
+  "font": "HindSiliguri",
+  "is_photo_like": false,
+  "is_synthetic_handwriting": false,
+  "text": "Shwapno Super Shop\nBIN: 001245860-0101\nDate: 15/04/2026\nFresh Milk 1L   95.00\nCotton Panjabi   1450.00\nমুরগির বিরিয়ানি   260.00\nVAT   90.25\nTotal   1895.25\nPaid by Visa Card",
+  "lines": [
+    "Shwapno Super Shop",
+    "BIN: 001245860-0101",
+    "Date: 15/04/2026",
+    "Fresh Milk 1L   95.00",
+    "Cotton Panjabi   1450.00",
+    "মুরগির বিরিয়ানি   260.00",
+    "VAT   90.25",
+    "Total   1895.25",
+    "Paid by Visa Card"
+  ],
+  "details": {
+    "shop": "Shwapno Super Shop",
+    "date": "2026-04-15",
+    "total": 1895.25,
+    "vat": 90.25,
+    "payment_method": "Card",
+    "bin": "001245860-0101",
+    "category": "groceries"
+  }
+}

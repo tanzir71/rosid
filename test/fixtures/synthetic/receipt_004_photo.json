@@ -1,0 +1,49 @@
+{
+  "id": "receipt_004_photo",
+  "image": "receipt_004_photo.jpg",
+  "kind": "receipt",
+  "script": "en",
+  "font": "NotoSansBengali",
+  "is_photo_like": true,
+  "is_synthetic_handwriting": false,
+  "ground_truth_quad": [
+    [
+      0.07854142040014267,
+      0.09983620792627335
+    ],
+    [
+      0.9173280000686646,
+      0.08320199698209763
+    ],
+    [
+      0.9100871682167053,
+      0.9186672568321228
+    ],
+    [
+      0.10119520127773285,
+      0.9152626395225525
+    ]
+  ],
+  "text": "Lazz Pharma Mirpur\nBIN: 001245717-0101\nDate: 04/04/2026\nBrown Sugar 1kg   135.00\nNapa Extra Strip   25.00\nRed Lentil 1kg   145.00\nSubtotal   305.00\nVAT 5%   15.25\nGrand Total   320.25\nPaid by Cash",
+  "lines": [
+    "Lazz Pharma Mirpur",
+    "BIN: 001245717-0101",
+    "Date: 04/04/2026",
+    "Brown Sugar 1kg   135.00",
+    "Napa Extra Strip   25.00",
+    "Red Lentil 1kg   145.00",
+    "Subtotal   305.00",
+    "VAT 5%   15.25",
+    "Grand Total   320.25",
+    "Paid by Cash"
+  ],
+  "details": {
+    "shop": "Lazz Pharma Mirpur",
+    "date": "2026-04-04",
+    "total": 320.25,
+    "vat": 15.25,
+    "payment_method": "Cash",
+    "bin": "001245717-0101",
+    "category": "health"
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "id": "bill_008_photo",
+  "image": "bill_008_photo.jpg",
+  "kind": "bill",
+  "script": "mixed",
+  "font": "NotoSerifBengali",
+  "is_photo_like": true,
+  "is_synthetic_handwriting": false,
+  "ground_truth_quad": [
+    [
+      0.07891404628753662,
+      0.09207144379615784
+    ],
+    [
+      0.9341922402381897,
+      0.10099124163389206
+    ],
+    [
+      0.9355663657188416,
+      0.9127656817436218
+    ],
+    [
+      0.10008976608514786,
+      0.9166309833526611
+    ]
+  ],
+  "text": "ঢাকা ইলেকট্রিক সাপ্লাই কোম্পানি (DESCO)\nAccount No: DESCO-550149\nগ্রাহকের নাম: তানভীর আহমেদ\nবিল মাস: নভেম্বর ২০২৬\nমোট বিল: 2065.00 BDT\nDue Date: 22/12/2026\nPay via bKash or Nagad",
+  "lines": [
+    "ঢাকা ইলেকট্রিক সাপ্লাই কোম্পানি (DESCO)",
+    "Account No: DESCO-550149",
+    "গ্রাহকের নাম: তানভীর আহমেদ",
+    "বিল মাস: নভেম্বর ২০২৬",
+    "মোট বিল: 2065.00 BDT",
+    "Due Date: 22/12/2026",
+    "Pay via bKash or Nagad"
+  ],
+  "details": {
+    "account": "DESCO-550149",
+    "total": 2065.0,
+    "due_date": "22/12/2026"
+  }
+}

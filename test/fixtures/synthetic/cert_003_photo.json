@@ -1,0 +1,44 @@
+{
+  "id": "cert_003_photo",
+  "image": "cert_003_photo.jpg",
+  "kind": "certificate",
+  "script": "en",
+  "font": "NotoSerifBengali",
+  "is_photo_like": true,
+  "is_synthetic_handwriting": false,
+  "ground_truth_quad": [
+    [
+      0.06344403326511383,
+      0.10505837202072144
+    ],
+    [
+      0.8992072939872742,
+      0.07692185789346695
+    ],
+    [
+      0.9105686545372009,
+      0.8916757702827454
+    ],
+    [
+      0.09152501821517944,
+      0.9197896122932434
+    ]
+  ],
+  "text": "Government of the People's Republic of Bangladesh\nBirth Registration Certificate\nRegistration No: 19922610107799\nName: Nusrat Jahan\nDate of Birth: 03/03/1997\nFather: Md. Mizanur Rahman\nMother: Dilruba Akter\nPlace of Birth: Dhaka, Bangladesh\nStatus: Verified Record",
+  "lines": [
+    "Government of the People's Republic of Bangladesh",
+    "Birth Registration Certificate",
+    "Registration No: 19922610107799",
+    "Name: Nusrat Jahan",
+    "Date of Birth: 03/03/1997",
+    "Father: Md. Mizanur Rahman",
+    "Mother: Dilruba Akter",
+    "Place of Birth: Dhaka, Bangladesh",
+    "Status: Verified Record"
+  ],
+  "details": {
+    "registration_no": "19922610107799",
+    "name_en": "Nusrat Jahan",
+    "dob": "03/03/1997"
+  }
+}

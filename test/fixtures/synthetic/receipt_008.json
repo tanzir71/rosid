@@ -1,0 +1,31 @@
+{
+  "id": "receipt_008",
+  "image": "receipt_008.jpg",
+  "kind": "receipt",
+  "script": "en",
+  "font": "NotoSerifBengali",
+  "is_photo_like": false,
+  "is_synthetic_handwriting": false,
+  "text": "Shwapno Super Shop\nBIN: 001245769-0101\nDate: 08/08/2026\nSoybean Oil 2L   340.00\nCotton Panjabi   1450.00\nRed Lentil 1kg   145.00\nSubtotal   1935.00\nVAT 5%   96.75\nGrand Total   2031.75\nPaid via Rocket",
+  "lines": [
+    "Shwapno Super Shop",
+    "BIN: 001245769-0101",
+    "Date: 08/08/2026",
+    "Soybean Oil 2L   340.00",
+    "Cotton Panjabi   1450.00",
+    "Red Lentil 1kg   145.00",
+    "Subtotal   1935.00",
+    "VAT 5%   96.75",
+    "Grand Total   2031.75",
+    "Paid via Rocket"
+  ],
+  "details": {
+    "shop": "Shwapno Super Shop",
+    "date": "2026-08-08",
+    "total": 2031.75,
+    "vat": 96.75,
+    "payment_method": "Rocket",
+    "bin": "001245769-0101",
+    "category": "groceries"
+  }
+}

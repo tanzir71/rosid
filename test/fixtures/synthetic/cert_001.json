@@ -1,0 +1,26 @@
+{
+  "id": "cert_001",
+  "image": "cert_001.jpg",
+  "kind": "certificate",
+  "script": "en",
+  "font": "TiroBangla",
+  "is_photo_like": false,
+  "is_synthetic_handwriting": false,
+  "text": "Government of the People's Republic of Bangladesh\nBirth Registration Certificate\nRegistration No: 19902610153635\nName: Farhana Akter\nDate of Birth: 01/01/1995\nFather: Md. Zakir Hossain\nMother: Roksana Begum\nPlace of Birth: Dhaka, Bangladesh\nStatus: Verified Record",
+  "lines": [
+    "Government of the People's Republic of Bangladesh",
+    "Birth Registration Certificate",
+    "Registration No: 19902610153635",
+    "Name: Farhana Akter",
+    "Date of Birth: 01/01/1995",
+    "Father: Md. Zakir Hossain",
+    "Mother: Roksana Begum",
+    "Place of Birth: Dhaka, Bangladesh",
+    "Status: Verified Record"
+  ],
+  "details": {
+    "registration_no": "19902610153635",
+    "name_en": "Farhana Akter",
+    "dob": "01/01/1995"
+  }
+}

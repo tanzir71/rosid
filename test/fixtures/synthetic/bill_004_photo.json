@@ -1,0 +1,42 @@
+{
+  "id": "bill_004_photo",
+  "image": "bill_004_photo.jpg",
+  "kind": "bill",
+  "script": "mixed",
+  "font": "NotoSansBengali",
+  "is_photo_like": true,
+  "is_synthetic_handwriting": false,
+  "ground_truth_quad": [
+    [
+      0.10515936464071274,
+      0.08644264936447144
+    ],
+    [
+      0.9068000912666321,
+      0.09425283223390579
+    ],
+    [
+      0.9280124306678772,
+      0.9259223937988281
+    ],
+    [
+      0.09691403061151505,
+      0.8917913436889648
+    ]
+  ],
+  "text": "ঢাকা ইলেকট্রিক সাপ্লাই কোম্পানি (DESCO)\nAccount No: DESCO-550121\nগ্রাহকের নাম: সালমা আক্তার\nবিল মাস: নভেম্বর ২০২৬\nমোট বিল: 1525.00 BDT\nDue Date: 18/12/2026\nPay via bKash or Nagad",
+  "lines": [
+    "ঢাকা ইলেকট্রিক সাপ্লাই কোম্পানি (DESCO)",
+    "Account No: DESCO-550121",
+    "গ্রাহকের নাম: সালমা আক্তার",
+    "বিল মাস: নভেম্বর ২০২৬",
+    "মোট বিল: 1525.00 BDT",
+    "Due Date: 18/12/2026",
+    "Pay via bKash or Nagad"
+  ],
+  "details": {
+    "account": "DESCO-550121",
+    "total": 1525.0,
+    "due_date": "18/12/2026"
+  }
+}

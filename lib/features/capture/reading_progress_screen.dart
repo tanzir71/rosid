@@ -11,7 +11,11 @@ import 'package:rosid/core/theme/tokens.g.dart';
 import 'package:rosid/core/utils/bangla_digits.dart';
 import 'package:rosid/core/widgets/rosid_controls.dart';
 import 'package:rosid/core/widgets/rosid_navigation.dart';
+import 'package:rosid/data/database/database_provider.dart';
+import 'package:rosid/data/repositories/record_repository.dart';
 import 'package:rosid/features/capture/scan_controller.dart';
+import 'package:rosid/ocr/pipeline/reading_interfaces.dart';
+import 'package:rosid/ocr/pipeline/rosid_reading_pipeline.dart';
 
 enum ReadingStepState { pending, active, done }
 
@@ -39,14 +43,15 @@ class ReadingProgressSnapshot {
 }
 
 /// Reading progress screen (`design/screens/scan-reading.png`).
-/// In M2 this runs the real page cleaning & ID card composition pipeline;
-/// M3 wires steps 2–4 to live line detection, recognition and detail extraction.
+/// Drives M2 cleaning + M3 ONNX/Tesseract reading pipeline with live per-line
+/// progress updates and clean cancellation via [ReadingCancelToken].
 class ReadingProgressScreen extends ConsumerStatefulWidget {
   const ReadingProgressScreen({
     super.key,
     this.previewSnapshot,
     this.previewPage,
     this.autoStart = true,
+    this.runOcr = true,
   });
 
   @visibleForTesting
@@ -58,6 +63,9 @@ class ReadingProgressScreen extends ConsumerStatefulWidget {
   @visibleForTesting
   final bool autoStart;
 
+  @visibleForTesting
+  final bool runOcr;
+
   @override
   ConsumerState<ReadingProgressScreen> createState() =>
       _ReadingProgressScreenState();
@@ -65,7 +73,7 @@ class ReadingProgressScreen extends ConsumerStatefulWidget {
 
 class _ReadingProgressScreenState extends ConsumerState<ReadingProgressScreen> {
   ReadingProgressSnapshot _snapshot = const ReadingProgressSnapshot();
-  bool _cancelled = false;
+  final ReadingCancelToken _cancelToken = ReadingCancelToken();
 
   @override
   void initState() {
@@ -75,18 +83,25 @@ class _ReadingProgressScreenState extends ConsumerState<ReadingProgressScreen> {
       return;
     }
     if (widget.autoStart) {
-      Future.microtask(_runM2CleaningPipeline);
+      Future.microtask(_runReadingPipeline);
     }
   }
 
-  Future<void> _runM2CleaningPipeline() async {
-    if (!mounted || _cancelled) return;
+  @override
+  void dispose() {
+    _cancelToken.cancel();
+    super.dispose();
+  }
+
+  Future<void> _runReadingPipeline() async {
+    if (!mounted || _cancelToken.isCancelled) return;
     try {
+      // Step 1: Clean and straighten every captured page.
       final scanId = await ref
           .read(v2ScanProvider.notifier)
           .cleanAllPages(
             onProgress: (completed, total) {
-              if (!mounted || _cancelled) return;
+              if (!mounted || _cancelToken.isCancelled) return;
               setState(() {
                 _snapshot = ReadingProgressSnapshot(
                   cleanStep: completed >= total
@@ -95,38 +110,161 @@ class _ReadingProgressScreenState extends ConsumerState<ReadingProgressScreen> {
                   scriptStep: completed >= total
                       ? ReadingStepState.active
                       : ReadingStepState.pending,
-                  scanBarFraction: total == 0 ? 0.4 : (completed / total) * 0.7,
+                  scanBarFraction: total == 0
+                      ? 0.25
+                      : (completed / total) * 0.30,
                 );
               });
             },
           );
-      if (!mounted || _cancelled) return;
+      if (!mounted || _cancelToken.isCancelled) return;
+      if (scanId == null) {
+        context.go('/');
+        return;
+      }
+
+      // Steps 2–4: Run ONNX line detector + script router + Latin/Bangla recognisers.
+      if (widget.runOcr) {
+        final pages = ref.read(v2ScanProvider).pages;
+        final pipeline = ref.read(readingPipelineProvider);
+        final pageResults = <ReadingPageResult>[];
+        var anyHandwriting = false;
+
+        for (var i = 0; i < pages.length; i++) {
+          if (!mounted || _cancelToken.isCancelled) return;
+          final page = pages[i];
+          final greyPath = page.cleanedGreyPath ?? page.originalPath;
+          final greyBytes = await File(greyPath).readAsBytes();
+          if (!mounted || _cancelToken.isCancelled) return;
+
+          final pageRes = await pipeline.readPage(
+            greyImageBytes: greyBytes,
+            pageIndex: i,
+            cancelToken: _cancelToken,
+            onProgress: (event) {
+              if (!mounted || _cancelToken.isCancelled) return;
+              anyHandwriting = anyHandwriting || event.hasHandwriting;
+              setState(() {
+                _snapshot = _snapshotForEvent(event, anyHandwriting);
+              });
+            },
+          );
+          if (!mounted || _cancelToken.isCancelled) return;
+          anyHandwriting = anyHandwriting || pageRes.hasHandwriting;
+          pageResults.add(pageRes);
+        }
+
+        if (!mounted || _cancelToken.isCancelled) return;
+        final fallbackTitle = context.l10n.document;
+        final db = ref.read(databaseProvider);
+        await persistReadingResults(
+          db: db,
+          scanId: scanId,
+          pageResults: pageResults,
+        );
+
+        final combinedText = pageResults
+            .map((r) => r.fullText)
+            .where((t) => t.isNotEmpty)
+            .join('\n\n');
+        final firstLine = combinedText
+            .split('\n')
+            .map((l) => l.trim())
+            .firstWhere((l) => l.isNotEmpty, orElse: () => '');
+        await ref
+            .read(recordRepositoryProvider)
+            .saveDocument(
+              scanId: scanId,
+              title: firstLine.isEmpty
+                  ? fallbackTitle
+                  : (firstLine.length > 60
+                        ? firstLine.substring(0, 60)
+                        : firstLine),
+              body: combinedText,
+              tags: const [],
+            );
+      }
+
+      if (!mounted || _cancelToken.isCancelled) return;
       setState(() {
-        _snapshot = const ReadingProgressSnapshot(
+        _snapshot = ReadingProgressSnapshot(
           cleanStep: ReadingStepState.done,
           scriptStep: ReadingStepState.done,
           readStep: ReadingStepState.done,
           detailsStep: ReadingStepState.done,
-          scanBarFraction: 0.9,
+          currentLine: _snapshot.totalLines,
+          totalLines: _snapshot.totalLines,
+          hasHandwriting: _snapshot.hasHandwriting,
+          scanBarFraction: 0.92,
         );
       });
-      await Future<void>.delayed(const Duration(milliseconds: 120));
-      if (!mounted || _cancelled) return;
-      if (scanId != null) {
-        context.go('/paper/$scanId');
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+      if (!mounted || _cancelToken.isCancelled) return;
+      context.go('/paper/$scanId');
+    } on Object {
+      if (!mounted || _cancelToken.isCancelled) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(context.l10n.processingFailed)));
+      if (context.canPop()) {
+        context.pop();
       } else {
         context.go('/');
       }
-    } on Object {
-      if (!mounted || _cancelled) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(context.l10n.processingFailed)));
-      if (context.canPop()) context.pop();
     }
   }
 
+  ReadingProgressSnapshot _snapshotForEvent(
+    ReadingProgressEvent event,
+    bool hasHandwriting,
+  ) {
+    return switch (event.stage) {
+      ReadingStage.cleaning => ReadingProgressSnapshot(
+        cleanStep: ReadingStepState.active,
+        hasHandwriting: hasHandwriting,
+        scanBarFraction: 0.20,
+      ),
+      ReadingStage.detectingLines => ReadingProgressSnapshot(
+        cleanStep: ReadingStepState.done,
+        scriptStep: ReadingStepState.active,
+        hasHandwriting: hasHandwriting,
+        scanBarFraction: 0.35,
+      ),
+      ReadingStage.readingLines => ReadingProgressSnapshot(
+        cleanStep: ReadingStepState.done,
+        scriptStep: ReadingStepState.done,
+        readStep: ReadingStepState.active,
+        currentLine: event.currentLine,
+        totalLines: event.totalLines,
+        hasHandwriting: hasHandwriting,
+        scanBarFraction: event.totalLines <= 0
+            ? 0.50
+            : 0.35 + (event.currentLine / event.totalLines) * 0.50,
+      ),
+      ReadingStage.findingDetails => ReadingProgressSnapshot(
+        cleanStep: ReadingStepState.done,
+        scriptStep: ReadingStepState.done,
+        readStep: ReadingStepState.done,
+        detailsStep: ReadingStepState.active,
+        currentLine: event.totalLines,
+        totalLines: event.totalLines,
+        hasHandwriting: hasHandwriting,
+        scanBarFraction: 0.88,
+      ),
+      ReadingStage.done => ReadingProgressSnapshot(
+        cleanStep: ReadingStepState.done,
+        scriptStep: ReadingStepState.done,
+        readStep: ReadingStepState.done,
+        detailsStep: ReadingStepState.done,
+        currentLine: event.totalLines,
+        totalLines: event.totalLines,
+        hasHandwriting: hasHandwriting,
+        scanBarFraction: 0.94,
+      ),
+    };
+  }
+
   void _cancel() {
-    _cancelled = true;
+    _cancelToken.cancel();
     if (context.canPop()) {
       context.pop();
     } else {

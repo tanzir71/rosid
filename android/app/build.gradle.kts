@@ -69,10 +69,3 @@ kotlin {
 flutter {
     source = "../.."
 }
-
-dependencies {
-    // Bundled Latin recognizer used only by the Android MethodChannel. Keeping
-    // this native dependency out of pubspec prevents ML Kit and its telemetry
-    // support pods from being linked into the iOS app.
-    implementation("com.google.mlkit:text-recognition:16.0.1")
-}

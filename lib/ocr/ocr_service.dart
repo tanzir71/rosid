@@ -1,10 +1,6 @@
-import 'dart:io';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:rosid/ocr/engines/mlkit_latin.dart';
 import 'package:rosid/ocr/engines/ocr_engine.dart';
 import 'package:rosid/ocr/engines/tesseract_bn.dart';
-import 'package:rosid/ocr/engines/tflite_bn_stub.dart';
 import 'package:rosid/ocr/merge.dart';
 import 'package:rosid/ocr/models/ocr_models.dart';
 import 'package:rosid/ocr/script_detect.dart';
@@ -30,14 +26,12 @@ class OcrService {
   const OcrService({
     required this.latinEngine,
     required this.banglaEngine,
-    required this.handwritingEngine,
     required this.tessdataInstaller,
     this.latinEngineRequiresTessdata = false,
   });
 
   final OcrEngine latinEngine;
   final OcrEngine banglaEngine;
-  final OcrEngine handwritingEngine;
   final TessdataInstaller tessdataInstaller;
   final bool latinEngineRequiresTessdata;
 
@@ -85,30 +79,16 @@ class OcrService {
   }
 }
 
-final mlKitLatinEngineProvider = Provider<MlKitLatinEngine>((ref) {
-  return const MlKitLatinEngine();
-});
-
 final tesseractBanglaEngineProvider = Provider<TesseractBanglaEngine>(
   (ref) => const TesseractBanglaEngine(),
 );
 
-final tfliteBanglaHandwritingEngineProvider =
-    Provider<TfliteBanglaHandwritingEngine>(
-      (ref) => const TfliteBanglaHandwritingEngine(),
-    );
-
 final ocrServiceProvider = Provider<OcrService>((ref) {
-  final usesAndroidMlKit = Platform.isAndroid;
   final tesseract = ref.watch(tesseractBanglaEngineProvider);
-  final latinEngine = usesAndroidMlKit
-      ? ref.watch(mlKitLatinEngineProvider)
-      : tesseract;
   return OcrService(
-    latinEngine: latinEngine,
+    latinEngine: tesseract,
     banglaEngine: tesseract,
-    handwritingEngine: ref.watch(tfliteBanglaHandwritingEngineProvider),
     tessdataInstaller: ref.watch(tessdataInstallerProvider),
-    latinEngineRequiresTessdata: !usesAndroidMlKit,
+    latinEngineRequiresTessdata: true,
   );
 });

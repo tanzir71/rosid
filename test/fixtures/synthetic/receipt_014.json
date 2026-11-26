@@ -1,0 +1,31 @@
+{
+  "id": "receipt_014",
+  "image": "receipt_014.jpg",
+  "kind": "receipt",
+  "script": "en",
+  "font": "NotoSansBengali",
+  "is_photo_like": false,
+  "is_synthetic_handwriting": false,
+  "text": "Dhaka Books Nilkhet\nBIN: 001245847-0101\nDate: 14/03/2026\nMiniket Rice 5kg   380.00\nRed Lentil 1kg   145.00\nSoybean Oil 2L   340.00\nSubtotal   865.00\nVAT 5%   43.25\nGrand Total   908.25\nPaid by Cash",
+  "lines": [
+    "Dhaka Books Nilkhet",
+    "BIN: 001245847-0101",
+    "Date: 14/03/2026",
+    "Miniket Rice 5kg   380.00",
+    "Red Lentil 1kg   145.00",
+    "Soybean Oil 2L   340.00",
+    "Subtotal   865.00",
+    "VAT 5%   43.25",
+    "Grand Total   908.25",
+    "Paid by Cash"
+  ],
+  "details": {
+    "shop": "Dhaka Books Nilkhet",
+    "date": "2026-03-14",
+    "total": 908.25,
+    "vat": 43.25,
+    "payment_method": "Cash",
+    "bin": "001245847-0101",
+    "category": "shopping"
+  }
+}

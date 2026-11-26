@@ -1,0 +1,31 @@
+{
+  "id": "receipt_006",
+  "image": "receipt_006.jpg",
+  "kind": "receipt",
+  "script": "en",
+  "font": "TiroBangla",
+  "is_photo_like": false,
+  "is_synthetic_handwriting": false,
+  "text": "Aarong Uttara\nBIN: 001245743-0101\nDate: 06/06/2026\nChicken Biryani   260.00\nBrown Sugar 1kg   135.00\nFresh Milk 1L   95.00\nSubtotal   490.00\nVAT 5%   24.50\nGrand Total   514.50\nPaid via bKash",
+  "lines": [
+    "Aarong Uttara",
+    "BIN: 001245743-0101",
+    "Date: 06/06/2026",
+    "Chicken Biryani   260.00",
+    "Brown Sugar 1kg   135.00",
+    "Fresh Milk 1L   95.00",
+    "Subtotal   490.00",
+    "VAT 5%   24.50",
+    "Grand Total   514.50",
+    "Paid via bKash"
+  ],
+  "details": {
+    "shop": "Aarong Uttara",
+    "date": "2026-06-06",
+    "total": 514.5,
+    "vat": 24.5,
+    "payment_method": "bKash",
+    "bin": "001245743-0101",
+    "category": "shopping"
+  }
+}

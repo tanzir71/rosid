@@ -1,0 +1,82 @@
+{
+  "mode": "baseline",
+  "engine_description": "v1 whole-page adaptive threshold + Tesseract ben+eng (tessdata_best, psm 6)",
+  "timestamp": "2026-11-27T01:54:34.660267",
+  "fixture_count": 168,
+  "by_script": {
+    "mixed": {
+      "count": 44,
+      "cer": 0.0394,
+      "wer": 0.1016
+    },
+    "en": {
+      "count": 54,
+      "cer": 0.0018,
+      "wer": 0.0082
+    },
+    "bn": {
+      "count": 62,
+      "cer": 0.0475,
+      "wer": 0.157
+    }
+  },
+  "by_kind": {
+    "bill": {
+      "count": 24,
+      "cer": 0.0533,
+      "wer": 0.1135
+    },
+    "certificate": {
+      "count": 32,
+      "cer": 0.01,
+      "wer": 0.0434
+    },
+    "synthetic_handwriting": {
+      "count": 8,
+      "cer": 0.0238,
+      "wer": 0.0496
+    },
+    "land": {
+      "count": 36,
+      "cer": 0.0396,
+      "wer": 0.1556
+    },
+    "letter": {
+      "count": 32,
+      "cer": 0.0367,
+      "wer": 0.1004
+    },
+    "receipt": {
+      "count": 36,
+      "cer": 0.0097,
+      "wer": 0.0322
+    }
+  },
+  "by_surface": {
+    "clean": {
+      "count": 120,
+      "cer": 0.0248,
+      "wer": 0.0819
+    },
+    "photo_like": {
+      "count": 40,
+      "cer": 0.0386,
+      "wer": 0.1181
+    }
+  },
+  "key_details": {
+    "receipts_total": 36,
+    "receipt_total_exact": 35,
+    "receipt_total_exact_rate": 0.9722,
+    "receipt_date_exact_rate": 0.9722,
+    "receipt_shop_hit_rate": 0.9722,
+    "land_total": 36,
+    "land_khatian_exact_rate": 0.8611,
+    "land_plot_exact_rate": 0.8889,
+    "land_area_exact_rate": 0.7222
+  },
+  "timing_ms": {
+    "median": 952.3,
+    "p90": 1293.0
+  }
+}

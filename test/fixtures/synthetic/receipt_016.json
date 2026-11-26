@@ -1,0 +1,30 @@
+{
+  "id": "receipt_016",
+  "image": "receipt_016.jpg",
+  "kind": "receipt",
+  "script": "mixed",
+  "font": "TiroBangla",
+  "is_photo_like": false,
+  "is_synthetic_handwriting": false,
+  "text": "Agora Gulshan\nBIN: 001245873-0101\nDate: 16/05/2026\nRed Lentil 1kg   145.00\nMiniket Rice 5kg   380.00\nপ্যারাসিটামল পাতা   25.00\nVAT   27.50\nTotal   577.50\nPaid via bKash",
+  "lines": [
+    "Agora Gulshan",
+    "BIN: 001245873-0101",
+    "Date: 16/05/2026",
+    "Red Lentil 1kg   145.00",
+    "Miniket Rice 5kg   380.00",
+    "প্যারাসিটামল পাতা   25.00",
+    "VAT   27.50",
+    "Total   577.50",
+    "Paid via bKash"
+  ],
+  "details": {
+    "shop": "Agora Gulshan",
+    "date": "2026-05-16",
+    "total": 577.5,
+    "vat": 27.5,
+    "payment_method": "bKash",
+    "bin": "001245873-0101",
+    "category": "groceries"
+  }
+}

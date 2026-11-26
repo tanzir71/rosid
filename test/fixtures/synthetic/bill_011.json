@@ -1,0 +1,24 @@
+{
+  "id": "bill_011",
+  "image": "bill_011.jpg",
+  "kind": "bill",
+  "script": "mixed",
+  "font": "TiroBangla",
+  "is_photo_like": false,
+  "is_synthetic_handwriting": false,
+  "text": "ঢাকা ইলেকট্রিক সাপ্লাই কোম্পানি (DESCO)\nAccount No: DESCO-550170\nগ্রাহকের নাম: মোঃ কামরুল হাসান\nবিল মাস: নভেম্বর ২০২৬\nমোট বিল: 2470.00 BDT\nDue Date: 25/12/2026\nPay via bKash or Nagad",
+  "lines": [
+    "ঢাকা ইলেকট্রিক সাপ্লাই কোম্পানি (DESCO)",
+    "Account No: DESCO-550170",
+    "গ্রাহকের নাম: মোঃ কামরুল হাসান",
+    "বিল মাস: নভেম্বর ২০২৬",
+    "মোট বিল: 2470.00 BDT",
+    "Due Date: 25/12/2026",
+    "Pay via bKash or Nagad"
+  ],
+  "details": {
+    "account": "DESCO-550170",
+    "total": 2470.0,
+    "due_date": "25/12/2026"
+  }
+}

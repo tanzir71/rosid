@@ -1,0 +1,44 @@
+{
+  "id": "cert_002_photo",
+  "image": "cert_002_photo.jpg",
+  "kind": "certificate",
+  "script": "en",
+  "font": "AnekBangla",
+  "is_photo_like": true,
+  "is_synthetic_handwriting": false,
+  "ground_truth_quad": [
+    [
+      0.10584940016269684,
+      0.077041856944561
+    ],
+    [
+      0.9111256003379822,
+      0.07648278027772903
+    ],
+    [
+      0.9403481483459473,
+      0.9202269315719604
+    ],
+    [
+      0.08208590745925903,
+      0.9234414100646973
+    ]
+  ],
+  "text": "Government of the People's Republic of Bangladesh\nBirth Registration Certificate\nRegistration No: 19912610139541\nName: Tanjimul Islam\nDate of Birth: 02/02/1996\nFather: Md. Saiful Islam\nMother: Shahanaz Parvin\nPlace of Birth: Dhaka, Bangladesh\nStatus: Verified Record",
+  "lines": [
+    "Government of the People's Republic of Bangladesh",
+    "Birth Registration Certificate",
+    "Registration No: 19912610139541",
+    "Name: Tanjimul Islam",
+    "Date of Birth: 02/02/1996",
+    "Father: Md. Saiful Islam",
+    "Mother: Shahanaz Parvin",
+    "Place of Birth: Dhaka, Bangladesh",
+    "Status: Verified Record"
+  ],
+  "details": {
+    "registration_no": "19912610139541",
+    "name_en": "Tanjimul Islam",
+    "dob": "02/02/1996"
+  }
+}
