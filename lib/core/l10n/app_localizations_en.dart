@@ -646,4 +646,81 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get scriptGlyphEn => 'A';
+
+  @override
+  String get autoCapture => 'Auto capture';
+
+  @override
+  String get hintNoPaper => 'Place paper inside the frame';
+
+  @override
+  String get hintMoveCloser => 'Move closer';
+
+  @override
+  String get hintTooDark => 'Too dark. Add light or turn on flash';
+
+  @override
+  String get hintGlare => 'Too much glare. Tilt the paper slightly';
+
+  @override
+  String get hintHoldSteady => 'Hold steady';
+
+  @override
+  String get hintEdgesFound => 'Edges found. Hold steady';
+
+  @override
+  String donePages(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count pages',
+      one: '1 page',
+    );
+    return 'Done, $_temp0';
+  }
+
+  @override
+  String get idFront => 'Front';
+
+  @override
+  String get idBack => 'Back';
+
+  @override
+  String get turnCardOver => 'Turn the card over';
+
+  @override
+  String get idBothSidesNote =>
+      'Front and back will be placed together on one page, ready to print or send.';
+
+  @override
+  String pageOfTotal(int current, int total) {
+    return 'Page $current of $total';
+  }
+
+  @override
+  String get holdAndDragReorder => 'Hold and drag to reorder';
+
+  @override
+  String get readText => 'Read text';
+
+  @override
+  String get stepPageCleaned => 'Page straightened and cleaned';
+
+  @override
+  String get stepTextFound => 'Bangla and English text found';
+
+  @override
+  String get stepReadingText => 'Reading the text';
+
+  @override
+  String stepLineProgress(int current, int total) {
+    return 'Line $current of $total';
+  }
+
+  @override
+  String get stepFindingDetails => 'Finding names, dates and numbers';
+
+  @override
+  String get handwritingNote =>
+      'Part of this page is handwritten. Handwriting is harder to read, so check those words on the next screen.';
 }

@@ -54,6 +54,22 @@ class PrivateFileStore {
     return destination;
   }
 
+  Future<String> persistCaptureBytes({
+    required List<int> bytes,
+    required String scanId,
+    required int pageIndex,
+    String extension = '.jpg',
+  }) async {
+    final directory = await _directory('scans');
+    final safeExtension = extension.isEmpty ? '.jpg' : extension;
+    final destination = path.join(
+      directory.path,
+      '${scanId}_$pageIndex$safeExtension',
+    );
+    await File(destination).writeAsBytes(bytes, flush: true);
+    return destination;
+  }
+
   Future<String> writeProcessed({
     required List<int> bytes,
     required String scanId,

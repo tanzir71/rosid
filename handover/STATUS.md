@@ -2,7 +2,7 @@
 
 The implementing agent keeps this file true. Update it in the same push as the work.
 
-Last updated: 2026-11-27 (M1 completed and verified to Level B)
+Last updated: 2026-11-27 (M2 completed and verified to Level B)
 
 ## Milestones
 
@@ -10,8 +10,8 @@ Last updated: 2026-11-27 (M1 completed and verified to Level B)
 |---|---|---|---|---|
 | M0 | Ground rules and baseline | done | B | `evidence/M0/summary.md` |
 | M1 | Design system and app shell | done | B | `evidence/M1/summary.md` |
-| M2 | Capture and image | not started | | |
-| M3 | Reading text | not started | | |
+| M2 | Capture and image | done | B | `evidence/M2/summary.md` |
+| M3 | Reading text | in progress | | |
 | M4 | Read and fix | not started | | |
 | M5 | English draft | not started | | |
 | M6 | Export | not started | | |
@@ -24,7 +24,7 @@ State is one of: not started, in progress, done, done with gaps.
 
 ## In progress
 
-Starting M2: Capture and image.
+Starting M3: Reading text.
 
 ## Measured numbers
 
@@ -53,6 +53,7 @@ Record every choice the handover left to you: which Bangla recogniser won, which
 | 2026-11-26 | Configured `rosid_test` (4 GB RAM, `android-35;google_apis;x86_64`, WHPX + host GPU) and `rosid_low` (2 GB RAM) | Hardware GPU acceleration (`-gpu host`) enabled reliable, fast headless emulator verification (2.66 s AOT cold start vs 24 s with software rendering). |
 | 2026-11-27 | Bundled subsetted Anek Bangla (instantiated at weights 400/500/600/700 from Google Fonts variable TTF) and Tiro Bangla (400), plus `flutter_svg: ^2.5.1` for the 56 stroke icons | Keeps total bundled fonts to ~1.1 MB while matching Mohor typography and line heights (`tokens.g.dart` generated from `design/tokens.json`). `flutter_svg` adds zero Android permissions. |
 | 2026-11-27 | Added Schema v3 migration (`scans` additions, `scan_pages` additions, 8 new tables) and built empty states for Library, Bundles, Expenses, and shell routes | Preserves all v1/v2 rows (verified by v2→v3 SQLite migration test). Empty states use Mohor cards and primary actions as specified in `design/screens.md` "States not drawn". |
+| 2026-11-27 | M2 fallback: removed `opencv_dart: 2.3.3` and implemented pure-Dart 320 px live edge/quality analyzer (`FrameAnalyzerIsolate`) plus <= 2,000 px `ImageCleaner` (perspective warp, 1/8-scale bright-dilation lighting division, 8x8 CLAHE clip 2.0, edge-preserving denoise, deskew) | `dartcv4`'s native build hook failed during `flutter build apk` while compiling OpenCV 4.13 from source via CMake/Ninja (`The paging file is too small for this operation to complete`). Per `M2-capture-and-image.md` Fallbacks, pure Dart met every M2 gate: 23/24 (95.8%) corners within 2% of frame diagonal on synthetic photo-like set, 3 ms median luma frame time (21 ms encoded JPEG) in `FrameAnalyzerIsolate` on `rosid_test`, and zero native size/alignment bloat. |
 
 ## Not done, needs a person
 
@@ -71,3 +72,4 @@ Things that exist and may work but that you could not check on your machine (for
 | What | Why it could not be checked |
 |---|---|
 | Physical Android device installation and camera lens/autofocus | Headless emulator only; no physical phone available |
+| Live hardware camera YUV image stream format on physical phones | Headless emulator camera tested via `FakeCaptureSource` fixture stream; live hardware Y-plane stride behaviour depends on device HAL |

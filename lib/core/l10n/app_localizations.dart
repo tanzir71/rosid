@@ -1273,6 +1273,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'A'**
   String get scriptGlyphEn;
+
+  /// No description provided for @autoCapture.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto capture'**
+  String get autoCapture;
+
+  /// No description provided for @hintNoPaper.
+  ///
+  /// In en, this message translates to:
+  /// **'Place paper inside the frame'**
+  String get hintNoPaper;
+
+  /// No description provided for @hintMoveCloser.
+  ///
+  /// In en, this message translates to:
+  /// **'Move closer'**
+  String get hintMoveCloser;
+
+  /// No description provided for @hintTooDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Too dark. Add light or turn on flash'**
+  String get hintTooDark;
+
+  /// No description provided for @hintGlare.
+  ///
+  /// In en, this message translates to:
+  /// **'Too much glare. Tilt the paper slightly'**
+  String get hintGlare;
+
+  /// No description provided for @hintHoldSteady.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold steady'**
+  String get hintHoldSteady;
+
+  /// No description provided for @hintEdgesFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Edges found. Hold steady'**
+  String get hintEdgesFound;
+
+  /// No description provided for @donePages.
+  ///
+  /// In en, this message translates to:
+  /// **'Done, {count, plural, =1{1 page} other{{count} pages}}'**
+  String donePages(int count);
+
+  /// No description provided for @idFront.
+  ///
+  /// In en, this message translates to:
+  /// **'Front'**
+  String get idFront;
+
+  /// No description provided for @idBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get idBack;
+
+  /// No description provided for @turnCardOver.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn the card over'**
+  String get turnCardOver;
+
+  /// No description provided for @idBothSidesNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Front and back will be placed together on one page, ready to print or send.'**
+  String get idBothSidesNote;
+
+  /// No description provided for @pageOfTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Page {current} of {total}'**
+  String pageOfTotal(int current, int total);
+
+  /// No description provided for @holdAndDragReorder.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold and drag to reorder'**
+  String get holdAndDragReorder;
+
+  /// No description provided for @readText.
+  ///
+  /// In en, this message translates to:
+  /// **'Read text'**
+  String get readText;
+
+  /// No description provided for @stepPageCleaned.
+  ///
+  /// In en, this message translates to:
+  /// **'Page straightened and cleaned'**
+  String get stepPageCleaned;
+
+  /// No description provided for @stepTextFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Bangla and English text found'**
+  String get stepTextFound;
+
+  /// No description provided for @stepReadingText.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading the text'**
+  String get stepReadingText;
+
+  /// No description provided for @stepLineProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Line {current} of {total}'**
+  String stepLineProgress(int current, int total);
+
+  /// No description provided for @stepFindingDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Finding names, dates and numbers'**
+  String get stepFindingDetails;
+
+  /// No description provided for @handwritingNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Part of this page is handwritten. Handwriting is harder to read, so check those words on the next screen.'**
+  String get handwritingNote;
 }
 
 class _AppLocalizationsDelegate

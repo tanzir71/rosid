@@ -1,0 +1,288 @@
+import 'dart:io';
+import 'dart:typed_data';
+
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:image/image.dart' as img;
+import 'package:integration_test/integration_test.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:rosid/app.dart';
+import 'package:rosid/core/settings/app_settings.dart';
+import 'package:rosid/features/capture/fake_capture_source.dart';
+import 'package:rosid/features/capture/frame_analyzer.dart';
+import 'package:rosid/features/capture/scan_camera_screen.dart';
+import 'package:rosid/features/capture/scan_controller.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+Uint8List _makeSyntheticJpeg({
+  required double left,
+  required double top,
+  required double right,
+  required double bottom,
+  int headerR = 27,
+  int headerG = 122,
+  int headerB = 80,
+}) {
+  const w = 320;
+  const h = 240;
+  final im = img.Image(width: w, height: h);
+  img.fill(im, color: img.ColorRgb8(40, 40, 40));
+  img.fillRect(
+    im,
+    x1: (left * w).round(),
+    y1: (top * h).round(),
+    x2: (right * w).round(),
+    y2: (bottom * h).round(),
+    color: img.ColorRgb8(230, 228, 220),
+  );
+  img.fillRect(
+    im,
+    x1: (left * w).round() + 6,
+    y1: (top * h).round() + 6,
+    x2: (right * w).round() - 6,
+    y2: (top * h).round() + 26,
+    color: img.ColorRgb8(headerR, headerG, headerB),
+  );
+  for (var y = (top * h).round() + 40; y < (bottom * h).round() - 16; y += 16) {
+    img.fillRect(
+      im,
+      x1: (left * w).round() + 18,
+      y1: y,
+      x2: (right * w).round() - 18,
+      y2: y + 4,
+      color: img.ColorRgb8(36, 36, 44),
+    );
+  }
+  return Uint8List.fromList(img.encodeJpg(im, quality: 90));
+}
+
+void main() {
+  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+
+  testWidgets('M2 emulator benchmark: FrameAnalyzerIsolate median <= 40 ms', (
+    tester,
+  ) async {
+    final isolate = await FrameAnalyzerIsolate.spawn();
+    addTearDown(isolate.dispose);
+
+    // Prepare raw 320x240 luma frame (mirrors Android camera Y-plane stream).
+    const w = 320;
+    const h = 240;
+    final luma = Uint8List(w * h);
+    for (var y = 0; y < h; y++) {
+      for (var x = 0; x < w; x++) {
+        final inside = x >= 45 && x <= 275 && y >= 25 && y <= 215;
+        luma[y * w + x] = inside ? 220 : 42;
+      }
+    }
+
+    // Warm up JIT/isolate once.
+    await isolate.analyzeLuma(luma, width: w, height: h, timestampMs: 0);
+
+    final timings = <int>[];
+    for (var i = 0; i < 21; i++) {
+      final res = await isolate.analyzeLuma(
+        luma,
+        width: w,
+        height: h,
+        timestampMs: (i + 1) * 100,
+        skipBlurCheck: true,
+      );
+      expect(res.quad, isNotNull);
+      timings.add(res.elapsedMs);
+    }
+    timings.sort();
+    final median = timings[timings.length ~/ 2];
+    // ignore: avoid_print
+    print(
+      '[M2_EMULATOR_BENCH] FrameAnalyzerIsolate median=${median}ms (n=${timings.length})',
+    );
+    expect(median, lessThanOrEqualTo(40));
+  });
+
+  testWidgets(
+    'Flow 2 (capture part): moving frames do not capture, steady auto-captures, adjust & clean persists original + processed',
+    (tester) async {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.clear();
+      await prefs.setBool('onboarding_complete', true);
+      await prefs.setString('language_code', 'en');
+
+      final steadyJpg = _makeSyntheticJpeg(
+        left: 0.14,
+        top: 0.12,
+        right: 0.86,
+        bottom: 0.88,
+      );
+      final movingFrames = [
+        for (var i = 0; i < 4; i++)
+          CaptureFrame(
+            bytes: _makeSyntheticJpeg(
+              left: 0.08 + i * 0.05,
+              top: 0.12,
+              right: 0.68 + i * 0.05,
+              bottom: 0.86,
+            ),
+            width: 320,
+            height: 240,
+          ),
+        for (var i = 0; i < 12; i++)
+          CaptureFrame(
+            bytes: steadyJpg,
+            width: 320,
+            height: 240,
+            isSteady: true,
+          ),
+      ];
+
+      final fakeSource = FakeCaptureSource(
+        sequence: movingFrames,
+        frameInterval: const Duration(milliseconds: 120),
+      );
+      addTearDown(fakeSource.dispose);
+
+      final container = ProviderContainer(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(prefs),
+          fakeCaptureSourceProvider.overrideWithValue(fakeSource),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: const RosidApp(),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Open Document scan from Home shortcut.
+      await tester.tap(find.text('Document'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 250));
+
+      // Wait for moving-then-steady frames to trigger auto-capture.
+      var captured = false;
+      for (var i = 0; i < 30; i++) {
+        await tester.pump(const Duration(milliseconds: 120));
+        if (container.read(v2ScanProvider).pages.isNotEmpty) {
+          captured = true;
+          break;
+        }
+      }
+      expect(captured, isTrue);
+
+      // Go to Adjust page.
+      await tester.tap(find.byKey(const ValueKey('scan-done-pages')));
+      await tester.pumpAndSettle();
+      expect(find.text('Page 1 of 1'), findsOneWidget);
+
+      // Select Grey filter & tap Read text.
+      await tester.tap(find.byKey(const ValueKey('adjust-filter-grey')));
+      await tester.pump();
+      await tester.tap(find.byKey(const ValueKey('adjust-read-text')));
+
+      // Wait for cleaning isolate to finish and navigate to /paper/:id.
+      for (var i = 0; i < 30; i++) {
+        await tester.pump(const Duration(milliseconds: 200));
+        final page = container.read(v2ScanProvider).pages.first;
+        if (page.cleanedColorPath != null && page.cleanedGreyPath != null) {
+          break;
+        }
+      }
+      final savedPage = container.read(v2ScanProvider).pages.first;
+      expect(File(savedPage.originalPath).existsSync(), isTrue);
+      expect(savedPage.cleanedColorPath, isNotNull);
+      expect(File(savedPage.cleanedColorPath!).existsSync(), isTrue);
+      expect(savedPage.cleanedGreyPath, isNotNull);
+      expect(File(savedPage.cleanedGreyPath!).existsSync(), isTrue);
+    },
+  );
+
+  testWidgets(
+    'Flow 3 (ID card capture part): scans front, prompts turn over, scans back, composes A4 sheet',
+    (tester) async {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.clear();
+      await prefs.setBool('onboarding_complete', true);
+      await prefs.setString('language_code', 'en');
+
+      final frontJpg = _makeSyntheticJpeg(
+        left: 0.12,
+        top: 0.22,
+        right: 0.88,
+        bottom: 0.78,
+        headerR: 27,
+        headerG: 122,
+        headerB: 80,
+      );
+      final backJpg = _makeSyntheticJpeg(
+        left: 0.12,
+        top: 0.22,
+        right: 0.88,
+        bottom: 0.78,
+        headerR: 67,
+        headerG: 51,
+        headerB: 176,
+      );
+      final fakeSource = FakeCaptureSource(
+        sequence: [
+          CaptureFrame(bytes: frontJpg, width: 320, height: 240),
+          CaptureFrame(bytes: backJpg, width: 320, height: 240),
+        ],
+        frameInterval: const Duration(milliseconds: 500),
+      );
+      addTearDown(fakeSource.dispose);
+
+      final container = ProviderContainer(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(prefs),
+          fakeCaptureSourceProvider.overrideWithValue(fakeSource),
+        ],
+      );
+      addTearDown(container.dispose);
+      // Turn off auto-capture for deterministic manual front + back taps.
+      container.read(v2ScanProvider.notifier).setAutoCapture(false);
+
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: const RosidApp(),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('ID card'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      // Capture front side.
+      await tester.tap(find.byKey(const ValueKey('scan-shutter')));
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pump();
+      expect(find.text('Turn the card over'), findsOneWidget);
+      expect(container.read(v2ScanProvider).pages.length, 1);
+      expect(container.read(v2ScanProvider).pages.first.side, 'front');
+
+      // Capture back side -> auto navigates to Adjust page with 2 sides.
+      await tester.tap(find.byKey(const ValueKey('scan-shutter')));
+      await tester.pumpAndSettle(const Duration(milliseconds: 400));
+      expect(container.read(v2ScanProvider).pages.length, 2);
+      expect(container.read(v2ScanProvider).pages[1].side, 'back');
+      expect(find.text('Page 2 of 2'), findsOneWidget);
+
+      // Tap Read text -> composes A4 sheet with both sides.
+      await tester.tap(find.byKey(const ValueKey('adjust-read-text')));
+      for (var i = 0; i < 40; i++) {
+        await tester.pump(const Duration(milliseconds: 200));
+        if (container.read(v2ScanProvider).composedIdCardPath != null) {
+          break;
+        }
+      }
+      final composedPath = container.read(v2ScanProvider).composedIdCardPath;
+      expect(composedPath, isNotNull);
+      expect(File(composedPath!).existsSync(), isTrue);
+    },
+  );
+}

@@ -642,4 +642,81 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get scriptGlyphEn => 'A';
+
+  @override
+  String get autoCapture => 'স্বয়ংক্রিয় ছবি';
+
+  @override
+  String get hintNoPaper => 'কাগজটি ফ্রেমের ভেতরে ধরুন';
+
+  @override
+  String get hintMoveCloser => 'আরেকটু কাছে আনুন';
+
+  @override
+  String get hintTooDark => 'আলো কম। ফ্ল্যাশ চালু করুন';
+
+  @override
+  String get hintGlare => 'আলো প্রতিফলিত হচ্ছে। কাগজ একটু কাত করুন';
+
+  @override
+  String get hintHoldSteady => 'স্থির হয়ে ধরুন';
+
+  @override
+  String get hintEdgesFound => 'কিনারা পাওয়া গেছে। স্থির ধরুন';
+
+  @override
+  String donePages(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count পৃষ্ঠা',
+      one: '১ পৃষ্ঠা',
+    );
+    return 'শেষ, $_temp0';
+  }
+
+  @override
+  String get idFront => 'সামনের পিঠ';
+
+  @override
+  String get idBack => 'পেছনের পিঠ';
+
+  @override
+  String get turnCardOver => 'কার্ডটি উল্টে দিন';
+
+  @override
+  String get idBothSidesNote =>
+      'সামনে ও পেছনের পিঠ এক পাতায় বসানো হবে, প্রিন্ট বা পাঠানোর জন্য তৈরি।';
+
+  @override
+  String pageOfTotal(int current, int total) {
+    return 'পৃষ্ঠা $current / $total';
+  }
+
+  @override
+  String get holdAndDragReorder => 'সাজাতে চেপে ধরে টানুন';
+
+  @override
+  String get readText => 'লেখা পড়ুন';
+
+  @override
+  String get stepPageCleaned => 'পাতা সোজা ও পরিষ্কার করা হয়েছে';
+
+  @override
+  String get stepTextFound => 'বাংলা ও ইংরেজি লেখা পাওয়া গেছে';
+
+  @override
+  String get stepReadingText => 'লেখা পড়া হচ্ছে';
+
+  @override
+  String stepLineProgress(int current, int total) {
+    return 'লাইন $current / $total';
+  }
+
+  @override
+  String get stepFindingDetails => 'নাম, তারিখ ও সংখ্যা খোঁজা হচ্ছে';
+
+  @override
+  String get handwritingNote =>
+      'এই পাতার কিছু অংশ হাতের লেখা। হাতের লেখা পড়া কঠিন, তাই পরের পর্দায় শব্দগুলো মিলিয়ে নিন।';
 }

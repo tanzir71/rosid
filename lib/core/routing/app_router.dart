@@ -6,7 +6,11 @@ import 'package:rosid/core/settings/app_settings.dart';
 import 'package:rosid/core/theme/rosid_icons.dart';
 import 'package:rosid/core/widgets/rosid_navigation.dart';
 import 'package:rosid/data/repositories/history_repository.dart';
+import 'package:rosid/features/capture/adjust_page_screen.dart';
 import 'package:rosid/features/capture/capture_screen.dart';
+import 'package:rosid/features/capture/reading_progress_screen.dart';
+import 'package:rosid/features/capture/scan_camera_screen.dart';
+import 'package:rosid/features/capture/scan_controller.dart';
 import 'package:rosid/features/crop/crop_enhance_screen.dart';
 import 'package:rosid/features/detail/detail_edit_screen.dart';
 import 'package:rosid/features/detail/detail_screen.dart';
@@ -114,7 +118,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       // 03 Scan
       GoRoute(
         path: '/scan',
-        builder: (context, state) => const CaptureScreen(),
+        builder: (context, state) {
+          final modeParam = state.uri.queryParameters['mode'];
+          final mode = switch (modeParam) {
+            'id' => V2ScanMode.idCard,
+            'receipt' => V2ScanMode.receipt,
+            'translate' => V2ScanMode.translate,
+            _ => V2ScanMode.document,
+          };
+          return ScanCameraScreen(initialMode: mode);
+        },
       ),
       GoRoute(
         path: '/capture',
@@ -122,7 +135,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/scan/adjust',
-        builder: (context, state) => const CropEnhanceScreen(),
+        builder: (context, state) => const AdjustPageScreen(),
       ),
       GoRoute(
         path: '/crop',
@@ -130,11 +143,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/scan/reading',
-        builder: (context, state) => V2RouteShellScreen(
-          title: context.l10n.readingOnPhone,
-          body: context.l10n.happensOnPhone,
-          icon: RosidIcons.scan,
-        ),
+        builder: (context, state) => const ReadingProgressScreen(),
       ),
 
       // 04 Read and fix + 05 Translate + 06 Export

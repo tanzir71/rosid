@@ -171,6 +171,7 @@ class RosidTopBar extends StatelessWidget implements PreferredSizeWidget {
     required this.title,
     this.showBack = false,
     this.onBack,
+    this.leading,
     this.trailing = const [],
     this.isWordmark = false,
     super.key,
@@ -179,6 +180,7 @@ class RosidTopBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final bool showBack;
   final VoidCallback? onBack;
+  final Widget? leading;
   final List<Widget> trailing;
   final bool isWordmark;
 
@@ -194,7 +196,9 @@ class RosidTopBar extends StatelessWidget implements PreferredSizeWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         child: Row(
           children: [
-            if (showBack)
+            if (leading != null)
+              leading!
+            else if (showBack)
               IconButton(
                 onPressed: onBack ?? () => Navigator.of(context).maybePop(),
                 icon: RosidIcon(RosidIcons.back, size: 24, color: c.inkPrimary),
