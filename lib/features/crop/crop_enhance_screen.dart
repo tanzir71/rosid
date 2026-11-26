@@ -2,7 +2,7 @@ import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rosid/core/extensions/l10n_extension.dart';
@@ -272,9 +272,8 @@ class _QuadEditorState extends State<_QuadEditor> {
     _removeListener();
     _resolvedPath = widget.imagePath;
     _imageSize = null;
-    final stream = FileImage(
-      File(widget.imagePath),
-    ).resolve(createLocalImageConfiguration(context));
+    final stream = FileImage(File(widget.imagePath))
+        .resolve(createLocalImageConfiguration(context));
     late final ImageStreamListener listener;
     listener = ImageStreamListener((info, synchronousCall) {
       if (!mounted || _resolvedPath != widget.imagePath) return;

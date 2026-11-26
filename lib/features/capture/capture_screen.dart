@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:camera/camera.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
@@ -367,9 +367,8 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen>
 
   void _showNativeOperationError(Object error, int token) {
     if (!_isCurrentNativeOperation(token)) return;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(error.toString())));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(error.toString())));
   }
 
   Future<void> _toggleFlash() async {
@@ -399,9 +398,8 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen>
       if (!mounted) return;
       setState(() => _isClosing = false);
       if (ref.read(captureSessionProvider).errorMessage == null) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(error.toString())));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(error.toString())));
       }
     }
   }
@@ -415,9 +413,8 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen>
     ref.listen(captureSessionProvider, (previous, next) {
       if (next.errorMessage != null &&
           next.errorMessage != previous?.errorMessage) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(next.errorMessage!)));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(next.errorMessage!)));
       }
     });
 

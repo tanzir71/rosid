@@ -219,9 +219,8 @@ class ReceiptReviewController extends Notifier<ReceiptReviewState> {
         ? const <OcrBlock>[]
         : blocks
               .where((block) {
-                final blockText = TextNormalizer.normalizeForParsing(
-                  block.text,
-                ).toLowerCase();
+                final blockText = TextNormalizer.normalizeForParsing(block.text)
+                    .toLowerCase();
                 return rawLines.any(
                   (line) =>
                       blockText.contains(line) || line.contains(blockText),

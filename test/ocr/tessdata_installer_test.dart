@@ -66,9 +66,8 @@ void main() {
     expect(result.installed, ['eng.traineddata']);
     expect(result.missing, ['ben.traineddata']);
     expect(
-      File(
-        path.join(directory.path, 'ben.traineddata.installing'),
-      ).existsSync(),
+      File(path.join(directory.path, 'ben.traineddata.installing'))
+          .existsSync(),
       isFalse,
     );
   });

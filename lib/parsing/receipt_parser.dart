@@ -237,9 +237,8 @@ class ReceiptParser {
       }
       final match = trailingAmount.firstMatch(line);
       if (match == null || match.start == 0) continue;
-      final amount = CurrencyNormalizer.extractAmounts(
-        match.group(0)!,
-      ).lastOrNull;
+      final amount = CurrencyNormalizer.extractAmounts(match.group(0)!)
+          .lastOrNull;
       if (amount == null || amount <= 0) continue;
       var namePart = line.substring(0, match.start).trim();
       var quantity = 1.0;

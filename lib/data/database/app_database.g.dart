@@ -3269,34 +3269,32 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   ]);
 }
 
-typedef $$ScansTableCreateCompanionBuilder =
-    ScansCompanion Function({
-      required String id,
-      required String type,
-      required String imagePath,
-      Value<String?> thumbPath,
-      Value<String> ocrRawText,
-      Value<String?> ocrEngine,
-      Value<double?> ocrMeanConfidence,
-      Value<String> langHint,
-      required DateTime createdAt,
-      required DateTime updatedAt,
-      Value<int> rowid,
-    });
-typedef $$ScansTableUpdateCompanionBuilder =
-    ScansCompanion Function({
-      Value<String> id,
-      Value<String> type,
-      Value<String> imagePath,
-      Value<String?> thumbPath,
-      Value<String> ocrRawText,
-      Value<String?> ocrEngine,
-      Value<double?> ocrMeanConfidence,
-      Value<String> langHint,
-      Value<DateTime> createdAt,
-      Value<DateTime> updatedAt,
-      Value<int> rowid,
-    });
+typedef $$ScansTableCreateCompanionBuilder = ScansCompanion Function({
+  required String id,
+  required String type,
+  required String imagePath,
+  Value<String?> thumbPath,
+  Value<String> ocrRawText,
+  Value<String?> ocrEngine,
+  Value<double?> ocrMeanConfidence,
+  Value<String> langHint,
+  required DateTime createdAt,
+  required DateTime updatedAt,
+  Value<int> rowid,
+});
+typedef $$ScansTableUpdateCompanionBuilder = ScansCompanion Function({
+  Value<String> id,
+  Value<String> type,
+  Value<String> imagePath,
+  Value<String?> thumbPath,
+  Value<String> ocrRawText,
+  Value<String?> ocrEngine,
+  Value<double?> ocrMeanConfidence,
+  Value<String> langHint,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<int> rowid,
+});
 
 final class $$ScansTableReferences
     extends BaseReferences<_$AppDatabase, $ScansTable, Scan> {
@@ -3942,24 +3940,22 @@ typedef $$ScansTableProcessedTableManager =
         bool scanTagsRefs,
       })
     >;
-typedef $$ScanPagesTableCreateCompanionBuilder =
-    ScanPagesCompanion Function({
-      required String id,
-      required String scanId,
-      required String imagePath,
-      Value<String?> processedPath,
-      required int pageIndex,
-      Value<int> rowid,
-    });
-typedef $$ScanPagesTableUpdateCompanionBuilder =
-    ScanPagesCompanion Function({
-      Value<String> id,
-      Value<String> scanId,
-      Value<String> imagePath,
-      Value<String?> processedPath,
-      Value<int> pageIndex,
-      Value<int> rowid,
-    });
+typedef $$ScanPagesTableCreateCompanionBuilder = ScanPagesCompanion Function({
+  required String id,
+  required String scanId,
+  required String imagePath,
+  Value<String?> processedPath,
+  required int pageIndex,
+  Value<int> rowid,
+});
+typedef $$ScanPagesTableUpdateCompanionBuilder = ScanPagesCompanion Function({
+  Value<String> id,
+  Value<String> scanId,
+  Value<String> imagePath,
+  Value<String?> processedPath,
+  Value<int> pageIndex,
+  Value<int> rowid,
+});
 
 final class $$ScanPagesTableReferences
     extends BaseReferences<_$AppDatabase, $ScanPagesTable, ScanPage> {
@@ -4223,17 +4219,15 @@ class $$ScanPagesTableTableManager
                     >
                   >(state) {
                     if (scanId) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.scanId,
-                                referencedTable: $$ScanPagesTableReferences
-                                    ._scanIdTable(db),
-                                referencedColumn: $$ScanPagesTableReferences
-                                    ._scanIdTable(db)
-                                    .id,
-                              )
-                              as T;
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.scanId,
+                        referencedTable: $$ScanPagesTableReferences
+                            ._scanIdTable(db),
+                        referencedColumn: $$ScanPagesTableReferences
+                            ._scanIdTable(db)
+                            .id,
+                      ) as T;
                     }
 
                     return state;
@@ -4261,24 +4255,22 @@ typedef $$ScanPagesTableProcessedTableManager =
       ScanPage,
       PrefetchHooks Function({bool scanId})
     >;
-typedef $$CategoriesTableCreateCompanionBuilder =
-    CategoriesCompanion Function({
-      required String id,
-      required String nameEn,
-      required String nameBn,
-      required String icon,
-      Value<bool> isDefault,
-      Value<int> rowid,
-    });
-typedef $$CategoriesTableUpdateCompanionBuilder =
-    CategoriesCompanion Function({
-      Value<String> id,
-      Value<String> nameEn,
-      Value<String> nameBn,
-      Value<String> icon,
-      Value<bool> isDefault,
-      Value<int> rowid,
-    });
+typedef $$CategoriesTableCreateCompanionBuilder = CategoriesCompanion Function({
+  required String id,
+  required String nameEn,
+  required String nameBn,
+  required String icon,
+  Value<bool> isDefault,
+  Value<int> rowid,
+});
+typedef $$CategoriesTableUpdateCompanionBuilder = CategoriesCompanion Function({
+  Value<String> id,
+  Value<String> nameEn,
+  Value<String> nameBn,
+  Value<String> icon,
+  Value<bool> isDefault,
+  Value<int> rowid,
+});
 
 final class $$CategoriesTableReferences
     extends BaseReferences<_$AppDatabase, $CategoriesTable, Category> {
@@ -4563,36 +4555,34 @@ typedef $$CategoriesTableProcessedTableManager =
       Category,
       PrefetchHooks Function({bool receiptsRefs})
     >;
-typedef $$ReceiptsTableCreateCompanionBuilder =
-    ReceiptsCompanion Function({
-      required String id,
-      required String scanId,
-      required String merchant,
-      required DateTime dateOfPurchase,
-      required double total,
-      Value<String> currency,
-      Value<double?> tax,
-      Value<String?> paymentMethod,
-      Value<String?> categoryId,
-      Value<String?> note,
-      Value<String> fieldConfidenceJson,
-      Value<int> rowid,
-    });
-typedef $$ReceiptsTableUpdateCompanionBuilder =
-    ReceiptsCompanion Function({
-      Value<String> id,
-      Value<String> scanId,
-      Value<String> merchant,
-      Value<DateTime> dateOfPurchase,
-      Value<double> total,
-      Value<String> currency,
-      Value<double?> tax,
-      Value<String?> paymentMethod,
-      Value<String?> categoryId,
-      Value<String?> note,
-      Value<String> fieldConfidenceJson,
-      Value<int> rowid,
-    });
+typedef $$ReceiptsTableCreateCompanionBuilder = ReceiptsCompanion Function({
+  required String id,
+  required String scanId,
+  required String merchant,
+  required DateTime dateOfPurchase,
+  required double total,
+  Value<String> currency,
+  Value<double?> tax,
+  Value<String?> paymentMethod,
+  Value<String?> categoryId,
+  Value<String?> note,
+  Value<String> fieldConfidenceJson,
+  Value<int> rowid,
+});
+typedef $$ReceiptsTableUpdateCompanionBuilder = ReceiptsCompanion Function({
+  Value<String> id,
+  Value<String> scanId,
+  Value<String> merchant,
+  Value<DateTime> dateOfPurchase,
+  Value<double> total,
+  Value<String> currency,
+  Value<double?> tax,
+  Value<String?> paymentMethod,
+  Value<String?> categoryId,
+  Value<String?> note,
+  Value<String> fieldConfidenceJson,
+  Value<int> rowid,
+});
 
 final class $$ReceiptsTableReferences
     extends BaseReferences<_$AppDatabase, $ReceiptsTable, Receipt> {
@@ -5108,30 +5098,26 @@ class $$ReceiptsTableTableManager
                         >
                       >(state) {
                         if (scanId) {
-                          state =
-                              state.withJoin(
-                                    currentTable: table,
-                                    currentColumn: table.scanId,
-                                    referencedTable: $$ReceiptsTableReferences
-                                        ._scanIdTable(db),
-                                    referencedColumn: $$ReceiptsTableReferences
-                                        ._scanIdTable(db)
-                                        .id,
-                                  )
-                                  as T;
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.scanId,
+                            referencedTable: $$ReceiptsTableReferences
+                                ._scanIdTable(db),
+                            referencedColumn: $$ReceiptsTableReferences
+                                ._scanIdTable(db)
+                                .id,
+                          ) as T;
                         }
                         if (categoryId) {
-                          state =
-                              state.withJoin(
-                                    currentTable: table,
-                                    currentColumn: table.categoryId,
-                                    referencedTable: $$ReceiptsTableReferences
-                                        ._categoryIdTable(db),
-                                    referencedColumn: $$ReceiptsTableReferences
-                                        ._categoryIdTable(db)
-                                        .id,
-                                  )
-                                  as T;
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.categoryId,
+                            referencedTable: $$ReceiptsTableReferences
+                                ._categoryIdTable(db),
+                            referencedColumn: $$ReceiptsTableReferences
+                                ._categoryIdTable(db)
+                                .id,
+                          ) as T;
                         }
 
                         return state;
@@ -5181,26 +5167,24 @@ typedef $$ReceiptsTableProcessedTableManager =
       Receipt,
       PrefetchHooks Function({bool scanId, bool categoryId, bool lineItemsRefs})
     >;
-typedef $$LineItemsTableCreateCompanionBuilder =
-    LineItemsCompanion Function({
-      required String id,
-      required String receiptId,
-      required String name,
-      Value<double> qty,
-      Value<double?> unitPrice,
-      required double amount,
-      Value<int> rowid,
-    });
-typedef $$LineItemsTableUpdateCompanionBuilder =
-    LineItemsCompanion Function({
-      Value<String> id,
-      Value<String> receiptId,
-      Value<String> name,
-      Value<double> qty,
-      Value<double?> unitPrice,
-      Value<double> amount,
-      Value<int> rowid,
-    });
+typedef $$LineItemsTableCreateCompanionBuilder = LineItemsCompanion Function({
+  required String id,
+  required String receiptId,
+  required String name,
+  Value<double> qty,
+  Value<double?> unitPrice,
+  required double amount,
+  Value<int> rowid,
+});
+typedef $$LineItemsTableUpdateCompanionBuilder = LineItemsCompanion Function({
+  Value<String> id,
+  Value<String> receiptId,
+  Value<String> name,
+  Value<double> qty,
+  Value<double?> unitPrice,
+  Value<double> amount,
+  Value<int> rowid,
+});
 
 final class $$LineItemsTableReferences
     extends BaseReferences<_$AppDatabase, $LineItemsTable, LineItem> {
@@ -5479,17 +5463,15 @@ class $$LineItemsTableTableManager
                     >
                   >(state) {
                     if (receiptId) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.receiptId,
-                                referencedTable: $$LineItemsTableReferences
-                                    ._receiptIdTable(db),
-                                referencedColumn: $$LineItemsTableReferences
-                                    ._receiptIdTable(db)
-                                    .id,
-                              )
-                              as T;
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.receiptId,
+                        referencedTable: $$LineItemsTableReferences
+                            ._receiptIdTable(db),
+                        referencedColumn: $$LineItemsTableReferences
+                            ._receiptIdTable(db)
+                            .id,
+                      ) as T;
                     }
 
                     return state;
@@ -5517,24 +5499,22 @@ typedef $$LineItemsTableProcessedTableManager =
       LineItem,
       PrefetchHooks Function({bool receiptId})
     >;
-typedef $$DocumentsTableCreateCompanionBuilder =
-    DocumentsCompanion Function({
-      required String id,
-      required String scanId,
-      required String title,
-      Value<String> body,
-      Value<bool> pinned,
-      Value<int> rowid,
-    });
-typedef $$DocumentsTableUpdateCompanionBuilder =
-    DocumentsCompanion Function({
-      Value<String> id,
-      Value<String> scanId,
-      Value<String> title,
-      Value<String> body,
-      Value<bool> pinned,
-      Value<int> rowid,
-    });
+typedef $$DocumentsTableCreateCompanionBuilder = DocumentsCompanion Function({
+  required String id,
+  required String scanId,
+  required String title,
+  Value<String> body,
+  Value<bool> pinned,
+  Value<int> rowid,
+});
+typedef $$DocumentsTableUpdateCompanionBuilder = DocumentsCompanion Function({
+  Value<String> id,
+  Value<String> scanId,
+  Value<String> title,
+  Value<String> body,
+  Value<bool> pinned,
+  Value<int> rowid,
+});
 
 final class $$DocumentsTableReferences
     extends BaseReferences<_$AppDatabase, $DocumentsTable, Document> {
@@ -5796,17 +5776,15 @@ class $$DocumentsTableTableManager
                     >
                   >(state) {
                     if (scanId) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.scanId,
-                                referencedTable: $$DocumentsTableReferences
-                                    ._scanIdTable(db),
-                                referencedColumn: $$DocumentsTableReferences
-                                    ._scanIdTable(db)
-                                    .id,
-                              )
-                              as T;
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.scanId,
+                        referencedTable: $$DocumentsTableReferences
+                            ._scanIdTable(db),
+                        referencedColumn: $$DocumentsTableReferences
+                            ._scanIdTable(db)
+                            .id,
+                      ) as T;
                     }
 
                     return state;
@@ -5834,18 +5812,16 @@ typedef $$DocumentsTableProcessedTableManager =
       Document,
       PrefetchHooks Function({bool scanId})
     >;
-typedef $$TagsTableCreateCompanionBuilder =
-    TagsCompanion Function({
-      required String id,
-      required String name,
-      Value<int> rowid,
-    });
-typedef $$TagsTableUpdateCompanionBuilder =
-    TagsCompanion Function({
-      Value<String> id,
-      Value<String> name,
-      Value<int> rowid,
-    });
+typedef $$TagsTableCreateCompanionBuilder = TagsCompanion Function({
+  required String id,
+  required String name,
+  Value<int> rowid,
+});
+typedef $$TagsTableUpdateCompanionBuilder = TagsCompanion Function({
+  Value<String> id,
+  Value<String> name,
+  Value<int> rowid,
+});
 
 final class $$TagsTableReferences
     extends BaseReferences<_$AppDatabase, $TagsTable, Tag> {
@@ -6001,18 +5977,16 @@ class $$TagsTableTableManager
               $$TagsTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
               $$TagsTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback:
-              ({
-                Value<String> id = const Value.absent(),
-                Value<String> name = const Value.absent(),
-                Value<int> rowid = const Value.absent(),
-              }) => TagsCompanion(id: id, name: name, rowid: rowid),
-          createCompanionCallback:
-              ({
-                required String id,
-                required String name,
-                Value<int> rowid = const Value.absent(),
-              }) => TagsCompanion.insert(id: id, name: name, rowid: rowid),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> name = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) => TagsCompanion(id: id, name: name, rowid: rowid),
+          createCompanionCallback: ({
+            required String id,
+            required String name,
+            Value<int> rowid = const Value.absent(),
+          }) => TagsCompanion.insert(id: id, name: name, rowid: rowid),
           withReferenceMapper: (p0) => p0
               .map(
                 (e) =>
@@ -6060,18 +6034,16 @@ typedef $$TagsTableProcessedTableManager =
       Tag,
       PrefetchHooks Function({bool scanTagsRefs})
     >;
-typedef $$ScanTagsTableCreateCompanionBuilder =
-    ScanTagsCompanion Function({
-      required String scanId,
-      required String tagId,
-      Value<int> rowid,
-    });
-typedef $$ScanTagsTableUpdateCompanionBuilder =
-    ScanTagsCompanion Function({
-      Value<String> scanId,
-      Value<String> tagId,
-      Value<int> rowid,
-    });
+typedef $$ScanTagsTableCreateCompanionBuilder = ScanTagsCompanion Function({
+  required String scanId,
+  required String tagId,
+  Value<int> rowid,
+});
+typedef $$ScanTagsTableUpdateCompanionBuilder = ScanTagsCompanion Function({
+  Value<String> scanId,
+  Value<String> tagId,
+  Value<int> rowid,
+});
 
 final class $$ScanTagsTableReferences
     extends BaseReferences<_$AppDatabase, $ScanTagsTable, ScanTag> {
@@ -6306,13 +6278,11 @@ class $$ScanTagsTableTableManager
               $$ScanTagsTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
               $$ScanTagsTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback:
-              ({
-                Value<String> scanId = const Value.absent(),
-                Value<String> tagId = const Value.absent(),
-                Value<int> rowid = const Value.absent(),
-              }) =>
-                  ScanTagsCompanion(scanId: scanId, tagId: tagId, rowid: rowid),
+          updateCompanionCallback: ({
+            Value<String> scanId = const Value.absent(),
+            Value<String> tagId = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) => ScanTagsCompanion(scanId: scanId, tagId: tagId, rowid: rowid),
           createCompanionCallback:
               ({
                 required String scanId,
@@ -6352,30 +6322,28 @@ class $$ScanTagsTableTableManager
                     >
                   >(state) {
                     if (scanId) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.scanId,
-                                referencedTable: $$ScanTagsTableReferences
-                                    ._scanIdTable(db),
-                                referencedColumn: $$ScanTagsTableReferences
-                                    ._scanIdTable(db)
-                                    .id,
-                              )
-                              as T;
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.scanId,
+                        referencedTable: $$ScanTagsTableReferences._scanIdTable(
+                          db,
+                        ),
+                        referencedColumn: $$ScanTagsTableReferences
+                            ._scanIdTable(db)
+                            .id,
+                      ) as T;
                     }
                     if (tagId) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.tagId,
-                                referencedTable: $$ScanTagsTableReferences
-                                    ._tagIdTable(db),
-                                referencedColumn: $$ScanTagsTableReferences
-                                    ._tagIdTable(db)
-                                    .id,
-                              )
-                              as T;
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.tagId,
+                        referencedTable: $$ScanTagsTableReferences._tagIdTable(
+                          db,
+                        ),
+                        referencedColumn: $$ScanTagsTableReferences
+                            ._tagIdTable(db)
+                            .id,
+                      ) as T;
                     }
 
                     return state;

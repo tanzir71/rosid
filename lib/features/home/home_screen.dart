@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -182,9 +182,8 @@ class _RecentTile extends StatelessWidget {
         leading: const CircleAvatar(child: Icon(Icons.receipt_long)),
         title: Text(entry.title),
         subtitle: Text(
-          DateFormat.yMMMd(
-            Localizations.localeOf(context).toLanguageTag(),
-          ).format(entry.receipt!.dateOfPurchase),
+          DateFormat.yMMMd(Localizations.localeOf(context).toLanguageTag())
+              .format(entry.receipt!.dateOfPurchase),
         ),
         trailing: Text(
           formatMoney(entry.receipt!.total, entry.receipt!.currency),

@@ -26,9 +26,8 @@ void main() {
     final localizations = AppLocalizationsEn();
     final ocr = _MockOcrService();
     final scans = _MockScanRepository();
-    when(
-      () => ocr.recognize(any(), hint: any(named: 'hint')),
-    ).thenAnswer((_) async => _lowConfidenceReceipt);
+    when(() => ocr.recognize(any(), hint: any(named: 'hint')))
+        .thenAnswer((_) async => _lowConfidenceReceipt);
     when(
       () => scans.updateOcr(
         scanId: any(named: 'scanId'),
@@ -91,9 +90,8 @@ void main() {
     final localizations = AppLocalizationsEn();
     final ocr = _MockOcrService();
     final scans = _MockScanRepository();
-    when(
-      () => ocr.recognize(any(), hint: any(named: 'hint')),
-    ).thenAnswer((_) async => _lowConfidenceReceipt);
+    when(() => ocr.recognize(any(), hint: any(named: 'hint')))
+        .thenAnswer((_) async => _lowConfidenceReceipt);
     when(
       () => scans.updateOcr(
         scanId: any(named: 'scanId'),

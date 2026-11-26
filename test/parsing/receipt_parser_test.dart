@@ -21,9 +21,9 @@ void main() {
       final name = fixture.uri.pathSegments.last.replaceAll('.txt', '');
       test('parses $name', () {
         final expectationFile = File(fixture.path.replaceAll('.txt', '.json'));
-        final expectation =
-            jsonDecode(expectationFile.readAsStringSync())
-                as Map<String, dynamic>;
+        final expectation = jsonDecode(
+          expectationFile.readAsStringSync(),
+        ) as Map<String, dynamic>;
         final result = parser.parse(
           fixture.readAsStringSync(),
           scanTime: DateTime(2026, 7, 17),

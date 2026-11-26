@@ -54,9 +54,8 @@ abstract final class DateNormalizer {
     final original = TextNormalizer.normalize(input);
     final normalized = BanglaNumerals.toLatin(original);
 
-    final ymd = RegExp(
-      r'(?<!\d)(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})(?!\d)',
-    ).firstMatch(normalized);
+    final ymd = RegExp(r'(?<!\d)(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})(?!\d)')
+        .firstMatch(normalized);
     if (ymd != null) {
       final date = _valid(
         int.parse(ymd.group(1)!),
@@ -71,9 +70,8 @@ abstract final class DateNormalizer {
       }
     }
 
-    final dmy = RegExp(
-      r'(?<!\d)(\d{1,2})[-/.](\d{1,2})[-/.](\d{2,4})(?!\d)',
-    ).firstMatch(normalized);
+    final dmy = RegExp(r'(?<!\d)(\d{1,2})[-/.](\d{1,2})[-/.](\d{2,4})(?!\d)')
+        .firstMatch(normalized);
     if (dmy != null) {
       final year = _fourDigitYear(int.parse(dmy.group(3)!));
       final date = _valid(

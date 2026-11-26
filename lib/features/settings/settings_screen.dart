@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rosid/core/app_metadata.dart';
 import 'package:rosid/core/extensions/l10n_extension.dart';
@@ -110,9 +110,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ..invalidate(historyResultsProvider)
         ..invalidate(dashboardSummaryProvider)
         ..invalidate(homeDocumentsProvider);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(context.l10n.saved)));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(context.l10n.saved)));
     } finally {
       if (mounted) setState(() => _deleteAllBusy = false);
     }

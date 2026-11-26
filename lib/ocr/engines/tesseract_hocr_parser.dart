@@ -33,18 +33,18 @@ abstract final class TesseractHocrParser {
       final bbox = _bbox.firstMatch(attributes);
       final text = _plainText(match.group(2)!).trim();
       if (bbox == null || text.isEmpty) continue;
-      final left = double.parse(
-        bbox.group(1)!,
-      ).clamp(0, imageWidth.toDouble()).toDouble();
-      final top = double.parse(
-        bbox.group(2)!,
-      ).clamp(0, imageHeight.toDouble()).toDouble();
-      final right = double.parse(
-        bbox.group(3)!,
-      ).clamp(left, imageWidth.toDouble()).toDouble();
-      final bottom = double.parse(
-        bbox.group(4)!,
-      ).clamp(top, imageHeight.toDouble()).toDouble();
+      final left = double.parse(bbox.group(1)!)
+          .clamp(0, imageWidth.toDouble())
+          .toDouble();
+      final top = double.parse(bbox.group(2)!)
+          .clamp(0, imageHeight.toDouble())
+          .toDouble();
+      final right = double.parse(bbox.group(3)!)
+          .clamp(left, imageWidth.toDouble())
+          .toDouble();
+      final bottom = double.parse(bbox.group(4)!)
+          .clamp(top, imageHeight.toDouble())
+          .toDouble();
       if (right <= left || bottom <= top) continue;
       final confidenceMatch = _confidence.firstMatch(attributes);
       final confidence = confidenceMatch == null

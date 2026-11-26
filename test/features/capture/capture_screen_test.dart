@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:camera/camera.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -106,18 +106,14 @@ void main() {
       final second = _MockCameraController();
       final firstInitialization = Completer<void>();
       final secondInitialization = Completer<void>();
-      when(
-        () => first.value,
-      ).thenReturn(const CameraValue.uninitialized(description));
-      when(
-        () => second.value,
-      ).thenReturn(const CameraValue.uninitialized(description));
-      when(
-        () => first.initialize(),
-      ).thenAnswer((_) => firstInitialization.future);
-      when(
-        () => second.initialize(),
-      ).thenAnswer((_) => secondInitialization.future);
+      when(() => first.value)
+          .thenReturn(const CameraValue.uninitialized(description));
+      when(() => second.value)
+          .thenReturn(const CameraValue.uninitialized(description));
+      when(() => first.initialize())
+          .thenAnswer((_) => firstInitialization.future);
+      when(() => second.initialize())
+          .thenAnswer((_) => secondInitialization.future);
       when(() => first.dispose()).thenAnswer((_) async {});
       when(() => second.dispose()).thenAnswer((_) async {});
 

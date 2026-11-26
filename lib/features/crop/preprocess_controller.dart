@@ -90,12 +90,11 @@ Uint8List createThumbnailBytes(Uint8List encoded) {
   return Uint8List.fromList(image.encodeJpg(thumbnail, quality: 82));
 }
 
-typedef PreprocessRunner =
-    Future<PreprocessResult> Function(
-      Uint8List bytes,
-      DocumentQuad quad,
-      int rotationQuarterTurns,
-    );
+typedef PreprocessRunner = Future<PreprocessResult> Function(
+  Uint8List bytes,
+  DocumentQuad quad,
+  int rotationQuarterTurns,
+);
 
 final preprocessRunnerProvider = Provider<PreprocessRunner>(
   (ref) =>

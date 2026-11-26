@@ -73,9 +73,8 @@ void main() {
   });
 
   test('reentering review retries OCR after an error', () async {
-    when(
-      () => ocr.recognize(any(), hint: any(named: 'hint')),
-    ).thenThrow(StateError('native OCR failed'));
+    when(() => ocr.recognize(any(), hint: any(named: 'hint')))
+        .thenThrow(StateError('native OCR failed'));
     final controller = container.read(documentReviewProvider.notifier);
 
     await controller.initialize(
@@ -85,9 +84,8 @@ void main() {
     );
     expect(container.read(documentReviewProvider).errorMessage, isNotNull);
 
-    when(
-      () => ocr.recognize(any(), hint: any(named: 'hint')),
-    ).thenAnswer((_) async => _result('Recovered text'));
+    when(() => ocr.recognize(any(), hint: any(named: 'hint')))
+        .thenAnswer((_) async => _result('Recovered text'));
     await controller.initialize(
       session: _session,
       assets: [_asset(1)],

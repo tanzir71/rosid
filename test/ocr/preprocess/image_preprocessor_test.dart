@@ -32,9 +32,8 @@ void main() {
   });
 
   test('processes the bundled perspective receipt fixture', () {
-    final encoded = File(
-      'assets/fixtures/english_receipt.png',
-    ).readAsBytesSync();
+    final encoded = File('assets/fixtures/english_receipt.png')
+        .readAsBytesSync();
     final quad = preprocessor.detectDocumentQuad(encoded);
     final result = preprocessor.process(
       encoded,

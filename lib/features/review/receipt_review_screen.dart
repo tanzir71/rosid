@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rosid/core/extensions/l10n_extension.dart';
@@ -54,9 +54,8 @@ class _ReceiptReviewScreenState extends ConsumerState<ReceiptReviewScreen> {
     if (!mounted || !saved) return;
     clearCompletedReview(ref);
     context.go('/');
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(context.l10n.saved)));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(context.l10n.saved)));
   }
 
   @override

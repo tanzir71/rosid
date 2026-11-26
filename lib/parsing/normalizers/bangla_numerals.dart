@@ -23,9 +23,9 @@ abstract final class BanglaNumerals {
   }
 
   static double? tryParse(String value) {
-    final normalized = toLatin(
-      value,
-    ).replaceAll(',', '').replaceAll(RegExp(r'[^0-9.\-]'), '');
+    final normalized = toLatin(value)
+        .replaceAll(',', '')
+        .replaceAll(RegExp(r'[^0-9.\-]'), '');
     if (normalized.isEmpty || normalized == '-' || normalized == '.') {
       return null;
     }
