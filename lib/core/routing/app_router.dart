@@ -16,6 +16,8 @@ import 'package:rosid/features/detail/detail_edit_screen.dart';
 import 'package:rosid/features/detail/detail_screen.dart';
 import 'package:rosid/features/export/export_screen.dart';
 import 'package:rosid/features/home/home_screen.dart';
+import 'package:rosid/features/paper/check_words_screen.dart';
+import 'package:rosid/features/paper/paper_screen.dart';
 import 'package:rosid/features/review/document_review_screen.dart';
 import 'package:rosid/features/review/receipt_review_screen.dart';
 import 'package:rosid/features/settings/settings_screen.dart';
@@ -156,7 +158,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             'english' => RosidReaderTab.english,
             _ => RosidReaderTab.text,
           };
-          return PaperShellScreen(
+          return PaperScreen(
             scanId: state.pathParameters['id']!,
             initialTab: tab,
           );
@@ -164,11 +166,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/paper/:id/check',
-        builder: (context, state) => V2RouteShellScreen(
-          title: context.l10n.checkWords,
-          body: context.l10n.checkWordsEmpty,
-          icon: RosidIcons.checkCircle,
-        ),
+        builder: (context, state) =>
+            CheckWordsScreen(scanId: state.pathParameters['id']!),
       ),
       GoRoute(
         path: '/paper/:id/export',

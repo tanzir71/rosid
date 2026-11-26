@@ -719,4 +719,117 @@ class AppLocalizationsBn extends AppLocalizations {
   @override
   String get handwritingNote =>
       'এই পাতার কিছু অংশ হাতের লেখা। হাতের লেখা পড়া কঠিন, তাই পরের পর্দায় শব্দগুলো মিলিয়ে নিন।';
+
+  @override
+  String wordsNeedALook(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countটি শব্দ দেখে নিন',
+      one: '১টি শব্দ দেখে নিন',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get checkThem => 'মিলিয়ে নিন';
+
+  @override
+  String get keyDetails => 'মূল তথ্য';
+
+  @override
+  String get khatianNo => 'খতিয়ান নং';
+
+  @override
+  String get plotDagNo => 'দাগ নং';
+
+  @override
+  String get ownerLabel => 'মালিক';
+
+  @override
+  String get fatherLabel => 'পিতা';
+
+  @override
+  String get mouzaLabel => 'মৌজা';
+
+  @override
+  String get jlNoLabel => 'জে.এল. নং';
+
+  @override
+  String get areaLabel => 'জমির পরিমাণ';
+
+  @override
+  String wordProgress(int current, int total) {
+    return 'শব্দ $current / $total';
+  }
+
+  @override
+  String get fromYourScan => 'আপনার স্ক্যান থেকে';
+
+  @override
+  String get rosidReadThisAs => 'রসিদ এটি পড়েছে';
+
+  @override
+  String get pickAnotherReading => 'অথবা অন্য পাঠ বাছুন';
+
+  @override
+  String get rememberNamesNote =>
+      'আপনি যে নাম ও স্থানের বানান ঠিক করেন, রসিদ তা মনে রাখে এবং পরের বার সঠিকভাবে পড়ে।';
+
+  @override
+  String get skip => 'এড়িয়ে যান';
+
+  @override
+  String get looksRight => 'ঠিক আছে';
+
+  @override
+  String get areaOfLand => 'জমির পরিমাণ';
+
+  @override
+  String get sameAreaOtherUnits => 'একই জমি অন্যান্য এককে';
+
+  @override
+  String get fixText => 'লেখা ঠিক করুন';
+
+  @override
+  String get copy => 'কপি';
+
+  @override
+  String get copied => 'কপি হয়েছে';
+
+  @override
+  String get listen => 'শুনুন';
+
+  @override
+  String get addToNamesBook => 'নামের খাতায়ও রাখুন';
+
+  @override
+  String get changePaperKind => 'কাগজের ধরন';
+
+  @override
+  String get paperKindDeed => 'দলিল';
+
+  @override
+  String get paperKindLicence => 'লাইসেন্স';
+
+  @override
+  String get paperKindBill => 'বিল';
+
+  @override
+  String get paperKindLetter => 'চিঠি';
+
+  @override
+  String get paperKindNotes => 'নোট';
+
+  @override
+  String get editFullText => 'লেখা সম্পাদনা';
+
+  @override
+  String get originalTextKept => 'মূল পাঠ আলাদাভাবে সংরক্ষিত থাকবে।';
+
+  @override
+  String get tapALineHint => 'যেকোনো লাইনে ট্যাপ করে লেখা দেখুন বা ঠিক করুন।';
+
+  @override
+  String get makeEnglishDraft => 'ইংরেজি খসড়া তৈরি করুন';
 }

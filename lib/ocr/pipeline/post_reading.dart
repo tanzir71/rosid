@@ -120,6 +120,31 @@ class PostReadingProcessor {
     'Registration',
   ];
 
+  /// Structural field labels that should not be flagged as uncertain when
+  /// matched verbatim on a moderate-confidence line.
+  static const Set<String> _knownLabels = <String>{
+    'মৌজা',
+    'পিতা',
+    'মাতা',
+    'জেলা',
+    'উপজেলা',
+    'দাগ',
+    'শ্রেণি',
+    'জমির',
+    'পরিমাণ',
+    'শতাংশ',
+    'মৃত',
+    'নং',
+    'জে.এল',
+    'মালিকের',
+    'নাম',
+    'খতিয়ান',
+    'Date',
+    'Total',
+    'VAT',
+    'Name',
+  };
+
   /// Normalizes a line to Unicode NFC, attaches uncertain words with up to 3
   /// alternatives, and optionally applies high-count exact remembered corrections.
   RecognizedLine processLine(
@@ -165,7 +190,10 @@ class PostReadingProcessor {
       }
 
       final isUncertain =
-          line.confidence < uncertainLineThreshold || exact != null;
+          exact != null ||
+          (line.confidence < uncertainLineThreshold &&
+              !_knownLabels.contains(cleanToken) &&
+              cleanToken.runes.length >= 3);
       if (isUncertain) {
         final alts = _suggestAlternatives(
           cleanToken,

@@ -723,4 +723,118 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get handwritingNote =>
       'Part of this page is handwritten. Handwriting is harder to read, so check those words on the next screen.';
+
+  @override
+  String wordsNeedALook(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count words need a look',
+      one: '1 word needs a look',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get checkThem => 'Check them';
+
+  @override
+  String get keyDetails => 'Key details';
+
+  @override
+  String get khatianNo => 'Khatian no.';
+
+  @override
+  String get plotDagNo => 'Plot (dag) no.';
+
+  @override
+  String get ownerLabel => 'Owner';
+
+  @override
+  String get fatherLabel => 'Father';
+
+  @override
+  String get mouzaLabel => 'Mouza';
+
+  @override
+  String get jlNoLabel => 'J.L. no.';
+
+  @override
+  String get areaLabel => 'Area';
+
+  @override
+  String wordProgress(int current, int total) {
+    return 'Word $current of $total';
+  }
+
+  @override
+  String get fromYourScan => 'From your scan';
+
+  @override
+  String get rosidReadThisAs => 'Rosid read this as';
+
+  @override
+  String get pickAnotherReading => 'Or pick another reading';
+
+  @override
+  String get rememberNamesNote =>
+      'Rosid remembers names and places you correct, and reads them right next time.';
+
+  @override
+  String get skip => 'Skip';
+
+  @override
+  String get looksRight => 'Looks right';
+
+  @override
+  String get areaOfLand => 'Area of land';
+
+  @override
+  String get sameAreaOtherUnits => 'The same area in other units';
+
+  @override
+  String get fixText => 'Fix text';
+
+  @override
+  String get copy => 'Copy';
+
+  @override
+  String get copied => 'Copied';
+
+  @override
+  String get listen => 'Listen';
+
+  @override
+  String get addToNamesBook => 'Also save to Names book';
+
+  @override
+  String get changePaperKind => 'Kind of paper';
+
+  @override
+  String get paperKindDeed => 'Deed';
+
+  @override
+  String get paperKindLicence => 'Licence';
+
+  @override
+  String get paperKindBill => 'Bill';
+
+  @override
+  String get paperKindLetter => 'Letter';
+
+  @override
+  String get paperKindNotes => 'Notes';
+
+  @override
+  String get editFullText => 'Edit text';
+
+  @override
+  String get originalTextKept => 'Your original reading is kept safely.';
+
+  @override
+  String get tapALineHint =>
+      'Tap any highlighted line on the scan to inspect or fix it.';
+
+  @override
+  String get makeEnglishDraft => 'Make an English draft';
 }

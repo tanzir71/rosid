@@ -9,6 +9,7 @@ import 'package:rosid/ocr/pipeline/post_reading.dart';
 import 'package:rosid/ocr/pipeline/reading_interfaces.dart';
 import 'package:rosid/ocr/pipeline/script_router.dart';
 import 'package:rosid/ocr/pipeline/tesseract_line_recognizer.dart';
+import 'package:rosid/parsing/paper_classifier.dart';
 import 'package:uuid/uuid.dart';
 
 /// Full M3 ReadingPipeline:
@@ -189,8 +190,10 @@ Future<void> persistReadingResults({
   const uuid = Uuid();
   await db.transaction(() async {
     await (db.delete(db.textLines)..where((t) => t.scanId.equals(scanId))).go();
+    await (db.delete(db.details)..where((d) => d.scanId.equals(scanId))).go();
 
     final fullBuf = <String>[];
+    final insertedLineIds = <String>[];
     var totalUncertain = 0;
     var confSum = 0.0;
     var lineCount = 0;
@@ -199,11 +202,12 @@ Future<void> persistReadingResults({
     for (final res in pageResults) {
       if (res.engineSummary.isNotEmpty) engines.add(res.engineSummary);
       for (final line in res.lines) {
+        final lineId = uuid.v7();
         await db
             .into(db.textLines)
             .insert(
               TextLinesCompanion.insert(
-                id: uuid.v7(),
+                id: lineId,
                 scanId: scanId,
                 pageIndex: line.pageIndex,
                 lineOrder: line.lineOrder,
@@ -214,6 +218,7 @@ Future<void> persistReadingResults({
                 corrected: Value(line.corrected),
               ),
             );
+        insertedLineIds.add(lineId);
         fullBuf.add(line.text);
         totalUncertain += line.uncertainWords.length;
         confSum += line.confidence;
@@ -222,9 +227,35 @@ Future<void> persistReadingResults({
     }
 
     final fullText = fullBuf.join('\n');
+    final existingScan = await (db.select(
+      db.scans,
+    )..where((s) => s.id.equals(scanId))).getSingleOrNull();
+    const classifier = PaperClassifier();
+    final kind = classifier.classify(fullText, currentKind: existingScan?.kind);
+    final extractedDetails = classifier.extractDetails(fullBuf, kind: kind);
+    for (final detail in extractedDetails) {
+      final srcIdx = detail.sourceLineIndex;
+      final srcLineId =
+          srcIdx != null && srcIdx >= 0 && srcIdx < insertedLineIds.length
+          ? insertedLineIds[srcIdx]
+          : null;
+      await db
+          .into(db.details)
+          .insert(
+            DetailsCompanion.insert(
+              id: uuid.v7(),
+              scanId: scanId,
+              detailKey: detail.key,
+              value: detail.value,
+              sourceLineId: Value(srcLineId),
+            ),
+          );
+    }
+
     final meanConf = lineCount == 0 ? 0.0 : confSum / lineCount;
     await (db.update(db.scans)..where((s) => s.id.equals(scanId))).write(
       ScansCompanion(
+        kind: Value(kind.code),
         ocrRawText: Value(fullText),
         ocrEngine: Value(engines.join('+')),
         ocrMeanConfidence: Value(meanConf),

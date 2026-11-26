@@ -1399,6 +1399,210 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Part of this page is handwritten. Handwriting is harder to read, so check those words on the next screen.'**
   String get handwritingNote;
+
+  /// No description provided for @wordsNeedALook.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 word needs a look} other{{count} words need a look}}'**
+  String wordsNeedALook(int count);
+
+  /// No description provided for @checkThem.
+  ///
+  /// In en, this message translates to:
+  /// **'Check them'**
+  String get checkThem;
+
+  /// No description provided for @keyDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Key details'**
+  String get keyDetails;
+
+  /// No description provided for @khatianNo.
+  ///
+  /// In en, this message translates to:
+  /// **'Khatian no.'**
+  String get khatianNo;
+
+  /// No description provided for @plotDagNo.
+  ///
+  /// In en, this message translates to:
+  /// **'Plot (dag) no.'**
+  String get plotDagNo;
+
+  /// No description provided for @ownerLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner'**
+  String get ownerLabel;
+
+  /// No description provided for @fatherLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Father'**
+  String get fatherLabel;
+
+  /// No description provided for @mouzaLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Mouza'**
+  String get mouzaLabel;
+
+  /// No description provided for @jlNoLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'J.L. no.'**
+  String get jlNoLabel;
+
+  /// No description provided for @areaLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Area'**
+  String get areaLabel;
+
+  /// No description provided for @wordProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Word {current} of {total}'**
+  String wordProgress(int current, int total);
+
+  /// No description provided for @fromYourScan.
+  ///
+  /// In en, this message translates to:
+  /// **'From your scan'**
+  String get fromYourScan;
+
+  /// No description provided for @rosidReadThisAs.
+  ///
+  /// In en, this message translates to:
+  /// **'Rosid read this as'**
+  String get rosidReadThisAs;
+
+  /// No description provided for @pickAnotherReading.
+  ///
+  /// In en, this message translates to:
+  /// **'Or pick another reading'**
+  String get pickAnotherReading;
+
+  /// No description provided for @rememberNamesNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Rosid remembers names and places you correct, and reads them right next time.'**
+  String get rememberNamesNote;
+
+  /// No description provided for @skip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get skip;
+
+  /// No description provided for @looksRight.
+  ///
+  /// In en, this message translates to:
+  /// **'Looks right'**
+  String get looksRight;
+
+  /// No description provided for @areaOfLand.
+  ///
+  /// In en, this message translates to:
+  /// **'Area of land'**
+  String get areaOfLand;
+
+  /// No description provided for @sameAreaOtherUnits.
+  ///
+  /// In en, this message translates to:
+  /// **'The same area in other units'**
+  String get sameAreaOtherUnits;
+
+  /// No description provided for @fixText.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix text'**
+  String get fixText;
+
+  /// No description provided for @copy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get copy;
+
+  /// No description provided for @copied.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied'**
+  String get copied;
+
+  /// No description provided for @listen.
+  ///
+  /// In en, this message translates to:
+  /// **'Listen'**
+  String get listen;
+
+  /// No description provided for @addToNamesBook.
+  ///
+  /// In en, this message translates to:
+  /// **'Also save to Names book'**
+  String get addToNamesBook;
+
+  /// No description provided for @changePaperKind.
+  ///
+  /// In en, this message translates to:
+  /// **'Kind of paper'**
+  String get changePaperKind;
+
+  /// No description provided for @paperKindDeed.
+  ///
+  /// In en, this message translates to:
+  /// **'Deed'**
+  String get paperKindDeed;
+
+  /// No description provided for @paperKindLicence.
+  ///
+  /// In en, this message translates to:
+  /// **'Licence'**
+  String get paperKindLicence;
+
+  /// No description provided for @paperKindBill.
+  ///
+  /// In en, this message translates to:
+  /// **'Bill'**
+  String get paperKindBill;
+
+  /// No description provided for @paperKindLetter.
+  ///
+  /// In en, this message translates to:
+  /// **'Letter'**
+  String get paperKindLetter;
+
+  /// No description provided for @paperKindNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get paperKindNotes;
+
+  /// No description provided for @editFullText.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit text'**
+  String get editFullText;
+
+  /// No description provided for @originalTextKept.
+  ///
+  /// In en, this message translates to:
+  /// **'Your original reading is kept safely.'**
+  String get originalTextKept;
+
+  /// No description provided for @tapALineHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap any highlighted line on the scan to inspect or fix it.'**
+  String get tapALineHint;
+
+  /// No description provided for @makeEnglishDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Make an English draft'**
+  String get makeEnglishDraft;
 }
 
 class _AppLocalizationsDelegate

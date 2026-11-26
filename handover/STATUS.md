@@ -2,7 +2,7 @@
 
 The implementing agent keeps this file true. Update it in the same push as the work.
 
-Last updated: 2026-11-27 (M3 completed and verified to Level B)
+Last updated: 2026-11-27 (M4 completed and verified to Level B)
 
 ## Milestones
 
@@ -12,8 +12,8 @@ Last updated: 2026-11-27 (M3 completed and verified to Level B)
 | M1 | Design system and app shell | done | B | `evidence/M1/summary.md` |
 | M2 | Capture and image | done | B | `evidence/M2/summary.md` |
 | M3 | Reading text | done | B | `evidence/M3/summary.md` |
-| M4 | Read and fix | in progress | | |
-| M5 | English draft | not started | | |
+| M4 | Read and fix | done | B | `evidence/M4/summary.md` |
+| M5 | English draft | in progress | | |
 | M6 | Export | not started | | |
 | M7 | Library and bundles | not started | | |
 | M8 | Expenses, settings, safety | not started | | |
@@ -24,7 +24,7 @@ State is one of: not started, in progress, done, done with gaps.
 
 ## In progress
 
-Starting M4: Read and fix.
+Starting M5: English draft.
 
 ## Measured numbers
 
@@ -56,6 +56,8 @@ Record every choice the handover left to you: which Bangla recogniser won, which
 | 2026-11-27 | M2 fallback: removed `opencv_dart: 2.3.3` and implemented pure-Dart 320 px live edge/quality analyzer (`FrameAnalyzerIsolate`) plus <= 2,000 px `ImageCleaner` (perspective warp, 1/8-scale bright-dilation lighting division, 8x8 CLAHE clip 2.0, edge-preserving denoise, deskew) | `dartcv4`'s native build hook failed during `flutter build apk` while compiling OpenCV 4.13 from source via CMake/Ninja (`The paging file is too small for this operation to complete`). Per `M2-capture-and-image.md` Fallbacks, pure Dart met every M2 gate: 23/24 (95.8%) corners within 2% of frame diagonal on synthetic photo-like set, 3 ms median luma frame time (21 ms encoded JPEG) in `FrameAnalyzerIsolate` on `rosid_test`, and zero native size/alignment bloat. |
 | 2026-11-27 | M3 OCR engine choice: bundled official Apache-2.0 PP-OCRv5 mobile det (4.60 MB) + PP-OCRv5 English mobile rec (7.48 MB) via `flutter_onnxruntime: 1.9.1` (ONNX Runtime 1.28.0) + per-line Tesseract `psm 7` with `tessdata_best` for Bangla; retired ML Kit (`com.google.mlkit:text-recognition`) and `tflite_bn_stub.dart`; skipped EasyOCR 54 MB Bengali ONNX | Benchmark on 168 synthetic fixtures (`evidence/M3/baseline.json` vs `final.json`): Baseline v1 whole-page Tesseract got 0.18% EN CER, 4.75% BN CER, 3.94% mixed CER. Per-line `tessdata_fast` got 17.58% BN CER (rejected). Per-line `tessdata_best` + PP-OCRv5 ONNX achieved **0.09% EN CER**, **2.22% BN CER (-53.3% vs baseline)**, **2.30% mixed CER**, **97.2% exact receipt totals**, **3.60 s/page** on `rosid_test`, **248.7 MB RSS** on `rosid_low`, and **91.92 MB** arm64 APK with zero Play Services classes. EasyOCR 54 MB ONNX would break the 110 MB arm64 APK limit (91.9 + 54 > 110 MB) and is slower. Handwriting detection tested using synthetic OFL `Galada` calligraphy fixtures (flagged `is_synthetic_handwriting: true`). |
 
+| 2026-11-27 | M4 Listen (read aloud) & Check Words alternatives | Implemented Listen via a zero-dependency, zero-permission Android `TextToSpeech` MethodChannel (`app.rosid.rosid/tts`) that checks `isLanguageAvailable(Locale("bn", "BD"))` and hides Listen automatically when no offline Bangla voice is installed. Built Check Words alternatives from remembered `corrections` (first priority), `names`, and a curated Bangla/English document vocabulary with edit-distance <= 2 (per M4 fallback). |
+
 ## Not done, needs a person
 
 Things you could not do alone. One line each: what, why, and what you shipped instead.
@@ -74,3 +76,4 @@ Things that exist and may work but that you could not check on your machine (for
 |---|---|
 | Physical Android device installation and camera lens/autofocus | Headless emulator only; no physical phone available |
 | Live hardware camera YUV image stream format on physical phones | Headless emulator camera tested via `FakeCaptureSource` fixture stream; live hardware Y-plane stride behaviour depends on device HAL |
+| Real Bangla TTS voice for Listen (read aloud) | Headless emulator ships without an offline `bn-BD` voice pack; Listen hides automatically when unavailable |
