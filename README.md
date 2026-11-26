@@ -1,59 +1,28 @@
 # Rosid (রসিদ)
 
-Rosid is a fully offline Flutter scanner for Bangla and English receipts and
-documents. Android defaults to receipt scanning and expense tracking; iOS
-defaults to a documents-first experience. `AppProfile` keeps those variants in
-one codebase.
+Rosid 2.0 is an offline Android app that scans any Bangla or English paper, reads it, lets you fix uncertain words, makes an English draft, and packs papers into one file for an application. It requests no internet permission, uses no analytics or accounts, and keeps every model and font inside the APK.
 
-Download the signed Android APK or the advanced unsigned iPhone package from
-the [Rosid landing page](https://tanzir71.github.io/rosid/). GitHub Releases
-hosts every version, checksum, and Android signing-certificate fingerprint.
-The iPhone package requires user-managed self-signing; it is not an App Store or
-TestFlight build.
+See [handover/README.md](handover/README.md) for the version 2 specification and [handover/STATUS.md](handover/STATUS.md) for current build and verification status. Downloads and checksums are published on the [Rosid landing page](https://tanzir71.github.io/rosid/) and on GitHub Releases.
 
-## Features
+## Local verification
 
-- Fully offline: no HTTP client, analytics, crash reporter, account, or Android internet permission.
-- Capture from the camera or gallery, then crop, perspective-correct, and enhance the page.
-- On-device OCR for Bangla and English. Android uses ML Kit Latin plus bundled Tesseract `ben+eng`; iOS uses bundled Tesseract only.
-- Editable review screens for receipts (with line items) and for documents, with per-field confidence.
-- Searchable local history stored in SQLite (Drift, FTS5).
-- Export to CSV and PDF through the system share sheet; temporary export files are deleted afterwards.
-- English and Bangla UI.
-
-## Tech stack
-
-Flutter and Dart, Riverpod, go_router, Drift/SQLite, Tesseract (`flutter_tesseract_ocr`), Google ML Kit on Android.
-
-## Local development
-
-```sh
-flutter pub get
-FLUTTER_BIN="$(command -v flutter)" tool/check.sh
-```
-
-On Windows PowerShell, use the equivalent native entrypoint:
+All checks run locally on the developer machine via `tool/verify` (there are no GitHub Actions workflows):
 
 ```powershell
 flutter pub get
-.\tool\check.ps1
+.\tool\verify.ps1                 # Level A: generate, format, analyse, test, offline audit
+.\tool\verify.ps1 -Emulator       # Level B: adds headless emulator checks
+.\tool\verify.ps1 -Release        # Release: adds split APK build, size, alignment, manifest and monkey checks
 ```
 
-The lightweight check runs localization/code generation, formatting, analysis,
-tests, and the offline audit. Set `ROSID_RUN_BUILD=1` (or pass `-RunBuild` to the
-PowerShell script) to include a debug APK on a machine with Android tooling and
-sufficient disk.
+Equivalent Bash script: `tool/verify.sh` (`--emulator`, `--release`, `--evidence <milestone>`).
 
-After producing a release APK, run `tool/audit_offline.sh --require-merged` or
-`.\tool\audit_offline.ps1 -RequireMerged`; release/tag audits fail if the merged
-manifest cannot be located or contains a permission outside the privacy policy.
+## Version 1 history and notes
 
-Release builds must include `eng.traineddata` and `ben.traineddata` in
-`assets/tessdata/`; the tag workflow verifies the checked-in files against their
-pinned SHA-256 values before building.
+Version 1.0.0 was an early-access receipt and document scanner. Its historical notes live in [notes/](notes/):
 
-See [PROGRESS.md](PROGRESS.md), [TASKS.md](TASKS.md),
-[docs/RELEASING.md](docs/RELEASING.md), and the recorded
-[landing-page research](docs/WEBSITE_RESEARCH.md).
-
-Architecture notes are in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+- [notes/ARCHITECTURE.md](notes/ARCHITECTURE.md)
+- [notes/RELEASING.md](notes/RELEASING.md)
+- [notes/MANUAL_QA.md](notes/MANUAL_QA.md)
+- [notes/WEBSITE_RESEARCH.md](notes/WEBSITE_RESEARCH.md)
+- [PROGRESS.md](PROGRESS.md) and [TASKS.md](TASKS.md)

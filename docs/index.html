@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="bn">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>রসিদ · Rosid — Offline Bangla &amp; English paper scanner</title>
+  <meta name="description" content="রসিদ একটি ফ্রি অফলাইন অ্যান্ড্রয়েড অ্যাপ। সংস্করণ ২ তৈরি হচ্ছে।">
+  <style>
+    :root {
+      --bg-canvas: #F2F4EE;
+      --bg-sheet: #FFFFFF;
+      --ink-primary: #1A1B2E;
+      --ink-secondary: #55586A;
+      --ink-tertiary: #8A8D9C;
+      --line-subtle: #DCE0D3;
+      --accent-base: #4333B0;
+      --accent-soft: #E7E3FA;
+      --accent-ink: #32258C;
+      --good-base: #1B7A50;
+      --good-soft: #DDF1E4;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg-canvas);
+      color: var(--ink-primary);
+      font-family: system-ui, -apple-system, "Segoe UI", "Noto Sans Bengali", sans-serif;
+      line-height: 1.6;
+      padding: 32px 20px;
+    }
+    main {
+      max-width: 680px;
+      margin: 0 auto;
+    }
+    .wordmark {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+    .wordmark strong {
+      font-size: 28px;
+      font-weight: 600;
+    }
+    .wordmark span {
+      font-size: 20px;
+      color: var(--ink-secondary);
+      font-weight: 600;
+    }
+    .pill {
+      display: inline-block;
+      background: var(--good-soft);
+      color: var(--good-base);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 999px;
+      margin-bottom: 16px;
+    }
+    .card {
+      background: var(--bg-sheet);
+      border: 1px solid var(--line-subtle);
+      border-radius: 4px;
+      padding: 28px 24px;
+      box-shadow: 0 1px 2px rgba(26, 27, 46, 0.10), 0 4px 10px rgba(26, 27, 46, 0.06);
+      margin-bottom: 20px;
+    }
+    h1 {
+      font-size: 26px;
+      line-height: 1.35;
+      margin: 0 0 12px;
+      font-weight: 600;
+    }
+    p {
+      margin: 0 0 14px;
+      color: var(--ink-secondary);
+      font-size: 16px;
+    }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 20px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 48px;
+      padding: 0 22px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .btn-primary {
+      background: var(--accent-base);
+      color: #FFFFFF;
+    }
+    .btn-outline {
+      border: 1px solid var(--line-subtle);
+      color: var(--ink-primary);
+      background: var(--bg-sheet);
+    }
+    .meta {
+      margin-top: 20px;
+      font-size: 13px;
+      color: var(--ink-tertiary);
+    }
+    a { color: var(--accent-ink); }
+    hr {
+      border: 0;
+      border-top: 1px solid var(--line-subtle);
+      margin: 24px 0;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="wordmark">
+      <strong>রসিদ</strong>
+      <span lang="en">Rosid</span>
+    </div>
+    <div class="card">
+      <div class="pill">ইন্টারনেট ছাড়াই চলে · Works offline</div>
+      <h1>সংস্করণ ২ আসছে</h1>
+      <p>রসিদ একটি ফ্রি অ্যান্ড্রয়েড অ্যাপ। যেকোনো বাংলা বা ইংরেজি কাগজ স্ক্যান করে পড়ে, ইংরেজি খসড়া বানায় এবং এক ফাইলে গুছিয়ে এক্সপোর্ট করে। ইন্টারনেট ছাড়াই চলে, আপনার কাগজ ফোনের বাইরে যায় না।</p>
+      <p>সংস্করণ ২.০ এখন তৈরি হচ্ছে। এর মধ্যে সংস্করণ ১.০.০ ডাউনলোড করা যাবে।</p>
+      <hr>
+      <div lang="en">
+        <h1>Version 2 is on its way</h1>
+        <p>Rosid is a free Android app that scans any Bangla or English paper, reads it, makes an English draft, and packs papers into one file. It works completely offline with no internet permission.</p>
+        <p>Version 2.0 is currently being built. Version 1.0.0 is available now on GitHub Releases.</p>
+      </div>
+      <div class="actions">
+        <a class="btn btn-primary" href="https://github.com/tanzir71/rosid/releases/tag/v1.0.0">সংস্করণ ১.০.০ ডাউনলোড · Download v1.0.0</a>
+        <a class="btn btn-outline" href="https://github.com/tanzir71/rosid">সোর্স কোড · Source code</a>
+      </div>
+      <p class="meta">Android 8 or newer · No internet permission · No account · No ads</p>
+    </div>
+  </main>
+</body>
+</html>
