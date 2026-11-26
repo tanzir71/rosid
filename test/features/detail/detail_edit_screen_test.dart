@@ -41,28 +41,28 @@ void main() {
           label: 'Total',
           occurrence: 0,
           input: '1abc2',
-          message: 'Enter valid non-negative total and tax amounts.',
+          message: 'Enter valid non-negative total and VAT amounts.',
         ),
         (
           name: 'tax',
-          label: 'Tax',
+          label: 'VAT',
           occurrence: 0,
           input: '1/2',
-          message: 'Enter valid non-negative total and tax amounts.',
+          message: 'Enter valid non-negative total and VAT amounts.',
         ),
         (
           name: 'quantity',
           label: 'Quantity',
           occurrence: 0,
           input: '1,23',
-          message: 'Each line item needs a valid name, quantity, and amount.',
+          message: 'Each item needs a name, quantity and amount.',
         ),
         (
           name: 'unit price',
           label: 'Unit price',
           occurrence: 0,
           input: '12x34',
-          message: 'Each line item needs a valid name, quantity, and amount.',
+          message: 'Each item needs a name, quantity and amount.',
         ),
       ];
 

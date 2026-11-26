@@ -432,7 +432,10 @@ void main() {
     expect(nativeOperations.deletedTemporaryPaths, [
       '/tmp/failed-gallery-cache.jpg',
     ]);
-    expect(find.textContaining('private copy failed'), findsOneWidget);
+    expect(
+      find.text('Could not take or import the photo. Try again.'),
+      findsOneWidget,
+    );
   });
 }
 

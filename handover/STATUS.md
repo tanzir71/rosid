@@ -2,14 +2,14 @@
 
 The implementing agent keeps this file true. Update it in the same push as the work.
 
-Last updated: 2026-11-27 (M0 completed and verified to Level B)
+Last updated: 2026-11-27 (M1 completed and verified to Level B)
 
 ## Milestones
 
 | | Milestone | State | Verified to | Evidence |
 |---|---|---|---|---|
 | M0 | Ground rules and baseline | done | B | `evidence/M0/summary.md` |
-| M1 | Design system and app shell | not started | | |
+| M1 | Design system and app shell | done | B | `evidence/M1/summary.md` |
 | M2 | Capture and image | not started | | |
 | M3 | Reading text | not started | | |
 | M4 | Read and fix | not started | | |
@@ -24,7 +24,7 @@ State is one of: not started, in progress, done, done with gaps.
 
 ## In progress
 
-Starting M1: Design system and app shell.
+Starting M2: Capture and image.
 
 ## Measured numbers
 
@@ -51,6 +51,8 @@ Record every choice the handover left to you: which Bangla recogniser won, which
 | 2026-11-26 | Upgraded Android build to Gradle 9.5.0, AGP 9.3.1, Kotlin 2.4.20, OpenJDK 21 (Android Studio JBR), and replaced discontinued `flutter_tesseract_ocr` 0.4.31 with `tesseract_ocr` 0.6.0 | Flutter 3.50.1 requires Gradle 9.3.1+ and AGP 9.x; `flutter_tesseract_ocr` used `jcenter()` which fails on Gradle 9. `tesseract_ocr` 0.6.0 drops `jcenter()` and bundles `tesseract4android:4.8.0`. Set `kotlin.incremental=false` in `android/gradle.properties` to avoid Windows cross-drive incremental cache close failures. |
 | 2026-11-26 | Made `tanzir71/rosid` public, switched GitHub Pages to `main /docs` (`build_type: legacy` + `.nojekyll`), removed `.github/workflows/*`, and disabled GitHub Actions (`enabled: false`) | Verified `gitleaks 8.30.1` clean across all 34 commits, verified all fixtures are synthetic, confirmed `https://tanzir71.github.io/rosid/` returns HTTP 200 without Actions. `gh` CLI is signed in as `tanzir71` with admin access; direct push to `main` works with no blocking rulesets. |
 | 2026-11-26 | Configured `rosid_test` (4 GB RAM, `android-35;google_apis;x86_64`, WHPX + host GPU) and `rosid_low` (2 GB RAM) | Hardware GPU acceleration (`-gpu host`) enabled reliable, fast headless emulator verification (2.66 s AOT cold start vs 24 s with software rendering). |
+| 2026-11-27 | Bundled subsetted Anek Bangla (instantiated at weights 400/500/600/700 from Google Fonts variable TTF) and Tiro Bangla (400), plus `flutter_svg: ^2.5.1` for the 56 stroke icons | Keeps total bundled fonts to ~1.1 MB while matching Mohor typography and line heights (`tokens.g.dart` generated from `design/tokens.json`). `flutter_svg` adds zero Android permissions. |
+| 2026-11-27 | Added Schema v3 migration (`scans` additions, `scan_pages` additions, 8 new tables) and built empty states for Library, Bundles, Expenses, and shell routes | Preserves all v1/v2 rows (verified by v2→v3 SQLite migration test). Empty states use Mohor cards and primary actions as specified in `design/screens.md` "States not drawn". |
 
 ## Not done, needs a person
 

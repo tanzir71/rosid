@@ -1,9 +1,8 @@
 import 'package:drift/native.dart';
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:rosid/app.dart';
-import 'package:rosid/core/profile/app_profile.dart';
 import 'package:rosid/core/routing/app_router.dart';
 import 'package:rosid/core/settings/app_settings.dart';
 import 'package:rosid/data/database/app_database.dart';
@@ -11,16 +10,21 @@ import 'package:rosid/data/database/database_provider.dart';
 import 'package:rosid/data/repositories/record_repository.dart';
 import 'package:rosid/data/repositories/scan_repository.dart';
 import 'package:rosid/data/repositories/startup_cleanup_repository.dart';
+import 'package:rosid/core/profile/app_profile.dart';
 import 'package:rosid/features/detail/detail_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
-  Future<SharedPreferences> preferences() async {
-    SharedPreferences.setMockInitialValues({});
+  Future<SharedPreferences> preferences([
+    Map<String, Object> initial = const {},
+  ]) async {
+    SharedPreferences.setMockInitialValues(initial);
     return SharedPreferences.getInstance();
   }
 
-  testWidgets('renders the navigable app shell', (tester) async {
+  testWidgets('first run completes onboarding and lands on Home', (
+    tester,
+  ) async {
     final prefs = await preferences();
     final database = AppDatabase.forTesting(NativeDatabase.memory());
     addTearDown(database.close);
@@ -28,7 +32,6 @@ void main() {
       ProviderScope(
         overrides: [
           sharedPreferencesProvider.overrideWithValue(prefs),
-          appProfileProvider.overrideWithValue(const AppProfile.android()),
           databaseProvider.overrideWithValue(database),
           startupCleanupProvider.overrideWith((ref) async => 0),
         ],
@@ -37,26 +40,77 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('This month'), findsOneWidget);
-    expect(find.byIcon(Icons.document_scanner_outlined), findsOneWidget);
-
-    await tester.tap(find.text('History'));
+    // Step 1: Choose English
+    await tester.ensureVisible(find.text('English'));
+    await tester.tap(find.text('English'));
     await tester.pumpAndSettle();
-    expect(find.text('History'), findsWidgets);
+    await tester.tap(find.byKey(const ValueKey('welcome-continue-language')));
+    await tester.pumpAndSettle();
+
+    // Step 2: Purposes screen
+    expect(find.text('What do you need Rosid for?'), findsOneWidget);
+    await tester.ensureVisible(find.text('Receipts and spending'));
+    await tester.tap(find.text('Receipts and spending'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('welcome-continue-purpose')));
+    await tester.pumpAndSettle();
+
+    // Step 3: Camera explanation -> skip
+    expect(find.text('Allow the camera to scan'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('welcome-skip-camera')));
+    await tester.pumpAndSettle();
+
+    // Landed on Home with Expenses tab enabled
+    expect(find.text('What are you scanning?'), findsOneWidget);
+    expect(find.text('Expenses'), findsOneWidget);
   });
 
-  testWidgets('uses Bangla labels from persisted language setting', (
-    tester,
-  ) async {
-    SharedPreferences.setMockInitialValues({'language_code': 'bn'});
-    final prefs = await SharedPreferences.getInstance();
+  testWidgets('renders the navigable v2 app shell in English', (tester) async {
+    final prefs = await preferences({
+      'onboarding_complete': true,
+      'language_code': 'en',
+      'expense_tracking_enabled': true,
+    });
     final database = AppDatabase.forTesting(NativeDatabase.memory());
     addTearDown(database.close);
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
           sharedPreferencesProvider.overrideWithValue(prefs),
-          appProfileProvider.overrideWithValue(const AppProfile.android()),
+          databaseProvider.overrideWithValue(database),
+          startupCleanupProvider.overrideWith((ref) async => 0),
+        ],
+        child: const RosidApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('What are you scanning?'), findsOneWidget);
+    expect(find.byKey(const ValueKey('dock-scan-button')), findsOneWidget);
+
+    await tester.tap(find.text('Library').last);
+    await tester.pumpAndSettle();
+    expect(find.text('Search inside your papers'), findsOneWidget);
+
+    await tester.tap(find.text('Bundles'));
+    await tester.pumpAndSettle();
+    expect(find.text('No bundles yet'), findsOneWidget);
+  });
+
+  testWidgets('uses Bangla labels from persisted language setting', (
+    tester,
+  ) async {
+    final prefs = await preferences({
+      'onboarding_complete': true,
+      'language_code': 'bn',
+      'expense_tracking_enabled': true,
+    });
+    final database = AppDatabase.forTesting(NativeDatabase.memory());
+    addTearDown(database.close);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(prefs),
           databaseProvider.overrideWithValue(database),
           startupCleanupProvider.overrideWith((ref) async => 0),
         ],
@@ -66,51 +120,20 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('হোম'), findsOneWidget);
-    expect(find.text('ইতিহাস'), findsOneWidget);
-    expect(find.text('সেটিংস'), findsOneWidget);
-    expect(find.byTooltip('অফলাইন'), findsOneWidget);
-  });
-
-  testWidgets('iOS profile starts documents-first and can enable expenses', (
-    tester,
-  ) async {
-    final prefs = await preferences();
-    final database = AppDatabase.forTesting(NativeDatabase.memory());
-    addTearDown(database.close);
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          sharedPreferencesProvider.overrideWithValue(prefs),
-          appProfileProvider.overrideWithValue(const AppProfile.ios()),
-          databaseProvider.overrideWithValue(database),
-          startupCleanupProvider.overrideWith((ref) async => 0),
-        ],
-        child: const RosidApp(),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    expect(find.text('No documents yet'), findsOneWidget);
-    expect(find.text('This month'), findsNothing);
-
-    await tester.tap(find.text('Settings'));
-    await tester.pumpAndSettle();
-    final expenseSwitch = tester.widget<SwitchListTile>(
-      find.widgetWithText(SwitchListTile, 'Expense tracking'),
-    );
-    expect(expenseSwitch.value, isFalse);
-    await tester.tap(find.widgetWithText(SwitchListTile, 'Expense tracking'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Home'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('This month'), findsOneWidget);
+    expect(find.text('কাগজপত্র'), findsWidgets);
+    expect(find.text('ফাইল'), findsWidgets);
+    expect(find.text('খরচ'), findsOneWidget);
+    expect(find.text('অফলাইন'), findsOneWidget);
   });
 
   testWidgets(
-    'expense-off profile hides receipt surfaces and rejects receipt details',
+    'expenses-off setting hides Expenses tab and rejects receipt details',
     (tester) async {
-      final prefs = await preferences();
+      final prefs = await preferences({
+        'onboarding_complete': true,
+        'language_code': 'en',
+        'expense_tracking_enabled': false,
+      });
       final database = AppDatabase.forTesting(NativeDatabase.memory());
       addTearDown(database.close);
       final scans = ScanRepository(database);
@@ -151,7 +174,6 @@ void main() {
         ProviderScope(
           overrides: [
             sharedPreferencesProvider.overrideWithValue(prefs),
-            appProfileProvider.overrideWithValue(const AppProfile.ios()),
             databaseProvider.overrideWithValue(database),
             startupCleanupProvider.overrideWith((ref) async => 0),
           ],
@@ -160,18 +182,12 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('History'));
+      expect(find.text('Expenses'), findsNothing);
+
+      await tester.tap(find.text('Library').last);
       await tester.pumpAndSettle();
       expect(find.text('Lecture notes'), findsOneWidget);
       expect(find.text('Hidden merchant'), findsNothing);
-      expect(find.text('Receipt'), findsNothing);
-      expect(find.text('Category'), findsNothing);
-
-      await tester.tap(find.text('Settings'));
-      await tester.pumpAndSettle();
-      expect(find.text('Expense tracking'), findsOneWidget);
-      expect(find.text('Default currency'), findsNothing);
-      expect(find.text('Categories'), findsNothing);
 
       final container = ProviderScope.containerOf(
         tester.element(find.byType(RosidApp)),
@@ -180,7 +196,6 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(DetailScreen), findsNothing);
-      expect(find.text('Lecture notes'), findsOneWidget);
       expect(find.text('Hidden merchant'), findsNothing);
     },
   );

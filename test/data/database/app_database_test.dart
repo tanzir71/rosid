@@ -181,4 +181,146 @@ void main() {
     expect((await scans.getScan('scan-1')).id, 'scan-1');
     expect(await scans.getPages('scan-1'), hasLength(1));
   });
+
+  test('v2 to v3 migration preserves receipts, documents, tags and creates v3 tables', () async {
+    await database.close();
+    final directory = await Directory.systemTemp.createTemp(
+      'rosid-v2-to-v3-test-',
+    );
+    final file = File(
+      '${directory.path}${Platform.pathSeparator}rosid_v2.sqlite',
+    );
+    try {
+      // Build an authentic version-2 schema database fixture.
+      final raw = sqlite3.sqlite3.open(file.path);
+      raw
+        ..execute('''
+          CREATE TABLE scans (
+            id TEXT NOT NULL PRIMARY KEY,
+            type TEXT NOT NULL,
+            image_path TEXT NOT NULL,
+            thumb_path TEXT,
+            ocr_raw_text TEXT NOT NULL DEFAULT '',
+            ocr_engine TEXT,
+            ocr_mean_confidence REAL,
+            lang_hint TEXT NOT NULL DEFAULT 'auto',
+            created_at INTEGER NOT NULL,
+            updated_at INTEGER NOT NULL
+          );
+          CREATE TABLE scan_pages (
+            id TEXT NOT NULL PRIMARY KEY,
+            scan_id TEXT NOT NULL REFERENCES scans(id) ON DELETE CASCADE,
+            image_path TEXT NOT NULL,
+            processed_path TEXT,
+            page_index INTEGER NOT NULL
+          );
+          CREATE TABLE categories (
+            id TEXT NOT NULL PRIMARY KEY,
+            name_en TEXT NOT NULL,
+            name_bn TEXT NOT NULL,
+            icon TEXT NOT NULL,
+            is_default INTEGER NOT NULL DEFAULT 0
+          );
+          CREATE TABLE receipts (
+            id TEXT NOT NULL PRIMARY KEY,
+            scan_id TEXT NOT NULL REFERENCES scans(id) ON DELETE CASCADE,
+            merchant TEXT NOT NULL,
+            date_of_purchase INTEGER NOT NULL,
+            total REAL NOT NULL,
+            currency TEXT NOT NULL DEFAULT 'BDT',
+            tax REAL,
+            payment_method TEXT,
+            category_id TEXT REFERENCES categories(id) ON DELETE SET NULL,
+            note TEXT,
+            field_confidence_json TEXT NOT NULL DEFAULT '{}'
+          );
+          CREATE TABLE line_items (
+            id TEXT NOT NULL PRIMARY KEY,
+            receipt_id TEXT NOT NULL REFERENCES receipts(id) ON DELETE CASCADE,
+            name TEXT NOT NULL,
+            qty REAL NOT NULL DEFAULT 1,
+            unit_price REAL,
+            amount REAL NOT NULL
+          );
+          CREATE TABLE documents (
+            id TEXT NOT NULL PRIMARY KEY,
+            scan_id TEXT NOT NULL REFERENCES scans(id) ON DELETE CASCADE,
+            title TEXT NOT NULL,
+            body TEXT NOT NULL DEFAULT '',
+            pinned INTEGER NOT NULL DEFAULT 0
+          );
+          CREATE TABLE tags (
+            id TEXT NOT NULL PRIMARY KEY,
+            name TEXT NOT NULL UNIQUE
+          );
+          CREATE TABLE scan_tags (
+            scan_id TEXT NOT NULL REFERENCES scans(id) ON DELETE CASCADE,
+            tag_id TEXT NOT NULL REFERENCES tags(id) ON DELETE CASCADE,
+            PRIMARY KEY (scan_id, tag_id)
+          );
+        ''')
+        ..execute(
+          "INSERT INTO categories VALUES ('groceries','Groceries','মুদি','shopping_basket',1)",
+        )
+        ..execute(
+          "INSERT INTO scans VALUES ('scan-rec','receipt','/p/r.jpg',NULL,'Shwapno 500','mlkit',0.9,'auto',1752710400,1752710400)",
+        )
+        ..execute(
+          "INSERT INTO scan_pages VALUES ('p-rec','scan-rec','/p/r.jpg',NULL,0)",
+        )
+        ..execute(
+          "INSERT INTO receipts VALUES ('rec-1','scan-rec','Shwapno',1752710400,500.0,'BDT',25.0,'Cash','groceries',NULL,'{}')",
+        )
+        ..execute(
+          "INSERT INTO line_items VALUES ('li-1','rec-1','Rice',2.0,250.0,500.0)",
+        )
+        ..execute(
+          "INSERT INTO scans VALUES ('scan-doc','document','/p/d.jpg',NULL,'খতিয়ান নং ১২৪৫','tess',0.8,'bn',1752710400,1752710400)",
+        )
+        ..execute(
+          "INSERT INTO scan_pages VALUES ('p-doc','scan-doc','/p/d.jpg',NULL,0)",
+        )
+        ..execute(
+          "INSERT INTO documents VALUES ('doc-1','scan-doc','খতিয়ান, বিরুলিয়া','খতিয়ান নং ১২৪৫',1)",
+        )
+        ..execute("INSERT INTO tags VALUES ('tag-1','land')")
+        ..execute("INSERT INTO scan_tags VALUES ('scan-doc','tag-1')")
+        ..userVersion = 2;
+      raw.close();
+
+      final migrated = AppDatabase.forTesting(NativeDatabase(file));
+      try {
+        final allScans = await migrated.select(migrated.scans).get();
+        expect(allScans, hasLength(2));
+        final recScan = allScans.firstWhere((s) => s.id == 'scan-rec');
+        final docScan = allScans.firstWhere((s) => s.id == 'scan-doc');
+        expect(recScan.kind, 'receipt');
+        expect(docScan.kind, 'document');
+        expect(docScan.checkCount, 0);
+
+        expect(await migrated.select(migrated.receipts).get(), hasLength(1));
+        expect(await migrated.select(migrated.documents).get(), hasLength(1));
+        expect(await migrated.select(migrated.tags).get(), hasLength(1));
+        expect(await migrated.select(migrated.scanTags).get(), hasLength(1));
+
+        // Verify all 8 new v3 tables are writable and queryable.
+        expect(await migrated.select(migrated.textLines).get(), isEmpty);
+        expect(await migrated.select(migrated.details).get(), isEmpty);
+        expect(await migrated.select(migrated.translations).get(), isEmpty);
+        expect(await migrated.select(migrated.names).get(), isEmpty);
+        expect(await migrated.select(migrated.terms).get(), isEmpty);
+        expect(await migrated.select(migrated.corrections).get(), isEmpty);
+        expect(await migrated.select(migrated.bundles).get(), isEmpty);
+        expect(await migrated.select(migrated.bundleItems).get(), isEmpty);
+
+        // Verify FTS search rebuilt across migrated rows.
+        expect(await migrated.searchScanIds('Shwapno'), ['scan-rec']);
+        expect(await migrated.searchScanIds('খতিয়ান'), ['scan-doc']);
+      } finally {
+        await migrated.close();
+      }
+    } finally {
+      if (await directory.exists()) await directory.delete(recursive: true);
+    }
+  });
 }

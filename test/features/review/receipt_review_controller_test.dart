@@ -40,6 +40,9 @@ void main() {
       (_) async => Scan(
         id: 'scan-a',
         type: 'receipt',
+        kind: 'receipt',
+        language: 'en',
+        checkCount: 0,
         imagePath: '/private/a.jpg',
         ocrRawText: '',
         langHint: 'automatic',
@@ -104,6 +107,9 @@ void main() {
       (_) async => Scan(
         id: 'scan-a',
         type: 'receipt',
+        kind: 'receipt',
+        language: 'en',
+        checkCount: 0,
         imagePath: '/private/a.jpg',
         ocrRawText: '',
         langHint: 'automatic',
