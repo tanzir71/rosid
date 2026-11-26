@@ -6,6 +6,9 @@ import 'package:rosid/core/settings/app_settings.dart';
 import 'package:rosid/core/theme/rosid_icons.dart';
 import 'package:rosid/core/widgets/rosid_navigation.dart';
 import 'package:rosid/data/repositories/history_repository.dart';
+import 'package:rosid/features/bundles/bundle_checklist_screen.dart';
+import 'package:rosid/features/bundles/bundle_export_screen.dart';
+import 'package:rosid/features/bundles/bundles_screen.dart';
 import 'package:rosid/features/capture/adjust_page_screen.dart';
 import 'package:rosid/features/capture/capture_screen.dart';
 import 'package:rosid/features/capture/reading_progress_screen.dart';
@@ -21,13 +24,15 @@ import 'package:rosid/features/export/export_saved_screen.dart';
 import 'package:rosid/features/export/export_screen.dart';
 import 'package:rosid/features/export/paper_export_options_screen.dart';
 import 'package:rosid/features/home/home_screen.dart';
+import 'package:rosid/features/library/library_screen.dart';
 import 'package:rosid/features/paper/check_words_screen.dart';
 import 'package:rosid/features/paper/paper_screen.dart';
 import 'package:rosid/features/review/document_review_screen.dart';
 import 'package:rosid/features/review/receipt_review_screen.dart';
 import 'package:rosid/features/settings/settings_screen.dart';
 import 'package:rosid/features/shared/app_shell.dart';
-import 'package:rosid/features/shell_views/v2_shell_screens.dart';
+import 'package:rosid/features/shell_views/v2_shell_screens.dart'
+    show ExpensesScreen, V2RouteShellScreen;
 import 'package:rosid/features/translation/name_book_screen.dart';
 import 'package:rosid/features/welcome/welcome_screens.dart';
 
@@ -214,19 +219,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       // 08 Bundles detail & export
       GoRoute(
         path: '/bundles/:id',
-        builder: (context, state) => V2RouteShellScreen(
-          title: context.l10n.bundles,
-          body: context.l10n.bundleChecklistComing,
-          icon: RosidIcons.bundle,
-        ),
+        builder: (context, state) =>
+            BundleChecklistScreen(bundleId: state.pathParameters['id']!),
       ),
       GoRoute(
         path: '/bundles/:id/export',
-        builder: (context, state) => V2RouteShellScreen(
-          title: context.l10n.export,
-          body: context.l10n.bundleChecklistComing,
-          icon: RosidIcons.share,
-        ),
+        builder: (context, state) =>
+            BundleExportScreen(bundleId: state.pathParameters['id']!),
       ),
 
       // 10 Settings & safety

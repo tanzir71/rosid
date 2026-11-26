@@ -1,0 +1,90 @@
+[
+  {
+    "id": "student_visa",
+    "icon": "seal",
+    "titleEn": "Student visa",
+    "titleBn": "স্টুডেন্ট ভিসা",
+    "subtitleEn": "Passport, certificates, bank and sponsor papers",
+    "subtitleBn": "পাসপোর্ট, সনদ, ব্যাংক ও স্পনসরের কাগজপত্র",
+    "disclaimerEn": "Check the official list for your application.",
+    "disclaimerBn": "আপনার আবেদনের জন্য অফিসিয়াল তালিকাটি মিলিয়ে নিন।",
+    "items": [
+      {"titleEn": "Passport", "titleBn": "পাসপোর্ট", "expectedKind": "id"},
+      {"titleEn": "National ID, both sides", "titleBn": "জাতীয় পরিচয়পত্র, দুই পিঠ", "expectedKind": "id"},
+      {"titleEn": "Birth certificate", "titleBn": "জন্ম নিবন্ধন সনদ", "expectedKind": "certificate"},
+      {"titleEn": "Academic certificates (SSC / HSC / Degree)", "titleBn": "শিক্ষা সনদ (এসএসসি / এইচএসসি / স্নাতক)", "expectedKind": "certificate"},
+      {"titleEn": "Bank solvency certificate", "titleBn": "ব্যাংক সলভেন্সি সনদ", "expectedKind": "certificate"},
+      {"titleEn": "Bank statement (6 months)", "titleBn": "ব্যাংক স্টেটমেন্ট (৬ মাস)", "expectedKind": "document"},
+      {"titleEn": "Sponsor letter", "titleBn": "স্পনসরের চিঠি", "expectedKind": "letter"},
+      {"titleEn": "Land record (Khatian)", "titleBn": "জমির খতিয়ান", "expectedKind": "land"},
+      {"titleEn": "Land tax receipt (Dakhila)", "titleBn": "ভূমি উন্নয়ন করের দাখিলা", "expectedKind": "land"},
+      {"titleEn": "Trade licence", "titleBn": "ট্রেড লাইসেন্স", "expectedKind": "licence"}
+    ]
+  },
+  {
+    "id": "visit_visa",
+    "icon": "seal",
+    "titleEn": "Visit visa",
+    "titleBn": "ভিজিট ভিসা",
+    "subtitleEn": "Passport, bank papers, job or business papers",
+    "subtitleBn": "পাসপোর্ট, ব্যাংক ও চাকরি বা ব্যবসার কাগজপত্র",
+    "disclaimerEn": "Check the official list for your application.",
+    "disclaimerBn": "আপনার আবেদনের জন্য অফিসিয়াল তালিকাটি মিলিয়ে নিন।",
+    "items": [
+      {"titleEn": "Passport", "titleBn": "পাসপোর্ট", "expectedKind": "id"},
+      {"titleEn": "National ID, both sides", "titleBn": "জাতীয় পরিচয়পত্র, দুই পিঠ", "expectedKind": "id"},
+      {"titleEn": "Bank solvency certificate", "titleBn": "ব্যাংক সলভেন্সি সনদ", "expectedKind": "certificate"},
+      {"titleEn": "Bank statement (6 months)", "titleBn": "ব্যাংক স্টেটমেন্ট (৬ মাস)", "expectedKind": "document"},
+      {"titleEn": "NOC / Employment letter", "titleBn": "চাকরির এনওসি / প্রত্যয়নপত্র", "expectedKind": "letter"},
+      {"titleEn": "Trade licence (if business)", "titleBn": "ট্রেড লাইসেন্স (ব্যবসা হলে)", "expectedKind": "licence"},
+      {"titleEn": "Invitation letter", "titleBn": "আমন্ত্রণপত্র", "expectedKind": "letter"}
+    ]
+  },
+  {
+    "id": "land_papers",
+    "icon": "land",
+    "titleEn": "Land papers",
+    "titleBn": "জমির কাগজপত্র",
+    "subtitleEn": "Deed, khatian, mutation and tax receipts",
+    "subtitleBn": "দলিল, খতিয়ান, নামজারি ও দাখিলা",
+    "disclaimerEn": "Check the official list for your application.",
+    "disclaimerBn": "আপনার আবেদনের জন্য অফিসিয়াল তালিকাটি মিলিয়ে নিন।",
+    "items": [
+      {"titleEn": "Registered deed (Dolil)", "titleBn": "রেজিস্ট্রিকৃত দলিল", "expectedKind": "deed"},
+      {"titleEn": "Khatian (Record of rights)", "titleBn": "খতিয়ান (পর্চা)", "expectedKind": "land"},
+      {"titleEn": "Mutation record (Namjari)", "titleBn": "নামজারি খতিয়ান", "expectedKind": "land"},
+      {"titleEn": "Land tax receipt (Dakhila)", "titleBn": "ভূমি উন্নয়ন করের দাখিলা", "expectedKind": "land"},
+      {"titleEn": "Owner National ID", "titleBn": "মালিকের জাতীয় পরিচয়পত্র", "expectedKind": "id"},
+      {"titleEn": "Succession certificate (Warish)", "titleBn": "ওয়ারিশ সনদ", "expectedKind": "certificate"}
+    ]
+  },
+  {
+    "id": "bank_loan",
+    "icon": "wallet",
+    "titleEn": "Bank loan",
+    "titleBn": "ব্যাংক ঋণ",
+    "subtitleEn": "ID, income and property papers",
+    "subtitleBn": "পরিচয়পত্র, আয় ও সম্পত্তির কাগজপত্র",
+    "disclaimerEn": "Check the official list for your application.",
+    "disclaimerBn": "আপনার আবেদনের জন্য অফিসিয়াল তালিকাটি মিলিয়ে নিন।",
+    "items": [
+      {"titleEn": "National ID, both sides", "titleBn": "জাতীয় পরিচয়পত্র, দুই পিঠ", "expectedKind": "id"},
+      {"titleEn": "TIN certificate", "titleBn": "টিআইএন সনদ", "expectedKind": "certificate"},
+      {"titleEn": "Salary certificate / Trade licence", "titleBn": "বেতন সনদ / ট্রেড লাইসেন্স", "expectedKind": "licence"},
+      {"titleEn": "Bank statement (12 months)", "titleBn": "ব্যাংক স্টেটমেন্ট (১২ মাস)", "expectedKind": "document"},
+      {"titleEn": "Utility bill (address proof)", "titleBn": "বিদ্যুৎ বা গ্যাস বিল", "expectedKind": "bill"},
+      {"titleEn": "Property deed or khatian", "titleBn": "সম্পত্তির দলিল বা খতিয়ান", "expectedKind": "land"}
+    ]
+  },
+  {
+    "id": "empty",
+    "icon": "plus",
+    "titleEn": "Empty bundle",
+    "titleBn": "খালি ফাইল",
+    "subtitleEn": "Make your own list",
+    "subtitleBn": "নিজের তালিকা তৈরি করুন",
+    "disclaimerEn": "Check the official list for your application.",
+    "disclaimerBn": "আপনার আবেদনের জন্য অফিসিয়াল তালিকাটি মিলিয়ে নিন।",
+    "items": []
+  }
+]

@@ -132,6 +132,7 @@ class _PaperScreenState extends ConsumerState<PaperScreen> {
                 onSelected: (action) {
                   if (action == 'kind') _showKindPicker(context, paper);
                   if (action == 'edit') _showFullTextEditor(context, paper);
+                  if (action == 'renew') _pickRenewByDate(context, paper);
                 },
                 itemBuilder: (_) => [
                   PopupMenuItem(
@@ -139,6 +140,10 @@ class _PaperScreenState extends ConsumerState<PaperScreen> {
                     child: Text(l10n.changePaperKind),
                   ),
                   PopupMenuItem(value: 'edit', child: Text(l10n.editFullText)),
+                  PopupMenuItem(
+                    value: 'renew',
+                    child: Text(l10n.setRenewByDate),
+                  ),
                 ],
               ),
             ],
@@ -522,6 +527,25 @@ class _PaperScreenState extends ConsumerState<PaperScreen> {
       await ref
           .read(paperRepositoryProvider)
           .updatePaperKind(paper.scan.id, chosen);
+      ref.invalidate(paperViewProvider(widget.scanId));
+    }
+  }
+
+  Future<void> _pickRenewByDate(
+    BuildContext context,
+    PaperViewData paper,
+  ) async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: paper.scan.renewBy ?? now.add(const Duration(days: 30)),
+      firstDate: DateTime(now.year - 1),
+      lastDate: DateTime(now.year + 20),
+    );
+    if (picked != null) {
+      await ref
+          .read(paperRepositoryProvider)
+          .updateRenewBy(paper.scan.id, picked);
       ref.invalidate(paperViewProvider(widget.scanId));
     }
   }

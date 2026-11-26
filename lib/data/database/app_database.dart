@@ -233,14 +233,14 @@ class AppDatabase extends _$AppDatabase {
           scanId,
           text
               .whereType<String>()
-              .map(TextNormalizer.normalize)
+              .map(TextNormalizer.normalizeForSearch)
               .where((value) => value.isNotEmpty)
               .join('\n'),
         ],
       );
 
   Future<List<String>> searchScanIds(String query, {int? limit}) async {
-    final normalized = TextNormalizer.normalize(query);
+    final normalized = TextNormalizer.normalizeForSearch(query);
     if (normalized.isEmpty) return [];
     final sql = limit == null
         ? 'SELECT scan_id FROM scan_search WHERE scan_search MATCH ?'

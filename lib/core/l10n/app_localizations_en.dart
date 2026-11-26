@@ -1098,4 +1098,162 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get translatorCertBody =>
       'I certify that I am competent in Bangla and English, and that this is a true and accurate translation of the attached document.';
+
+  @override
+  String foundInPapers(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count papers',
+      one: '1 paper',
+    );
+    return 'Found in $_temp0. Names in your name book match in both languages.';
+  }
+
+  @override
+  String pageBanglaText(int page) {
+    return 'Page $page, Bangla text';
+  }
+
+  @override
+  String renewByDate(String date) {
+    return 'Renew by $date';
+  }
+
+  @override
+  String get setRenewByDate => 'Set renewal date';
+
+  @override
+  String get clearRenewByDate => 'Clear renewal date';
+
+  @override
+  String get bundlesIntro =>
+      'Keep the papers for one purpose together, then export them in one go.';
+
+  @override
+  String neededByDate(String date) {
+    return 'Needed by $date';
+  }
+
+  @override
+  String byDueDate(String date) {
+    return 'By $date';
+  }
+
+  @override
+  String get setDueDate => 'Set due date';
+
+  @override
+  String itemIsMissing(String item) {
+    return '$item is missing';
+  }
+
+  @override
+  String bundleChecklistSummary(int ready, int needsWork, int missing) {
+    return '$ready ready, $needsWork need work, $missing missing';
+  }
+
+  @override
+  String get checklistDisclaimer =>
+      'Check the official list for your application.';
+
+  @override
+  String get notScannedYet => 'Not scanned yet';
+
+  @override
+  String scannedPagesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count pages',
+      one: '1 page',
+    );
+    return 'Scanned, $_temp0';
+  }
+
+  @override
+  String get draftNeedsCertifying => 'English draft still needs certifying';
+
+  @override
+  String wordsToCheckBeforeTranslating(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count words to check before translating',
+      one: '1 word to check before translating',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get openAction => 'Open';
+
+  @override
+  String get checkAction => 'Check';
+
+  @override
+  String get addAction => 'Add';
+
+  @override
+  String get exportBundle => 'Export bundle';
+
+  @override
+  String get linkExistingPaper => 'Link an existing paper';
+
+  @override
+  String get scanNewPaper => 'Scan a new paper';
+
+  @override
+  String get addChecklistItem => 'Add checklist item';
+
+  @override
+  String get itemNameHint => 'Paper name';
+
+  @override
+  String get bundleTitleHint => 'Bundle name';
+
+  @override
+  String get createBundle => 'Create bundle';
+
+  @override
+  String get howToPackIt => 'How to pack it';
+
+  @override
+  String get onePdfWithContents => 'One PDF with a contents page';
+
+  @override
+  String get onePdfWithContentsSub =>
+      'Papers in checklist order, with page numbers';
+
+  @override
+  String get separateFiles => 'Separate files';
+
+  @override
+  String get separateFilesSub =>
+      'Named 01-Passport.pdf, 02-National-ID.pdf and so on';
+
+  @override
+  String get orderHeading => 'Order';
+
+  @override
+  String readyPapersCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ready papers',
+      one: '1 ready paper',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bundleDraftWarning(String title) {
+    return 'The $title translation is still a draft. Add the certified copy when you have it.';
+  }
+
+  @override
+  String get keepEachFileUnder => 'Keep each file under';
+
+  @override
+  String get watermarkEveryPage => 'Watermark every page';
 }

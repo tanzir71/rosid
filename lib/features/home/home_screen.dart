@@ -12,8 +12,7 @@ import 'package:rosid/core/utils/money.dart';
 import 'package:rosid/core/widgets/rosid_controls.dart';
 import 'package:rosid/core/widgets/rosid_navigation.dart';
 import 'package:rosid/core/widgets/rosid_paper_thumbnail.dart';
-import 'package:rosid/data/database/app_database.dart';
-import 'package:rosid/data/database/database_provider.dart';
+import 'package:rosid/data/repositories/bundle_repository.dart';
 import 'package:rosid/data/repositories/history_repository.dart';
 
 /// Home screen (`design/screens/home.png`, `home-bn.png`, `home-dark.png`).
@@ -27,7 +26,7 @@ class HomeScreen extends ConsumerWidget {
     final locale = Localizations.localeOf(context);
     final settings = ref.watch(appSettingsProvider);
     final recentPapers = ref.watch(_homePapersProvider);
-    final activeBundles = ref.watch(_homeBundlesProvider);
+    final activeBundles = ref.watch(allBundlesProvider);
 
     final shortcuts = _orderedShortcuts(settings.purposes, l10n);
 
@@ -151,8 +150,24 @@ class HomeScreen extends ConsumerWidget {
                                 l10n.wordsToCheckCount(entry.scan.checkCount),
                                 locale,
                               )
+                            : (entry.scan.renewBy != null &&
+                                  entry.scan.renewBy!
+                                          .difference(DateTime.now())
+                                          .inDays <=
+                                      30)
+                            ? l10n.renewByDate(
+                                localizeDigits(
+                                  DateFormat(
+                                    'd MMM',
+                                    locale.toLanguageTag(),
+                                  ).format(entry.scan.renewBy!),
+                                  locale,
+                                ),
+                              )
                             : null,
-                        pillTone: RosidTone.warn,
+                        pillTone: entry.scan.checkCount > 0
+                            ? RosidTone.warn
+                            : RosidTone.neutral,
                         onTap: () => context.push('/paper/${entry.scan.id}'),
                       ),
                       Divider(color: c.lineSubtle, height: 1),
@@ -534,7 +549,7 @@ class _BundleSummaryCard extends StatelessWidget {
     required this.onTap,
   });
 
-  final _BundleSummary summary;
+  final BundleDetailView summary;
   final Locale locale;
   final VoidCallback onTap;
 
@@ -577,7 +592,11 @@ class _BundleSummaryCard extends StatelessWidget {
                       child: Container(
                         height: 6,
                         decoration: BoxDecoration(
-                          color: i < ready ? c.goodBase : c.bgSunken,
+                          color: i < ready
+                              ? c.goodBase
+                              : i < ready + summary.needsWorkCount
+                              ? c.warnBase
+                              : c.bgSunken,
                           borderRadius: BorderRadius.circular(3),
                         ),
                       ),
@@ -586,7 +605,7 @@ class _BundleSummaryCard extends StatelessWidget {
                 ],
               ),
             ],
-            if (summary.nextMissingTitle != null) ...[
+            if (summary.firstMissingTitle != null) ...[
               const SizedBox(height: 12),
               Row(
                 children: [
@@ -594,7 +613,7 @@ class _BundleSummaryCard extends StatelessWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      summary.nextMissingTitle!,
+                      summary.firstMissingTitle!,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: RosidTextTokens.uiCaption.copyWith(
@@ -658,20 +677,6 @@ class _EmptyPapersCard extends StatelessWidget {
   }
 }
 
-class _BundleSummary {
-  const _BundleSummary({
-    required this.bundle,
-    required this.readyCount,
-    required this.totalCount,
-    this.nextMissingTitle,
-  });
-
-  final Bundle bundle;
-  final int readyCount;
-  final int totalCount;
-  final String? nextMissingTitle;
-}
-
 final _homePapersProvider = FutureProvider<List<HistoryEntry>>((ref) async {
   final expenseEnabled = ref.watch(expenseTrackingEnabledProvider);
   final repo = ref.watch(historyRepositoryProvider);
@@ -680,32 +685,4 @@ final _homePapersProvider = FutureProvider<List<HistoryEntry>>((ref) async {
       type: expenseEnabled ? HistoryTypeFilter.all : HistoryTypeFilter.document,
     ),
   );
-});
-
-final _homeBundlesProvider = FutureProvider<List<_BundleSummary>>((ref) async {
-  final db = ref.watch(databaseProvider);
-  final rows = await db.select(db.bundles).get();
-  final result = <_BundleSummary>[];
-  for (final bundle in rows) {
-    final items = await (db.select(
-      db.bundleItems,
-    )..where((row) => row.bundleId.equals(bundle.id))).get();
-    final ready = items.where((i) => i.linkedScanId != null).length;
-    String? nextMissing;
-    for (final item in items) {
-      if (item.linkedScanId == null) {
-        nextMissing = item.title;
-        break;
-      }
-    }
-    result.add(
-      _BundleSummary(
-        bundle: bundle,
-        readyCount: ready,
-        totalCount: items.length,
-        nextMissingTitle: nextMissing,
-      ),
-    );
-  }
-  return result;
 });

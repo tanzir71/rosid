@@ -2,7 +2,7 @@
 
 The implementing agent keeps this file true. Update it in the same push as the work.
 
-Last updated: 2026-11-27 (M6 completed and verified to Level B)
+Last updated: 2026-11-27 (M7 completed and verified to Level B)
 
 ## Milestones
 
@@ -15,8 +15,8 @@ Last updated: 2026-11-27 (M6 completed and verified to Level B)
 | M4 | Read and fix | done | B | `evidence/M4/summary.md` |
 | M5 | English draft | done | B | `evidence/M5/summary.md` |
 | M6 | Export | done | B | `evidence/M6/summary.md` |
-| M7 | Library and bundles | in progress | | |
-| M8 | Expenses, settings, safety | not started | | |
+| M7 | Library and bundles | done | B | `evidence/M7/summary.md` |
+| M8 | Expenses, settings, safety | in progress | | |
 | M9 | Landing page and release | not started | | |
 
 State is one of: not started, in progress, done, done with gaps.
@@ -24,7 +24,7 @@ State is one of: not started, in progress, done, done with gaps.
 
 ## In progress
 
-Starting M7: Library and bundles.
+Starting M8: Expenses, settings and safety.
 
 ## Measured numbers
 
@@ -40,6 +40,7 @@ Fill in as they are measured. Never write a number you did not measure.
 | Peak memory while reading, 2 GB emulator | 600 MB or less | 248.7 MB RSS (`rosid_low`) | `evidence/M3/summary.md` |
 | arm64 APK size | 90 MB target, 110 MB limit | 108.5 MB split arm64-v8a release APK (M5, incl. Mozilla `bn-en` model + Bergamot WASM) | `evidence/M5/summary.md` |
 | M5 English draft gate (40 lines) | 100% preservation, <= 8 s/page | 51/51 (100%) preserved, 65 ms median/page (`rosid_test`), chrF 81.32 | `evidence/M5/summary.md` |
+| 500-paper search, emulator | 150 ms or less | 3 ms Bangla, 2 ms English via Name Book (`rosid_test`) | `evidence/M7/summary.md` |
 | Random-input test, 5,000 events | no crash | | |
 
 ## Decisions taken

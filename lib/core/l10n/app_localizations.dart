@@ -2095,6 +2095,222 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'I certify that I am competent in Bangla and English, and that this is a true and accurate translation of the attached document.'**
   String get translatorCertBody;
+
+  /// No description provided for @foundInPapers.
+  ///
+  /// In en, this message translates to:
+  /// **'Found in {count, plural, =1{1 paper} other{{count} papers}}. Names in your name book match in both languages.'**
+  String foundInPapers(int count);
+
+  /// No description provided for @pageBanglaText.
+  ///
+  /// In en, this message translates to:
+  /// **'Page {page}, Bangla text'**
+  String pageBanglaText(int page);
+
+  /// No description provided for @renewByDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Renew by {date}'**
+  String renewByDate(String date);
+
+  /// No description provided for @setRenewByDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Set renewal date'**
+  String get setRenewByDate;
+
+  /// No description provided for @clearRenewByDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear renewal date'**
+  String get clearRenewByDate;
+
+  /// No description provided for @bundlesIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep the papers for one purpose together, then export them in one go.'**
+  String get bundlesIntro;
+
+  /// No description provided for @neededByDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Needed by {date}'**
+  String neededByDate(String date);
+
+  /// No description provided for @byDueDate.
+  ///
+  /// In en, this message translates to:
+  /// **'By {date}'**
+  String byDueDate(String date);
+
+  /// No description provided for @setDueDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Set due date'**
+  String get setDueDate;
+
+  /// No description provided for @itemIsMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'{item} is missing'**
+  String itemIsMissing(String item);
+
+  /// No description provided for @bundleChecklistSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{ready} ready, {needsWork} need work, {missing} missing'**
+  String bundleChecklistSummary(int ready, int needsWork, int missing);
+
+  /// No description provided for @checklistDisclaimer.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the official list for your application.'**
+  String get checklistDisclaimer;
+
+  /// No description provided for @notScannedYet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not scanned yet'**
+  String get notScannedYet;
+
+  /// No description provided for @scannedPagesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Scanned, {count, plural, =1{1 page} other{{count} pages}}'**
+  String scannedPagesCount(int count);
+
+  /// No description provided for @draftNeedsCertifying.
+  ///
+  /// In en, this message translates to:
+  /// **'English draft still needs certifying'**
+  String get draftNeedsCertifying;
+
+  /// No description provided for @wordsToCheckBeforeTranslating.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 word to check before translating} other{{count} words to check before translating}}'**
+  String wordsToCheckBeforeTranslating(int count);
+
+  /// No description provided for @openAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get openAction;
+
+  /// No description provided for @checkAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Check'**
+  String get checkAction;
+
+  /// No description provided for @addAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get addAction;
+
+  /// No description provided for @exportBundle.
+  ///
+  /// In en, this message translates to:
+  /// **'Export bundle'**
+  String get exportBundle;
+
+  /// No description provided for @linkExistingPaper.
+  ///
+  /// In en, this message translates to:
+  /// **'Link an existing paper'**
+  String get linkExistingPaper;
+
+  /// No description provided for @scanNewPaper.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan a new paper'**
+  String get scanNewPaper;
+
+  /// No description provided for @addChecklistItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Add checklist item'**
+  String get addChecklistItem;
+
+  /// No description provided for @itemNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Paper name'**
+  String get itemNameHint;
+
+  /// No description provided for @bundleTitleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Bundle name'**
+  String get bundleTitleHint;
+
+  /// No description provided for @createBundle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create bundle'**
+  String get createBundle;
+
+  /// No description provided for @howToPackIt.
+  ///
+  /// In en, this message translates to:
+  /// **'How to pack it'**
+  String get howToPackIt;
+
+  /// No description provided for @onePdfWithContents.
+  ///
+  /// In en, this message translates to:
+  /// **'One PDF with a contents page'**
+  String get onePdfWithContents;
+
+  /// No description provided for @onePdfWithContentsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Papers in checklist order, with page numbers'**
+  String get onePdfWithContentsSub;
+
+  /// No description provided for @separateFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Separate files'**
+  String get separateFiles;
+
+  /// No description provided for @separateFilesSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Named 01-Passport.pdf, 02-National-ID.pdf and so on'**
+  String get separateFilesSub;
+
+  /// No description provided for @orderHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Order'**
+  String get orderHeading;
+
+  /// No description provided for @readyPapersCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 ready paper} other{{count} ready papers}}'**
+  String readyPapersCount(int count);
+
+  /// No description provided for @bundleDraftWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'The {title} translation is still a draft. Add the certified copy when you have it.'**
+  String bundleDraftWarning(String title);
+
+  /// No description provided for @keepEachFileUnder.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep each file under'**
+  String get keepEachFileUnder;
+
+  /// No description provided for @watermarkEveryPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Watermark every page'**
+  String get watermarkEveryPage;
 }
 
 class _AppLocalizationsDelegate

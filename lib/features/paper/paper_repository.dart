@@ -247,6 +247,12 @@ class PaperRepository {
     await _reextractDetails(scanId, kind);
   }
 
+  Future<void> updateRenewBy(String scanId, DateTime? renewBy) async {
+    await (db.update(db.scans)..where((s) => s.id.equals(scanId))).write(
+      ScansCompanion(renewBy: Value(renewBy), updatedAt: Value(DateTime.now())),
+    );
+  }
+
   /// Updates the user-edited full text in `documents` while preserving the
   /// original OCR reading in `scans.ocrRawText`.
   Future<void> updateFullText(

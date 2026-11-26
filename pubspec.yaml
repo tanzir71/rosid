@@ -96,6 +96,7 @@ flutter:
     - assets/tessdata_config.json
     - assets/icons/
     - assets/data/terms.json
+    - assets/data/checklists.json
     - assets/models/ocr/ppocr_v5_mobile_det.onnx
     - assets/models/ocr/ppocr_v5_en_mobile_rec.onnx
     - assets/models/ocr/ppocr_v5_en_dict.txt

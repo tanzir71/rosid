@@ -11,8 +11,10 @@ import 'package:rosid/core/widgets/rosid_controls.dart';
 import 'package:rosid/core/widgets/rosid_navigation.dart';
 import 'package:rosid/core/widgets/rosid_paper_thumbnail.dart';
 import 'package:rosid/data/files/private_file_store.dart';
+import 'package:rosid/data/repositories/bundle_repository.dart';
 import 'package:rosid/export/paper_export_service.dart';
 import 'package:rosid/features/export/export_controller.dart';
+import 'package:rosid/features/paper/paper_repository.dart';
 import 'package:share_plus/share_plus.dart';
 
 /// Export saved confirmation screen (`/paper/:id/export/saved`) matching
@@ -36,6 +38,85 @@ class ExportSavedScreen extends ConsumerWidget {
 
   @visibleForTesting
   final String? previewBundleName;
+
+  Future<void> _addToBundle(BuildContext context, WidgetRef ref) async {
+    final bundles = await ref.read(allBundlesProvider.future);
+    if (!context.mounted) return;
+    if (bundles.isEmpty) {
+      context.go('/bundles');
+      return;
+    }
+    final picked = await showModalBottomSheet<BundleDetailView>(
+      context: context,
+      builder: (ctx) {
+        final c = RosidColors.of(ctx);
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  ctx.l10n.addToABundle,
+                  style: RosidTextTokens.uiTitle.copyWith(color: c.inkPrimary),
+                ),
+                const SizedBox(height: 12),
+                for (final b in bundles) ...[
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: RosidIcon(
+                      RosidIcons.bundle,
+                      size: 22,
+                      color: c.accentBase,
+                    ),
+                    title: Text(
+                      b.bundle.title,
+                      style: RosidTextTokens.uiBodyStrong.copyWith(
+                        color: c.inkPrimary,
+                      ),
+                    ),
+                    trailing: RosidIcon(
+                      RosidIcons.chevronRight,
+                      size: 18,
+                      color: c.inkTertiary,
+                    ),
+                    onTap: () => Navigator.of(ctx).pop(b),
+                  ),
+                  Divider(color: c.lineSubtle, height: 1),
+                ],
+              ],
+            ),
+          ),
+        );
+      },
+    );
+    if (picked == null || !context.mounted) return;
+    final repo = ref.read(bundleRepositoryProvider);
+    final fallbackTitle = context.l10n.document;
+    final firstMissing = picked.items
+        .where((i) => i.item.linkedScanId == null)
+        .firstOrNull;
+    if (firstMissing != null) {
+      await repo.linkScanToItem(
+        bundleId: picked.bundle.id,
+        itemId: firstMissing.item.id,
+        scanId: scanId,
+      );
+    } else {
+      final paper = await ref.read(paperRepositoryProvider).loadPaper(scanId);
+      await repo.addItem(
+        bundleId: picked.bundle.id,
+        title: paper?.title ?? fallbackTitle,
+        expectedKind: paper?.scan.kind ?? 'document',
+        linkedScanId: scanId,
+      );
+    }
+    ref.invalidate(allBundlesProvider);
+    ref.invalidate(bundleDetailProvider(picked.bundle.id));
+    if (!context.mounted) return;
+    context.go('/bundles/${picked.bundle.id}');
+  }
 
   Future<void> _cleanupAndExit(BuildContext context, WidgetRef ref) async {
     final res = ref.read(paperExportControllerProvider).lastResult;
@@ -182,7 +263,7 @@ class ExportSavedScreen extends ConsumerWidget {
                   icon: RosidIcons.bundle,
                   title: l10n.addToABundle,
                   subtitle: previewBundleName,
-                  onTap: () => context.go('/bundles'),
+                  onTap: () => _addToBundle(context, ref),
                 ),
                 Divider(color: c.lineSubtle, height: 1),
                 _SavedActionRow(
