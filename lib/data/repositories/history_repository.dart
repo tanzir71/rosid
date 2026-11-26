@@ -51,6 +51,7 @@ class HistoryEntry {
   final Category? category;
 
   bool get isReceipt => receipt != null;
+  DateTime get date => receipt?.dateOfPurchase ?? scan.createdAt;
   String get title => receipt?.merchant ?? document?.title ?? 'Unreviewed scan';
   String get body => document?.body ?? scan.ocrRawText;
 }

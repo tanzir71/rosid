@@ -15,6 +15,14 @@ part 'app_database.g.dart';
     Categories,
     Tags,
     ScanTags,
+    TextLines,
+    Details,
+    Translations,
+    Names,
+    Terms,
+    Corrections,
+    Bundles,
+    BundleItems,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -23,7 +31,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -32,7 +40,14 @@ class AppDatabase extends _$AppDatabase {
       await _createSearchIndex();
     },
     onUpgrade: (migrator, from, to) async {
-      if (from < 2) await _rebuildSearchIndex();
+      if (from < 3) {
+        await _migrateToV3(migrator);
+      }
+      if (from < 2) {
+        await _rebuildSearchIndex();
+      } else if (from < 3) {
+        await _rebuildSearchIndex();
+      }
     },
     beforeOpen: (details) async {
       await customStatement('PRAGMA foreign_keys = ON');
@@ -40,6 +55,79 @@ class AppDatabase extends _$AppDatabase {
       await _seedCategories();
     },
   );
+
+  Future<void> _migrateToV3(Migrator migrator) async {
+    final scanCols = await _existingColumns('scans');
+    if (!scanCols.contains('kind')) {
+      await migrator.addColumn(scans, scans.kind);
+    }
+    if (!scanCols.contains('language')) {
+      await migrator.addColumn(scans, scans.language);
+    }
+    if (!scanCols.contains('check_count')) {
+      await migrator.addColumn(scans, scans.checkCount);
+    }
+    if (!scanCols.contains('renew_by')) {
+      await migrator.addColumn(scans, scans.renewBy);
+    }
+
+    final pageCols = await _existingColumns('scan_pages');
+    if (!pageCols.contains('filter')) {
+      await migrator.addColumn(scanPages, scanPages.filter);
+    }
+    if (!pageCols.contains('quad_json')) {
+      await migrator.addColumn(scanPages, scanPages.quadJson);
+    }
+    if (!pageCols.contains('rotation')) {
+      await migrator.addColumn(scanPages, scanPages.rotation);
+    }
+    if (!pageCols.contains('side')) {
+      await migrator.addColumn(scanPages, scanPages.side);
+    }
+
+    // Backfill kind from existing v1/v2 `type` column.
+    await customStatement(
+      "UPDATE scans SET kind = CASE WHEN type = 'receipt' THEN 'receipt' ELSE 'document' END WHERE kind = 'document'",
+    );
+
+    final existingTables = await _existingTables();
+    if (!existingTables.contains('text_lines')) {
+      await migrator.createTable(textLines);
+    }
+    if (!existingTables.contains('details')) {
+      await migrator.createTable(details);
+    }
+    if (!existingTables.contains('translations')) {
+      await migrator.createTable(translations);
+    }
+    if (!existingTables.contains('names')) {
+      await migrator.createTable(names);
+    }
+    if (!existingTables.contains('terms')) {
+      await migrator.createTable(terms);
+    }
+    if (!existingTables.contains('corrections')) {
+      await migrator.createTable(corrections);
+    }
+    if (!existingTables.contains('bundles')) {
+      await migrator.createTable(bundles);
+    }
+    if (!existingTables.contains('bundle_items')) {
+      await migrator.createTable(bundleItems);
+    }
+  }
+
+  Future<Set<String>> _existingColumns(String tableName) async {
+    final rows = await customSelect('PRAGMA table_info($tableName)').get();
+    return rows.map((row) => row.read<String>('name')).toSet();
+  }
+
+  Future<Set<String>> _existingTables() async {
+    final rows = await customSelect(
+      "SELECT name FROM sqlite_master WHERE type = 'table'",
+    ).get();
+    return rows.map((row) => row.read<String>('name')).toSet();
+  }
 
   Future<void> _createSearchIndex() => customStatement('''
     CREATE VIRTUAL TABLE IF NOT EXISTS scan_search USING fts5(
@@ -73,8 +161,22 @@ class AppDatabase extends _$AppDatabase {
                 )..where((row) => row.receiptId.equals(receipt.id))).get())
                 .map((item) => item.name)
                 .join(' ');
+      final translatedLines =
+          (await (select(
+                translations,
+              )..where((row) => row.scanId.equals(scan.id))).get())
+              .map((row) => row.englishText)
+              .join('\n');
+      final ocrLines =
+          (await (select(
+                textLines,
+              )..where((row) => row.scanId.equals(scan.id))).get())
+              .map((row) => row.textContent)
+              .join('\n');
       await _writeSearchIndex(scan.id, [
         scan.ocrRawText,
+        ocrLines,
+        translatedLines,
         receipt?.merchant,
         receipt?.note,
         document?.title,
