@@ -200,6 +200,7 @@ class RosidTopBar extends StatelessWidget implements PreferredSizeWidget {
               leading!
             else if (showBack)
               IconButton(
+                key: const ValueKey('rosid-top-bar-back'),
                 onPressed: onBack ?? () => Navigator.of(context).maybePop(),
                 icon: RosidIcon(RosidIcons.back, size: 24, color: c.inkPrimary),
               )

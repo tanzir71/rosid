@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Rosid Offline Translation Engine</title>
+  <script src="https://rosid.local/translation/bergamot-translator.js"></script>
+</head>
+<body>
+<script>
+(function () {
+  let bergamot = null;
+  let model = null;
+  let service = null;
+  let initPromise = null;
+
+  async function fetchArrayBuffer(path) {
+    const resp = await fetch('https://rosid.local/translation/' + path);
+    if (!resp.ok) {
+      throw new Error('Failed to load local asset ' + path + ': ' + resp.status);
+    }
+    return await resp.arrayBuffer();
+  }
+
+  function allocateAligned(bm, buffer, alignment) {
+    const mem = new bm.AlignedMemory(buffer.byteLength, alignment);
+    mem.getByteArrayView().set(new Uint8Array(buffer));
+    return mem;
+  }
+
+  async function ensureInitialized() {
+    if (service && model && bergamot) return;
+    if (initPromise) return initPromise;
+
+    initPromise = (async () => {
+      const [wasmBuf, modelBuf, lexBuf, vocabBuf] = await Promise.all([
+        fetchArrayBuffer('bergamot-translator.wasm'),
+        fetchArrayBuffer('model.bnen.intgemm.alphas.bin'),
+        fetchArrayBuffer('lex.50.50.bnen.s2t.bin'),
+        fetchArrayBuffer('vocab.bnen.spm'),
+      ]);
+
+      bergamot = await new Promise((resolve, reject) => {
+        let instance;
+        instance = loadBergamot({
+          INITIAL_MEMORY: 41943040,
+          wasmBinary: wasmBuf,
+          print: () => {},
+          printErr: () => {},
+          onAbort: () => reject(new Error('Bergamot WASM aborted')),
+          onRuntimeInitialized: () => {
+            setTimeout(() => resolve(instance), 0);
+          },
+        });
+      });
+
+      const modelMem = allocateAligned(bergamot, modelBuf, 256);
+      const lexMem = allocateAligned(bergamot, lexBuf, 64);
+      const vocabMem = allocateAligned(bergamot, vocabBuf, 64);
+      const vocabList = new bergamot.AlignedMemoryList();
+      vocabList.push_back(vocabMem);
+
+      const cfg = [
+        'beam-size: 1',
+        'normalize: 1.0',
+        'word-penalty: 0',
+        'max-length-break: 128',
+        'mini-batch-words: 1024',
+        'workspace: 128',
+        'max-length-factor: 2.0',
+        'skip-cost: true',
+        'cpu-threads: 0',
+        'quiet: true',
+        'quiet-translation: true',
+        'gemm-precision: int8shiftAlphaAll',
+        'alignment: soft',
+      ].join('\n');
+
+      model = new bergamot.TranslationModel('bn', 'en', cfg, modelMem, lexMem, vocabList, null);
+      service = new bergamot.BlockingService({ cacheSize: 0 });
+      vocabList.delete();
+    })();
+
+    try {
+      await initPromise;
+    } catch (e) {
+      initPromise = null;
+      throw e;
+    }
+  }
+
+  window.rosidWarmUp = async function (reqId) {
+    try {
+      await ensureInitialized();
+      if (window.RosidBridge) {
+        window.RosidBridge.onResult(reqId, JSON.stringify({ ok: true }));
+      }
+    } catch (err) {
+      if (window.RosidBridge) {
+        window.RosidBridge.onError(reqId, String(err && err.message ? err.message : err));
+      }
+    }
+  };
+
+  window.rosidTranslateBatch = async function (reqId, jsonPayload) {
+    try {
+      await ensureInitialized();
+      const lines = JSON.parse(jsonPayload);
+      if (!Array.isArray(lines) || lines.length === 0) {
+        window.RosidBridge.onResult(reqId, JSON.stringify([]));
+        return;
+      }
+
+      const messages = new bergamot.VectorString();
+      const options = new bergamot.VectorResponseOptions();
+      for (let i = 0; i < lines.length; i++) {
+        messages.push_back(String(lines[i] || ''));
+        options.push_back({ qualityScores: false, alignment: false, html: false });
+      }
+      const responses = service.translate(model, messages, options);
+      const results = [];
+      for (let i = 0; i < responses.size(); i++) {
+        results.push(responses.get(i).getTranslatedText());
+      }
+      responses.delete();
+      messages.delete();
+      options.delete();
+
+      window.RosidBridge.onResult(reqId, JSON.stringify(results));
+    } catch (err) {
+      if (window.RosidBridge) {
+        window.RosidBridge.onError(reqId, String(err && err.message ? err.message : err));
+      }
+    }
+  };
+
+  window.rosidReady = true;
+  if (window.RosidBridge && window.RosidBridge.onEnginePageLoaded) {
+    window.RosidBridge.onEnginePageLoaded();
+  }
+})();
+</script>
+</body>
+</html>

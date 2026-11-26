@@ -14,12 +14,16 @@ import 'package:rosid/core/widgets/rosid_controls.dart';
 import 'package:rosid/core/widgets/rosid_navigation.dart';
 import 'package:rosid/data/database/app_database.dart';
 import 'package:rosid/features/paper/paper_repository.dart';
+import 'package:rosid/features/translation/english_draft_view.dart';
 import 'package:rosid/ocr/pipeline/reading_interfaces.dart';
 import 'package:rosid/parsing/land_units.dart';
 import 'package:rosid/parsing/paper_classifier.dart';
+import 'package:rosid/translation/draft_rules.dart';
+import 'package:rosid/translation/translation_repository.dart';
 
 /// Paper reader screen matching `design/screens/read-text.png`,
-/// `read-text-dark.png`, and `read-scan-tap-line.png`.
+/// `read-text-dark.png`, `read-scan-tap-line.png`,
+/// `translate-english-draft.png`, and `translate-english-draft-dark.png`.
 class PaperScreen extends ConsumerStatefulWidget {
   const PaperScreen({
     required this.scanId,
@@ -27,6 +31,8 @@ class PaperScreen extends ConsumerStatefulWidget {
     this.previewScanWidget,
     this.previewSelectedLineId,
     this.previewShowListen,
+    this.previewDraftLines,
+    this.previewTerms,
     super.key,
   });
 
@@ -41,6 +47,12 @@ class PaperScreen extends ConsumerStatefulWidget {
 
   @visibleForTesting
   final bool? previewShowListen;
+
+  @visibleForTesting
+  final List<DraftLineView>? previewDraftLines;
+
+  @visibleForTesting
+  final List<TermRule>? previewTerms;
 
   @override
   ConsumerState<PaperScreen> createState() => _PaperScreenState();
@@ -138,7 +150,7 @@ class _PaperScreenState extends ConsumerState<PaperScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (_tab != RosidReaderTab.scan) ...[
+                    if (_tab == RosidReaderTab.text) ...[
                       Row(
                         children: [
                           InkWell(
@@ -186,7 +198,13 @@ class _PaperScreenState extends ConsumerState<PaperScreen> {
                     selectedLine,
                     locale,
                   ),
-                  RosidReaderTab.english => _buildEnglishPlaceholder(context),
+                  RosidReaderTab.english => EnglishDraftView(
+                    scanId: paper.scan.id,
+                    previewLines: widget.previewDraftLines,
+                    previewTerms: widget.previewTerms,
+                    onExport: () =>
+                        context.push('/paper/${paper.scan.id}/export'),
+                  ),
                 },
               ),
               if (_tab == RosidReaderTab.text)
@@ -456,28 +474,6 @@ class _PaperScreenState extends ConsumerState<PaperScreen> {
                 ? Border.all(color: c.accentBase, width: 2.0)
                 : null,
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildEnglishPlaceholder(BuildContext context) {
-    final c = RosidColors.of(context);
-    final l10n = context.l10n;
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(28),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            RosidIcon(RosidIcons.translate, size: 36, color: c.accentBase),
-            const SizedBox(height: 12),
-            Text(
-              l10n.englishDraftPending,
-              textAlign: TextAlign.center,
-              style: RosidTextTokens.uiBody.copyWith(color: c.inkSecondary),
-            ),
-          ],
         ),
       ),
     );

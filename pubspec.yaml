@@ -94,9 +94,16 @@ flutter:
     - assets/tessdata/
     - assets/tessdata_config.json
     - assets/icons/
+    - assets/data/terms.json
     - assets/models/ocr/ppocr_v5_mobile_det.onnx
     - assets/models/ocr/ppocr_v5_en_mobile_rec.onnx
     - assets/models/ocr/ppocr_v5_en_dict.txt
+    - assets/models/translation/index.html
+    - assets/models/translation/bergamot-translator.js
+    - assets/models/translation/bergamot-translator.wasm.gz
+    - assets/models/translation/model.bnen.intgemm.alphas.bin.gz
+    - assets/models/translation/lex.50.50.bnen.s2t.bin.gz
+    - assets/models/translation/vocab.bnen.spm.gz
 
   fonts:
     - family: Anek Bangla

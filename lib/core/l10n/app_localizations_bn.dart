@@ -832,4 +832,96 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get makeEnglishDraft => 'ইংরেজি খসড়া তৈরি করুন';
+
+  @override
+  String get draftStamp => 'খসড়া';
+
+  @override
+  String get englishDraftBanner =>
+      'এই খসড়া আপনার ফোনেই তৈরি হয়েছে। ব্যবহারের আগে নাম ও সংখ্যা মিলিয়ে নিন।';
+
+  @override
+  String get spellingFromNameBook => 'আপনার নামের তালিকা থেকে বানান';
+
+  @override
+  String get newNameCheckSpelling => 'নতুন নাম। বানানটি মিলিয়ে নিন';
+
+  @override
+  String get terms => 'শব্দকোষ';
+
+  @override
+  String get howShouldTermAppear => 'ইংরেজিতে কীভাবে দেখাবে?';
+
+  @override
+  String get termBothDesc => 'বাংলা শব্দটি রাখে এবং একবার অর্থ ব্যাখ্যা করে';
+
+  @override
+  String get termEnglishOnlyDesc => 'শুধু সহজ ইংরেজি';
+
+  @override
+  String get termBanglaOnlyDesc => 'শুধু বাংলা শব্দ';
+
+  @override
+  String get termChoiceAppliesAll =>
+      'আপনার পছন্দ প্রতিটি জমির কাগজের অনুবাদে ব্যবহৃত হবে।';
+
+  @override
+  String get useThis => 'এটি ব্যবহার করুন';
+
+  @override
+  String get namesIntro =>
+      'এখানে ঠিক করা বানান সব অনুবাদে ব্যবহৃত হবে, যাতে আপনার কাগজ পাসপোর্টের সাথে মেলে।';
+
+  @override
+  String get people => 'ব্যক্তি';
+
+  @override
+  String get places => 'স্থান';
+
+  @override
+  String get asInPassport => 'পাসপোর্ট অনুযায়ী';
+
+  @override
+  String get asInNid => 'এনআইডি অনুযায়ী';
+
+  @override
+  String get suggestedCheck => 'প্রস্তাবিত, দেখে নিন';
+
+  @override
+  String get confirmedSpelling => 'নিশ্চিত';
+
+  @override
+  String get namesFooterNote =>
+      'নতুন নাম দেখলে রসিদ প্রথমবার বানান প্রস্তাব করে। চূড়ান্ত বানান আপনি ঠিক করেন।';
+
+  @override
+  String get addName => 'নাম যোগ করুন';
+
+  @override
+  String get editName => 'নাম সম্পাদনা';
+
+  @override
+  String get banglaSpelling => 'বাংলা বানান';
+
+  @override
+  String get englishSpelling => 'ইংরেজি বানান';
+
+  @override
+  String get whereSpellingFrom => 'এই বানানের উৎস';
+
+  @override
+  String get makingEnglishDraft => 'আপনার ফোনেই ইংরেজি খসড়া তৈরি হচ্ছে…';
+
+  @override
+  String get editEnglishDraft => 'ইংরেজি খসড়া সম্পাদনা';
+
+  @override
+  String get editEnglishLineHint =>
+      'বাংলা লাইন না বদলালে খসড়া আবার তৈরি করলেও আপনার পরিবর্তন থাকবে।';
+
+  @override
+  String get remakeDraft => 'খসড়া আবার তৈরি করুন';
+
+  @override
+  String get editedLabel => 'সম্পাদিত';
 }

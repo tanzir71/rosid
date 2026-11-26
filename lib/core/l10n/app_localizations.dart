@@ -1603,6 +1603,180 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Make an English draft'**
   String get makeEnglishDraft;
+
+  /// No description provided for @draftStamp.
+  ///
+  /// In en, this message translates to:
+  /// **'DRAFT'**
+  String get draftStamp;
+
+  /// No description provided for @englishDraftBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'This draft was made on your phone. Check names and numbers before you use it.'**
+  String get englishDraftBanner;
+
+  /// No description provided for @spellingFromNameBook.
+  ///
+  /// In en, this message translates to:
+  /// **'Spelling from your name book'**
+  String get spellingFromNameBook;
+
+  /// No description provided for @newNameCheckSpelling.
+  ///
+  /// In en, this message translates to:
+  /// **'New name. Check the spelling'**
+  String get newNameCheckSpelling;
+
+  /// No description provided for @terms.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms'**
+  String get terms;
+
+  /// No description provided for @howShouldTermAppear.
+  ///
+  /// In en, this message translates to:
+  /// **'How should it appear in English?'**
+  String get howShouldTermAppear;
+
+  /// No description provided for @termBothDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Keeps the Bangla word and explains it once'**
+  String get termBothDesc;
+
+  /// No description provided for @termEnglishOnlyDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Plain English only'**
+  String get termEnglishOnlyDesc;
+
+  /// No description provided for @termBanglaOnlyDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Bangla word only'**
+  String get termBanglaOnlyDesc;
+
+  /// No description provided for @termChoiceAppliesAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Your choice is used for every land paper you translate.'**
+  String get termChoiceAppliesAll;
+
+  /// No description provided for @useThis.
+  ///
+  /// In en, this message translates to:
+  /// **'Use this'**
+  String get useThis;
+
+  /// No description provided for @namesIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Spellings you set here are used in every translation, so your papers match your passport.'**
+  String get namesIntro;
+
+  /// No description provided for @people.
+  ///
+  /// In en, this message translates to:
+  /// **'People'**
+  String get people;
+
+  /// No description provided for @places.
+  ///
+  /// In en, this message translates to:
+  /// **'Places'**
+  String get places;
+
+  /// No description provided for @asInPassport.
+  ///
+  /// In en, this message translates to:
+  /// **'As in passport'**
+  String get asInPassport;
+
+  /// No description provided for @asInNid.
+  ///
+  /// In en, this message translates to:
+  /// **'As in NID'**
+  String get asInNid;
+
+  /// No description provided for @suggestedCheck.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggested, check'**
+  String get suggestedCheck;
+
+  /// No description provided for @confirmedSpelling.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirmed'**
+  String get confirmedSpelling;
+
+  /// No description provided for @namesFooterNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Rosid suggests a spelling the first time it sees a name. You decide the final one.'**
+  String get namesFooterNote;
+
+  /// No description provided for @addName.
+  ///
+  /// In en, this message translates to:
+  /// **'Add name'**
+  String get addName;
+
+  /// No description provided for @editName.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit name'**
+  String get editName;
+
+  /// No description provided for @banglaSpelling.
+  ///
+  /// In en, this message translates to:
+  /// **'Bangla spelling'**
+  String get banglaSpelling;
+
+  /// No description provided for @englishSpelling.
+  ///
+  /// In en, this message translates to:
+  /// **'English spelling'**
+  String get englishSpelling;
+
+  /// No description provided for @whereSpellingFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'Where this spelling comes from'**
+  String get whereSpellingFrom;
+
+  /// No description provided for @makingEnglishDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Making English draft on this phone…'**
+  String get makingEnglishDraft;
+
+  /// No description provided for @editEnglishDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit English draft'**
+  String get editEnglishDraft;
+
+  /// No description provided for @editEnglishLineHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Your edits are kept even if you remake the draft, unless the Bangla line changes.'**
+  String get editEnglishLineHint;
+
+  /// No description provided for @remakeDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Remake draft'**
+  String get remakeDraft;
+
+  /// No description provided for @editedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Edited'**
+  String get editedLabel;
 }
 
 class _AppLocalizationsDelegate

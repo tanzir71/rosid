@@ -13,6 +13,8 @@ import 'package:rosid/data/files/private_file_store.dart';
 import 'package:rosid/data/repositories/dashboard_repository.dart';
 import 'package:rosid/data/repositories/settings_repository.dart';
 import 'package:rosid/features/history/history_state.dart';
+import 'package:rosid/features/translation/term_help_sheet.dart';
+import 'package:rosid/translation/translation_repository.dart';
 
 /// Settings screen (`design/screens/settings.png`).
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -173,14 +175,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             _SettingsRow(
               icon: RosidIcons.people,
               title: l10n.names,
-              subtitle: l10n.namesEmpty,
+              subtitle: ref
+                  .watch(namesBookProvider)
+                  .when(
+                    data: (list) => list.isEmpty
+                        ? l10n.namesEmpty
+                        : '${list.length} ${l10n.names.toLowerCase()}',
+                    loading: () => l10n.namesEmpty,
+                    error: (_, _) => l10n.namesEmpty,
+                  ),
               onTap: () => context.push('/names'),
             ),
             _SettingsRow(
               icon: RosidIcons.book,
               title: l10n.wordChoices,
               subtitle: l10n.wordChoicesSub,
-              onTap: () => context.push('/names'),
+              onTap: () => showTermsPickerSheet(context, ref),
             ),
             _SettingsRow(
               icon: RosidIcons.filter,

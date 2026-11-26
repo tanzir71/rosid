@@ -1,0 +1,192 @@
+[
+  {
+    "id": "khatian",
+    "bangla": "খতিয়ান",
+    "aliases": ["খতিয়ান"],
+    "transliteration": "Khatian",
+    "english": "Record of rights",
+    "both": "Khatian (record of rights)",
+    "explanation": "The government record that shows who owns a piece of land, with its plot numbers and area. In English it is often called a record of rights.",
+    "defaultForm": "both"
+  },
+  {
+    "id": "porcha",
+    "bangla": "পর্চা",
+    "aliases": [],
+    "transliteration": "Porcha",
+    "english": "Copy of the khatian",
+    "both": "Porcha (copy of the khatian)",
+    "explanation": "Certified copy of a khatian issued from the land office.",
+    "defaultForm": "both"
+  },
+  {
+    "id": "dag_no",
+    "bangla": "দাগ নং",
+    "aliases": ["দাগ নম্বর", "দাগ"],
+    "transliteration": "Dag No.",
+    "english": "Plot No.",
+    "both": "Plot (Dag) No.",
+    "explanation": "Number of a plot on the survey map.",
+    "defaultForm": "both"
+  },
+  {
+    "id": "mouza",
+    "bangla": "মৌজা",
+    "aliases": ["মোজা"],
+    "transliteration": "Mouza",
+    "english": "Revenue village",
+    "both": "Mouza",
+    "explanation": "Revenue village, the unit of land survey.",
+    "defaultForm": "both"
+  },
+  {
+    "id": "jl_no",
+    "bangla": "জে.এল. নং",
+    "aliases": ["জে এল নং", "জে.এল."],
+    "transliteration": "J.L. No.",
+    "english": "Jurisdiction list No.",
+    "both": "J.L. No.",
+    "explanation": "Jurisdiction list number of a mouza.",
+    "defaultForm": "both"
+  },
+  {
+    "id": "namjari",
+    "bangla": "নামজারি",
+    "aliases": ["নামজারী"],
+    "transliteration": "Namjari",
+    "english": "Mutation",
+    "both": "Mutation (namjari)",
+    "explanation": "Change of the owner's name in the land record.",
+    "defaultForm": "both"
+  },
+  {
+    "id": "dolil",
+    "bangla": "দলিল",
+    "aliases": ["দলীল"],
+    "transliteration": "Dolil",
+    "english": "Deed",
+    "both": "Deed",
+    "explanation": "Registered document of a land transaction.",
+    "defaultForm": "both"
+  },
+  {
+    "id": "dakhila",
+    "bangla": "দাখিলা",
+    "aliases": [],
+    "transliteration": "Dakhila",
+    "english": "Land tax receipt",
+    "both": "Land tax receipt (dakhila)",
+    "explanation": "Receipt for land development tax.",
+    "defaultForm": "both"
+  },
+  {
+    "id": "bhumi_unnayan_kor",
+    "bangla": "ভূমি উন্নয়ন কর",
+    "aliases": ["ভূমি উন্নয়ন কর"],
+    "transliteration": "Bhumi Unnayan Kor",
+    "english": "Land development tax",
+    "both": "Land development tax",
+    "explanation": "Yearly tax paid to the land office on land.",
+    "defaultForm": "both"
+  },
+  {
+    "id": "tofsil",
+    "bangla": "তফসিল",
+    "aliases": ["তপশীল", "তফশীল"],
+    "transliteration": "Tofsil",
+    "english": "Schedule",
+    "both": "Schedule",
+    "explanation": "Description of the property in a deed.",
+    "defaultForm": "both"
+  },
+  {
+    "id": "warish_sonod",
+    "bangla": "ওয়ারিশ সনদ",
+    "aliases": ["ওয়ারিশ সনদ", "ওয়ারিশান সনদ"],
+    "transliteration": "Warish Sonod",
+    "english": "Succession certificate",
+    "both": "Succession (warish) certificate",
+    "explanation": "Certificate listing a deceased person's legal heirs.",
+    "defaultForm": "both"
+  },
+  {
+    "id": "jonmo_nibondhon",
+    "bangla": "জন্ম নিবন্ধন সনদ",
+    "aliases": ["জন্ম নিবন্ধন"],
+    "transliteration": "Jonmo Nibondhon Sonod",
+    "english": "Birth registration certificate",
+    "both": "Birth registration certificate",
+    "explanation": "Official certificate recording a person's birth details.",
+    "defaultForm": "both"
+  },
+  {
+    "id": "jatio_porichoypotro",
+    "bangla": "জাতীয় পরিচয়পত্র",
+    "aliases": ["জাতীয় পরিচয়পত্র"],
+    "transliteration": "Jatio Porichoypotro",
+    "english": "National ID card",
+    "both": "National ID card",
+    "explanation": "Bangladesh National Identity Card (NID).",
+    "defaultForm": "both"
+  },
+  {
+    "id": "nikahnama",
+    "bangla": "নিকাহনামা",
+    "aliases": ["কাবিননামা"],
+    "transliteration": "Nikahnama",
+    "english": "Marriage certificate",
+    "both": "Marriage certificate (nikahnama)",
+    "explanation": "Registered Muslim marriage contract and certificate.",
+    "defaultForm": "both"
+  },
+  {
+    "id": "trade_licence",
+    "bangla": "ট্রেড লাইসেন্স",
+    "aliases": [],
+    "transliteration": "Trade Licence",
+    "english": "Trade licence",
+    "both": "Trade licence",
+    "explanation": "Local municipal licence to operate a business.",
+    "defaultForm": "both"
+  },
+  {
+    "id": "admin_area",
+    "bangla": "উপজেলা",
+    "aliases": ["জেলা", "ইউনিয়ন", "ইউনিয়ন"],
+    "transliteration": "Upazila",
+    "english": "Sub-district",
+    "both": "Upazila",
+    "explanation": "Administrative area of Bangladesh (Upazila, District, Union); usually kept as its proper name.",
+    "defaultForm": "both"
+  },
+  {
+    "id": "relation",
+    "bangla": "পিতা",
+    "aliases": ["মাতা", "স্বামী"],
+    "transliteration": "Pita",
+    "english": "Father",
+    "both": "Father",
+    "explanation": "Family relation labels used on official papers (Father, Mother, Husband).",
+    "defaultForm": "both"
+  },
+  {
+    "id": "mrito",
+    "bangla": "মৃত",
+    "aliases": ["মৃতঃ"],
+    "transliteration": "Mrito",
+    "english": "Late",
+    "both": "Late",
+    "explanation": "Placed before the name of a deceased person.",
+    "defaultForm": "both"
+  },
+  {
+    "id": "sang",
+    "bangla": "সাং",
+    "aliases": ["সাং-"],
+    "transliteration": "Sang",
+    "english": "Village",
+    "both": "Village",
+    "explanation": "Short for 'resident of' (সাকিন) in old land records and deeds.",
+    "defaultForm": "both"
+  }
+]

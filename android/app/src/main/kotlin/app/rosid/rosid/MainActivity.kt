@@ -9,6 +9,7 @@ import java.util.Locale
 class MainActivity : FlutterActivity() {
     private var tts: TextToSpeech? = null
     private var ttsReady = false
+    private var translator: OfflineBergamotTranslator? = null
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -16,6 +17,7 @@ class MainActivity : FlutterActivity() {
         tts = TextToSpeech(this) { status ->
             ttsReady = (status == TextToSpeech.SUCCESS)
         }
+        translator = OfflineBergamotTranslator(this)
 
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "app.rosid.rosid/tts")
             .setMethodCallHandler { call, result ->
@@ -50,9 +52,32 @@ class MainActivity : FlutterActivity() {
                     else -> result.notImplemented()
                 }
             }
+
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "app.rosid.rosid/translate")
+            .setMethodCallHandler { call, result ->
+                val engine = translator
+                if (engine == null) {
+                    result.error("UNAVAILABLE", "Translator not initialized", null)
+                    return@setMethodCallHandler
+                }
+                when (call.method) {
+                    "warmUp" -> engine.warmUp(result)
+                    "translateBatch" -> {
+                        val lines = call.argument<List<String>>("lines") ?: emptyList()
+                        engine.translateBatch(lines, result)
+                    }
+                    "release" -> {
+                        engine.release()
+                        result.success(null)
+                    }
+                    else -> result.notImplemented()
+                }
+            }
     }
 
     override fun onDestroy() {
+        translator?.release()
+        translator = null
         tts?.stop()
         tts?.shutdown()
         tts = null

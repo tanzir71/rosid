@@ -291,6 +291,9 @@ void main() {
         final isolate = await FrameAnalyzerIsolate.spawn();
         addTearDown(isolate.dispose);
 
+        // Warm up JIT inside the fresh background isolate before measuring.
+        await isolate.analyzeEncoded(jpg, timestampMs: 50, skipBlurCheck: true);
+
         final res = await isolate.analyzeEncoded(
           jpg,
           timestampMs: 100,

@@ -14,6 +14,11 @@ Rosid bundles the following openly licensed fonts, models, and libraries inside 
 - **Tesseract traineddata (`eng.traineddata`, `ben.traineddata`)** — Apache License 2.0. Source: `tesseract-ocr/tessdata_best`.
 - **Tesseract4Android** (`cz.adaptech.tesseract4android:tesseract4android:4.8.0`) — Apache License 2.0.
 
+## On-Device Translation
+
+- **Mozilla Firefox Translations Bangla-to-English (`bn-en` v1.0) model (`model.bnen.intgemm.alphas.bin`, `lex.50.50.bnen.s2t.bin`, `vocab.bnen.spm`)** — Mozilla Public License 2.0 (MPL-2.0). Source: Mozilla Remote Settings (`translations-models`). See `assets/models/README.md` for SHA-256 checksums.
+- **Bergamot Translator WebAssembly Runtime (`bergamot-translator` v3.0 WASM & `bergamot-translator.js` v0.6.0)** — Mozilla Public License 2.0 (MPL-2.0). Source: Mozilla Remote Settings (`translations-wasm`) and `mozilla-firefox/firefox`.
+
 ## Core Libraries
 
 - **Flutter & Dart SDK, `material_ui`, `cupertino_ui`** — BSD-3-Clause.

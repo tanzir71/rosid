@@ -405,6 +405,8 @@ void main() {
       final composedPath = container.read(v2ScanProvider).composedIdCardPath;
       expect(composedPath, isNotNull);
       expect(File(composedPath!).existsSync(), isTrue);
+      // Allow the final route transition to finish before container teardown.
+      await tester.pumpAndSettle(const Duration(milliseconds: 500));
     },
   );
 }

@@ -23,6 +23,7 @@ import 'package:rosid/features/review/receipt_review_screen.dart';
 import 'package:rosid/features/settings/settings_screen.dart';
 import 'package:rosid/features/shared/app_shell.dart';
 import 'package:rosid/features/shell_views/v2_shell_screens.dart';
+import 'package:rosid/features/translation/name_book_screen.dart';
 import 'package:rosid/features/welcome/welcome_screens.dart';
 
 class _RouterRefresh extends ChangeNotifier {
@@ -213,11 +214,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       // 05 Name book
       GoRoute(
         path: '/names',
-        builder: (context, state) => V2RouteShellScreen(
-          title: context.l10n.names,
-          body: context.l10n.namesEmpty,
-          icon: RosidIcons.people,
-        ),
+        builder: (context, state) => const NameBookScreen(),
       ),
 
       // 08 Bundles detail & export

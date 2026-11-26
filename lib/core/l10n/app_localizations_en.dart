@@ -837,4 +837,96 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get makeEnglishDraft => 'Make an English draft';
+
+  @override
+  String get draftStamp => 'DRAFT';
+
+  @override
+  String get englishDraftBanner =>
+      'This draft was made on your phone. Check names and numbers before you use it.';
+
+  @override
+  String get spellingFromNameBook => 'Spelling from your name book';
+
+  @override
+  String get newNameCheckSpelling => 'New name. Check the spelling';
+
+  @override
+  String get terms => 'Terms';
+
+  @override
+  String get howShouldTermAppear => 'How should it appear in English?';
+
+  @override
+  String get termBothDesc => 'Keeps the Bangla word and explains it once';
+
+  @override
+  String get termEnglishOnlyDesc => 'Plain English only';
+
+  @override
+  String get termBanglaOnlyDesc => 'Bangla word only';
+
+  @override
+  String get termChoiceAppliesAll =>
+      'Your choice is used for every land paper you translate.';
+
+  @override
+  String get useThis => 'Use this';
+
+  @override
+  String get namesIntro =>
+      'Spellings you set here are used in every translation, so your papers match your passport.';
+
+  @override
+  String get people => 'People';
+
+  @override
+  String get places => 'Places';
+
+  @override
+  String get asInPassport => 'As in passport';
+
+  @override
+  String get asInNid => 'As in NID';
+
+  @override
+  String get suggestedCheck => 'Suggested, check';
+
+  @override
+  String get confirmedSpelling => 'Confirmed';
+
+  @override
+  String get namesFooterNote =>
+      'Rosid suggests a spelling the first time it sees a name. You decide the final one.';
+
+  @override
+  String get addName => 'Add name';
+
+  @override
+  String get editName => 'Edit name';
+
+  @override
+  String get banglaSpelling => 'Bangla spelling';
+
+  @override
+  String get englishSpelling => 'English spelling';
+
+  @override
+  String get whereSpellingFrom => 'Where this spelling comes from';
+
+  @override
+  String get makingEnglishDraft => 'Making English draft on this phone…';
+
+  @override
+  String get editEnglishDraft => 'Edit English draft';
+
+  @override
+  String get editEnglishLineHint =>
+      'Your edits are kept even if you remake the draft, unless the Bangla line changes.';
+
+  @override
+  String get remakeDraft => 'Remake draft';
+
+  @override
+  String get editedLabel => 'Edited';
 }
