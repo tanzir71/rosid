@@ -924,4 +924,172 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get editedLabel => 'সম্পাদিত';
+
+  @override
+  String get whatGoesIn => 'কী কী থাকবে';
+
+  @override
+  String get englishDraftLabel => 'ইংরেজি খসড়া';
+
+  @override
+  String get banglaTextLabel => 'বাংলা লেখা';
+
+  @override
+  String get fileType => 'ফাইলের ধরন';
+
+  @override
+  String get fileTypePdf => 'PDF';
+
+  @override
+  String get fileTypePdfDesc => 'কাগজের মতো দেখতে। প্রিন্ট ও আপলোডের জন্য সেরা';
+
+  @override
+  String get fileTypeDocx => 'Word (.docx)';
+
+  @override
+  String get fileTypeDocxDesc => 'সম্পাদনা ও নতুন করে সাজানোর উপযোগী লেখা';
+
+  @override
+  String get fileTypeDocxFontNote =>
+      'বাংলা লেখা দেখার জন্য Word-এ বাংলা ফন্ট থাকা দরকার।';
+
+  @override
+  String get fileTypeTxt => 'সাধারণ লেখা (.txt)';
+
+  @override
+  String get fileTypeTxtDesc => 'শুধু শব্দগুলো';
+
+  @override
+  String get fileTypeJpg => 'ছবি (.jpg)';
+
+  @override
+  String get fileTypeJpgDesc => 'প্রতিটি পাতার জন্য একটি ছবি';
+
+  @override
+  String get fileTypeCsv => 'স্প্রেডশিট (.csv)';
+
+  @override
+  String get fileTypeCsvDesc => 'রসিদের মোট, ভ্যাট ও পরিশোধের তথ্য';
+
+  @override
+  String get options => 'বিকল্পসমূহ';
+
+  @override
+  String get pageSize => 'পাতার মাপ';
+
+  @override
+  String get pageSizeA4 => 'A4';
+
+  @override
+  String get pageSizeLetter => 'Letter';
+
+  @override
+  String get pageSizeAsScanned => 'স্ক্যান অনুযায়ী';
+
+  @override
+  String get keepFileUnder => 'ফাইলের আকার সীমা';
+
+  @override
+  String get keepFileUnderSub => 'আপলোড ফর্মে সাধারণত সীমা থাকে';
+
+  @override
+  String get noSizeLimit => 'সীমা নেই';
+
+  @override
+  String sizeLimitMb(int mb) {
+    return '$mb এমবি';
+  }
+
+  @override
+  String get sizeLimitCannotFit =>
+      'পড়ার যোগ্য মান রেখে এই সীমার ভেতর কাগজটি আঁটানো যায়নি।';
+
+  @override
+  String get watermark => 'জলছাপ';
+
+  @override
+  String get watermarkDefaultPurpose => 'শুধু ভিসা আবেদনের জন্য';
+
+  @override
+  String get watermarkPurposeHint => 'জলছাপের লেখা';
+
+  @override
+  String get translatorSignPage => 'অনুবাদকের স্বাক্ষরের পাতা';
+
+  @override
+  String get translatorSignPageSub => 'নাম, স্বাক্ষর, তারিখ ও সিল';
+
+  @override
+  String get preview => 'প্রিভিউ';
+
+  @override
+  String get saveToPhone => 'ফোনে সংরক্ষণ';
+
+  @override
+  String get print => 'প্রিন্ট';
+
+  @override
+  String get draftTranslationStamp => 'খসড়া অনুবাদ';
+
+  @override
+  String get draftTranslationFooter => 'বাংলা থেকে খসড়া অনুবাদ';
+
+  @override
+  String get toSignTab => 'স্বাক্ষর';
+
+  @override
+  String get nextGetCertified => 'এরপর সত্যায়ন করিয়ে নিন';
+
+  @override
+  String get nextGetCertifiedBody =>
+      'একজন অনুবাদক বা নোটারি এই খসড়া যাচাই করে শেষ পাতায় স্বাক্ষর ও সিল দেবেন। বেশিরভাগ দূতাবাস ও অফিস কেবল সত্যায়িত অনুবাদ গ্রহণ করে।';
+
+  @override
+  String get idBothSidesTitle => 'জাতীয় পরিচয়পত্র, দুই পিঠ';
+
+  @override
+  String get coverDetailSub => 'পাঠানোর আগে নম্বর বা ঠিকানা ঢেকে দিন';
+
+  @override
+  String get blackAndWhiteCopy => 'সাদা-কালো কপি';
+
+  @override
+  String copyMadeOn(String date) {
+    return 'কপি তৈরি $date';
+  }
+
+  @override
+  String get savedStamp => 'সংরক্ষিত';
+
+  @override
+  String get savedToYourPhone => 'আপনার ফোনে সংরক্ষিত হয়েছে';
+
+  @override
+  String get shareSub => 'হোয়াটসঅ্যাপ, ইমেইল, ব্লুটুথ ও আরও অনেক কিছু';
+
+  @override
+  String get addToABundle => 'ফাইলে যোগ করুন';
+
+  @override
+  String get openTheFolder => 'ফোল্ডার খুলুন';
+
+  @override
+  String get coverToolBlackBar => 'কালো দাগ';
+
+  @override
+  String get coverToolBlur => 'ঝাপসা';
+
+  @override
+  String get undo => 'পূর্বাবস্থায়';
+
+  @override
+  String get coverDetailSafeNote =>
+      'ঢাকা অংশটি এক্সপোর্ট করা কপি থেকে মুছে ফেলা হয়। আপনার মূল স্ক্যান অক্ষত থাকে।';
+
+  @override
+  String get translatorCertTitle => 'Translator\'s Certification';
+
+  @override
+  String get translatorCertBody =>
+      'I certify that I am competent in Bangla and English, and that this is a true and accurate translation of the attached document.';
 }

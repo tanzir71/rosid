@@ -1,5 +1,6 @@
 package app.rosid.rosid
 
+import android.content.Intent
 import android.speech.tts.TextToSpeech
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -10,6 +11,7 @@ class MainActivity : FlutterActivity() {
     private var tts: TextToSpeech? = null
     private var ttsReady = false
     private var translator: OfflineBergamotTranslator? = null
+    private var fileBridge: PlatformFileBridge? = null
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -18,6 +20,7 @@ class MainActivity : FlutterActivity() {
             ttsReady = (status == TextToSpeech.SUCCESS)
         }
         translator = OfflineBergamotTranslator(this)
+        fileBridge = PlatformFileBridge(this)
 
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "app.rosid.rosid/tts")
             .setMethodCallHandler { call, result ->
@@ -73,11 +76,47 @@ class MainActivity : FlutterActivity() {
                     else -> result.notImplemented()
                 }
             }
+
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "app.rosid.rosid/files")
+            .setMethodCallHandler { call, result ->
+                val bridge = fileBridge
+                if (bridge == null) {
+                    result.error("UNAVAILABLE", "File bridge not initialized", null)
+                    return@setMethodCallHandler
+                }
+                when (call.method) {
+                    "saveFile" -> {
+                        val sourcePath = call.argument<String>("sourcePath") ?: ""
+                        val suggestedName = call.argument<String>("suggestedName") ?: "export.pdf"
+                        val mimeType = call.argument<String>("mimeType") ?: "application/pdf"
+                        bridge.saveFile(sourcePath, suggestedName, mimeType, result)
+                    }
+                    "printPdf" -> {
+                        val filePath = call.argument<String>("filePath") ?: ""
+                        val jobName = call.argument<String>("jobName") ?: "Rosid Document"
+                        bridge.printPdf(filePath, jobName, result)
+                    }
+                    "openFolder" -> {
+                        val uri = call.argument<String>("uri") ?: ""
+                        bridge.openFolder(uri, result)
+                    }
+                    else -> result.notImplemented()
+                }
+            }
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (fileBridge?.handleActivityResult(requestCode, resultCode, data) == true) {
+            return
+        }
+        super.onActivityResult(requestCode, resultCode, data)
     }
 
     override fun onDestroy() {
         translator?.release()
         translator = null
+        fileBridge = null
         tts?.stop()
         tts?.shutdown()
         tts = null

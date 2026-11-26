@@ -14,7 +14,12 @@ import 'package:rosid/features/capture/scan_controller.dart';
 import 'package:rosid/features/crop/crop_enhance_screen.dart';
 import 'package:rosid/features/detail/detail_edit_screen.dart';
 import 'package:rosid/features/detail/detail_screen.dart';
+import 'package:rosid/features/export/cover_detail_screen.dart';
+import 'package:rosid/features/export/export_id_card_screen.dart';
+import 'package:rosid/features/export/export_preview_screen.dart';
+import 'package:rosid/features/export/export_saved_screen.dart';
 import 'package:rosid/features/export/export_screen.dart';
+import 'package:rosid/features/export/paper_export_options_screen.dart';
 import 'package:rosid/features/home/home_screen.dart';
 import 'package:rosid/features/paper/check_words_screen.dart';
 import 'package:rosid/features/paper/paper_screen.dart';
@@ -172,39 +177,28 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/paper/:id/export',
-        builder: (context, state) => const ExportScreen(),
+        builder: (context, state) =>
+            PaperExportOptionsScreen(scanId: state.pathParameters['id']!),
       ),
       GoRoute(
         path: '/paper/:id/export/preview',
-        builder: (context, state) => V2RouteShellScreen(
-          title: context.l10n.exportPdf,
-          body: context.l10n.englishDraftPending,
-          icon: RosidIcons.document,
-        ),
+        builder: (context, state) =>
+            ExportPreviewScreen(scanId: state.pathParameters['id']!),
       ),
       GoRoute(
         path: '/paper/:id/export/id',
-        builder: (context, state) => V2RouteShellScreen(
-          title: context.l10n.idCard,
-          body: context.l10n.export,
-          icon: RosidIcons.idCard,
-        ),
+        builder: (context, state) =>
+            ExportIdCardScreen(scanId: state.pathParameters['id']!),
       ),
       GoRoute(
         path: '/paper/:id/export/saved',
-        builder: (context, state) => V2RouteShellScreen(
-          title: context.l10n.saved,
-          body: context.l10n.privacyDescription,
-          icon: RosidIcons.checkCircle,
-        ),
+        builder: (context, state) =>
+            ExportSavedScreen(scanId: state.pathParameters['id']!),
       ),
       GoRoute(
         path: '/paper/:id/export/cover',
-        builder: (context, state) => V2RouteShellScreen(
-          title: context.l10n.coverDetailTitle,
-          body: context.l10n.coverDetailHint,
-          icon: RosidIcons.hide,
-        ),
+        builder: (context, state) =>
+            CoverDetailScreen(scanId: state.pathParameters['id']!),
       ),
       GoRoute(
         path: '/paper/:id/receipt',

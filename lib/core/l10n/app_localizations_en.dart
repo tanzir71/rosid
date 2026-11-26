@@ -929,4 +929,173 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get editedLabel => 'Edited';
+
+  @override
+  String get whatGoesIn => 'What goes in';
+
+  @override
+  String get englishDraftLabel => 'English draft';
+
+  @override
+  String get banglaTextLabel => 'Bangla text';
+
+  @override
+  String get fileType => 'File type';
+
+  @override
+  String get fileTypePdf => 'PDF';
+
+  @override
+  String get fileTypePdfDesc =>
+      'Looks like the paper. Best for printing and uploading';
+
+  @override
+  String get fileTypeDocx => 'Word (.docx)';
+
+  @override
+  String get fileTypeDocxDesc => 'Text you can edit and lay out again';
+
+  @override
+  String get fileTypeDocxFontNote =>
+      'Word needs a Bangla font to show Bangla text.';
+
+  @override
+  String get fileTypeTxt => 'Plain text (.txt)';
+
+  @override
+  String get fileTypeTxtDesc => 'Only the words';
+
+  @override
+  String get fileTypeJpg => 'Pictures (.jpg)';
+
+  @override
+  String get fileTypeJpgDesc => 'One picture for each page';
+
+  @override
+  String get fileTypeCsv => 'Spreadsheet (.csv)';
+
+  @override
+  String get fileTypeCsvDesc => 'Receipt totals, VAT and payment details';
+
+  @override
+  String get options => 'Options';
+
+  @override
+  String get pageSize => 'Page size';
+
+  @override
+  String get pageSizeA4 => 'A4';
+
+  @override
+  String get pageSizeLetter => 'Letter';
+
+  @override
+  String get pageSizeAsScanned => 'As scanned';
+
+  @override
+  String get keepFileUnder => 'Keep the file under';
+
+  @override
+  String get keepFileUnderSub => 'Upload forms often set a limit';
+
+  @override
+  String get noSizeLimit => 'No limit';
+
+  @override
+  String sizeLimitMb(int mb) {
+    return '$mb MB';
+  }
+
+  @override
+  String get sizeLimitCannotFit =>
+      'This paper cannot fit under that limit at readable quality.';
+
+  @override
+  String get watermark => 'Watermark';
+
+  @override
+  String get watermarkDefaultPurpose => 'For visa application only';
+
+  @override
+  String get watermarkPurposeHint => 'Watermark text';
+
+  @override
+  String get translatorSignPage => 'Page for the translator to sign';
+
+  @override
+  String get translatorSignPageSub => 'Name, signature, date and seal';
+
+  @override
+  String get preview => 'Preview';
+
+  @override
+  String get saveToPhone => 'Save to phone';
+
+  @override
+  String get print => 'Print';
+
+  @override
+  String get draftTranslationStamp => 'DRAFT TRANSLATION';
+
+  @override
+  String get draftTranslationFooter => 'Draft translation from Bangla';
+
+  @override
+  String get toSignTab => 'To sign';
+
+  @override
+  String get nextGetCertified => 'Next, get it certified';
+
+  @override
+  String get nextGetCertifiedBody =>
+      'A translator or notary checks this draft, then signs and seals the last page. Most embassies and offices only accept a certified translation.';
+
+  @override
+  String get idBothSidesTitle => 'National ID, both sides';
+
+  @override
+  String get coverDetailSub => 'Hide a number or address before you share';
+
+  @override
+  String get blackAndWhiteCopy => 'Black and white copy';
+
+  @override
+  String copyMadeOn(String date) {
+    return 'Copy made $date';
+  }
+
+  @override
+  String get savedStamp => 'SAVED';
+
+  @override
+  String get savedToYourPhone => 'Saved to your phone';
+
+  @override
+  String get shareSub => 'WhatsApp, email, Bluetooth and more';
+
+  @override
+  String get addToABundle => 'Add to a bundle';
+
+  @override
+  String get openTheFolder => 'Open the folder';
+
+  @override
+  String get coverToolBlackBar => 'Black bar';
+
+  @override
+  String get coverToolBlur => 'Blur';
+
+  @override
+  String get undo => 'Undo';
+
+  @override
+  String get coverDetailSafeNote =>
+      'The covered part is removed from the copy you export. Your saved scan stays whole.';
+
+  @override
+  String get translatorCertTitle => 'Translator\'s Certification';
+
+  @override
+  String get translatorCertBody =>
+      'I certify that I am competent in Bangla and English, and that this is a true and accurate translation of the attached document.';
 }

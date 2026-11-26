@@ -215,8 +215,11 @@ class _PaperScreenState extends ConsumerState<PaperScreen> {
                       .read(offlineSpeechServiceProvider)
                       .speak(paper.displayBody),
                   onEdit: () => _showFullTextEditor(context, paper),
-                  onExport: () =>
-                      context.push('/paper/${paper.scan.id}/export'),
+                  onExport: () => context.push(
+                    paper.paperKind == PaperKind.idCard
+                        ? '/paper/${paper.scan.id}/export/id'
+                        : '/paper/${paper.scan.id}/export',
+                  ),
                 ),
             ],
           ),

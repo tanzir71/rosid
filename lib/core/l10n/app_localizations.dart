@@ -1777,6 +1777,324 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Edited'**
   String get editedLabel;
+
+  /// No description provided for @whatGoesIn.
+  ///
+  /// In en, this message translates to:
+  /// **'What goes in'**
+  String get whatGoesIn;
+
+  /// No description provided for @englishDraftLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'English draft'**
+  String get englishDraftLabel;
+
+  /// No description provided for @banglaTextLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Bangla text'**
+  String get banglaTextLabel;
+
+  /// No description provided for @fileType.
+  ///
+  /// In en, this message translates to:
+  /// **'File type'**
+  String get fileType;
+
+  /// No description provided for @fileTypePdf.
+  ///
+  /// In en, this message translates to:
+  /// **'PDF'**
+  String get fileTypePdf;
+
+  /// No description provided for @fileTypePdfDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Looks like the paper. Best for printing and uploading'**
+  String get fileTypePdfDesc;
+
+  /// No description provided for @fileTypeDocx.
+  ///
+  /// In en, this message translates to:
+  /// **'Word (.docx)'**
+  String get fileTypeDocx;
+
+  /// No description provided for @fileTypeDocxDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Text you can edit and lay out again'**
+  String get fileTypeDocxDesc;
+
+  /// No description provided for @fileTypeDocxFontNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Word needs a Bangla font to show Bangla text.'**
+  String get fileTypeDocxFontNote;
+
+  /// No description provided for @fileTypeTxt.
+  ///
+  /// In en, this message translates to:
+  /// **'Plain text (.txt)'**
+  String get fileTypeTxt;
+
+  /// No description provided for @fileTypeTxtDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Only the words'**
+  String get fileTypeTxtDesc;
+
+  /// No description provided for @fileTypeJpg.
+  ///
+  /// In en, this message translates to:
+  /// **'Pictures (.jpg)'**
+  String get fileTypeJpg;
+
+  /// No description provided for @fileTypeJpgDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'One picture for each page'**
+  String get fileTypeJpgDesc;
+
+  /// No description provided for @fileTypeCsv.
+  ///
+  /// In en, this message translates to:
+  /// **'Spreadsheet (.csv)'**
+  String get fileTypeCsv;
+
+  /// No description provided for @fileTypeCsvDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt totals, VAT and payment details'**
+  String get fileTypeCsvDesc;
+
+  /// No description provided for @options.
+  ///
+  /// In en, this message translates to:
+  /// **'Options'**
+  String get options;
+
+  /// No description provided for @pageSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Page size'**
+  String get pageSize;
+
+  /// No description provided for @pageSizeA4.
+  ///
+  /// In en, this message translates to:
+  /// **'A4'**
+  String get pageSizeA4;
+
+  /// No description provided for @pageSizeLetter.
+  ///
+  /// In en, this message translates to:
+  /// **'Letter'**
+  String get pageSizeLetter;
+
+  /// No description provided for @pageSizeAsScanned.
+  ///
+  /// In en, this message translates to:
+  /// **'As scanned'**
+  String get pageSizeAsScanned;
+
+  /// No description provided for @keepFileUnder.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep the file under'**
+  String get keepFileUnder;
+
+  /// No description provided for @keepFileUnderSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload forms often set a limit'**
+  String get keepFileUnderSub;
+
+  /// No description provided for @noSizeLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'No limit'**
+  String get noSizeLimit;
+
+  /// No description provided for @sizeLimitMb.
+  ///
+  /// In en, this message translates to:
+  /// **'{mb} MB'**
+  String sizeLimitMb(int mb);
+
+  /// No description provided for @sizeLimitCannotFit.
+  ///
+  /// In en, this message translates to:
+  /// **'This paper cannot fit under that limit at readable quality.'**
+  String get sizeLimitCannotFit;
+
+  /// No description provided for @watermark.
+  ///
+  /// In en, this message translates to:
+  /// **'Watermark'**
+  String get watermark;
+
+  /// No description provided for @watermarkDefaultPurpose.
+  ///
+  /// In en, this message translates to:
+  /// **'For visa application only'**
+  String get watermarkDefaultPurpose;
+
+  /// No description provided for @watermarkPurposeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Watermark text'**
+  String get watermarkPurposeHint;
+
+  /// No description provided for @translatorSignPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Page for the translator to sign'**
+  String get translatorSignPage;
+
+  /// No description provided for @translatorSignPageSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Name, signature, date and seal'**
+  String get translatorSignPageSub;
+
+  /// No description provided for @preview.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview'**
+  String get preview;
+
+  /// No description provided for @saveToPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Save to phone'**
+  String get saveToPhone;
+
+  /// No description provided for @print.
+  ///
+  /// In en, this message translates to:
+  /// **'Print'**
+  String get print;
+
+  /// No description provided for @draftTranslationStamp.
+  ///
+  /// In en, this message translates to:
+  /// **'DRAFT TRANSLATION'**
+  String get draftTranslationStamp;
+
+  /// No description provided for @draftTranslationFooter.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft translation from Bangla'**
+  String get draftTranslationFooter;
+
+  /// No description provided for @toSignTab.
+  ///
+  /// In en, this message translates to:
+  /// **'To sign'**
+  String get toSignTab;
+
+  /// No description provided for @nextGetCertified.
+  ///
+  /// In en, this message translates to:
+  /// **'Next, get it certified'**
+  String get nextGetCertified;
+
+  /// No description provided for @nextGetCertifiedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A translator or notary checks this draft, then signs and seals the last page. Most embassies and offices only accept a certified translation.'**
+  String get nextGetCertifiedBody;
+
+  /// No description provided for @idBothSidesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'National ID, both sides'**
+  String get idBothSidesTitle;
+
+  /// No description provided for @coverDetailSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide a number or address before you share'**
+  String get coverDetailSub;
+
+  /// No description provided for @blackAndWhiteCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Black and white copy'**
+  String get blackAndWhiteCopy;
+
+  /// No description provided for @copyMadeOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy made {date}'**
+  String copyMadeOn(String date);
+
+  /// No description provided for @savedStamp.
+  ///
+  /// In en, this message translates to:
+  /// **'SAVED'**
+  String get savedStamp;
+
+  /// No description provided for @savedToYourPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved to your phone'**
+  String get savedToYourPhone;
+
+  /// No description provided for @shareSub.
+  ///
+  /// In en, this message translates to:
+  /// **'WhatsApp, email, Bluetooth and more'**
+  String get shareSub;
+
+  /// No description provided for @addToABundle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to a bundle'**
+  String get addToABundle;
+
+  /// No description provided for @openTheFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the folder'**
+  String get openTheFolder;
+
+  /// No description provided for @coverToolBlackBar.
+  ///
+  /// In en, this message translates to:
+  /// **'Black bar'**
+  String get coverToolBlackBar;
+
+  /// No description provided for @coverToolBlur.
+  ///
+  /// In en, this message translates to:
+  /// **'Blur'**
+  String get coverToolBlur;
+
+  /// No description provided for @undo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get undo;
+
+  /// No description provided for @coverDetailSafeNote.
+  ///
+  /// In en, this message translates to:
+  /// **'The covered part is removed from the copy you export. Your saved scan stays whole.'**
+  String get coverDetailSafeNote;
+
+  /// No description provided for @translatorCertTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Translator\'s Certification'**
+  String get translatorCertTitle;
+
+  /// No description provided for @translatorCertBody.
+  ///
+  /// In en, this message translates to:
+  /// **'I certify that I am competent in Bangla and English, and that this is a true and accurate translation of the attached document.'**
+  String get translatorCertBody;
 }
 
 class _AppLocalizationsDelegate
