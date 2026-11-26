@@ -46,7 +46,7 @@ function Write-Log {
     param([string]$Message)
     $stamp = Get-Date -Format 'HH:mm:ss'
     $line = "[$stamp] $Message"
-    Write-Output $line
+    Write-Host $line
     $logLines.Add($line)
 }
 
@@ -87,7 +87,7 @@ function Invoke-Checked {
     }
     foreach ($line in $output) {
         $text = "$line"
-        Write-Output $text
+        Write-Host $text
         $logLines.Add($text)
     }
     if ($code -ne 0) {
@@ -98,9 +98,15 @@ function Invoke-Checked {
 
 function Get-RunningEmulatorSerial {
     if (-not (Test-Path -LiteralPath $adbBin -PathType Leaf)) { return $null }
-    $out = & $adbBin devices 2>$null
+    $prevPref = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try {
+        $out = & $adbBin devices 2>&1
+    } finally {
+        $ErrorActionPreference = $prevPref
+    }
     foreach ($line in $out) {
-        if ($line -match '^(emulator-\d+)\s+device$') {
+        if ("$line" -match '^(emulator-\d+)\s+device$') {
             return $Matches[1]
         }
     }
@@ -117,7 +123,13 @@ function Ensure-EmulatorRunning {
     if (-not (Test-Path -LiteralPath $emulatorBin -PathType Leaf)) {
         throw "Android emulator binary not found at $emulatorBin"
     }
-    $avds = @(& $emulatorBin -list-avds 2>$null)
+    $prevPref = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try {
+        $avds = @(& $emulatorBin -list-avds 2>&1 | ForEach-Object { "$_".Trim() })
+    } finally {
+        $ErrorActionPreference = $prevPref
+    }
     if ($avds -notcontains $Name) {
         throw "AVD '$Name' not found. Available: $($avds -join ', ')"
     }
@@ -129,23 +141,32 @@ function Ensure-EmulatorRunning {
         '-no-boot-anim',
         '-camera-back', 'none',
         '-camera-front', 'none',
-        '-gpu', 'swiftshader_indirect'
+        '-gpu', 'host'
     ) -PassThru -WindowStyle Hidden
     $script:startedEmulatorProcess = $proc
 
-    $deadline = (Get-Date).AddMinutes(4)
+    $deadline = (Get-Date).AddMinutes(6)
     while ((Get-Date) -lt $deadline) {
         if ($proc.HasExited) {
             throw "Emulator process exited prematurely with code $($proc.ExitCode)"
         }
         $serial = Get-RunningEmulatorSerial
         if ($null -ne $serial) {
-            $boot = (& $adbBin -s $serial shell getprop sys.boot_completed 2>$null) -join ''
+            $prevPref2 = $ErrorActionPreference
+            $ErrorActionPreference = 'Continue'
+            try {
+                $boot = (& $adbBin -s $serial shell getprop sys.boot_completed 2>&1) -join ''
+            } finally {
+                $ErrorActionPreference = $prevPref2
+            }
             if ($boot.Trim() -eq '1') {
-                Start-Sleep -Seconds 3
-                $script:startedEmulatorSerial = $serial
-                Write-Log "Emulator '$Name' booted at $serial"
-                return $serial
+                $pmCheck = (& $adbBin -s $serial shell pm path android 2>&1) -join ''
+                if ($pmCheck -match 'package:') {
+                    Start-Sleep -Seconds 3
+                    $script:startedEmulatorSerial = $serial
+                    Write-Log "Emulator '$Name' booted at $serial"
+                    return $serial
+                }
             }
         }
         Start-Sleep -Seconds 3
@@ -154,13 +175,19 @@ function Ensure-EmulatorRunning {
 }
 
 function Stop-StartedEmulator {
-    if ($null -ne $script:startedEmulatorSerial) {
-        Write-Log "Shutting down emulator $script:startedEmulatorSerial..."
-        try { & $adbBin -s $script:startedEmulatorSerial emu kill 2>$null | Out-Null } catch {}
-        Start-Sleep -Seconds 2
-    }
-    if ($null -ne $script:startedEmulatorProcess -and -not $script:startedEmulatorProcess.HasExited) {
-        try { $script:startedEmulatorProcess.Kill() } catch {}
+    $prevPref = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try {
+        if ($null -ne $script:startedEmulatorSerial) {
+            Write-Log "Shutting down emulator $script:startedEmulatorSerial..."
+            try { & $adbBin -s $script:startedEmulatorSerial emu kill 2>&1 | Out-Null } catch {}
+            Start-Sleep -Seconds 2
+        }
+        if ($null -ne $script:startedEmulatorProcess -and -not $script:startedEmulatorProcess.HasExited) {
+            try { $script:startedEmulatorProcess.Kill() } catch {}
+        }
+    } finally {
+        $ErrorActionPreference = $prevPref
     }
 }
 
@@ -221,27 +248,41 @@ try {
         Invoke-Step 'Start emulator and install debug APK' {
             $script:emuSerial = Ensure-EmulatorRunning -Name $AvdName
             $apk = Join-Path $projectDir 'build\app\outputs\flutter-apk\app-debug.apk'
+            $prevPref = $ErrorActionPreference
+            $ErrorActionPreference = 'Continue'
+            try { & $adbBin -s $script:emuSerial uninstall app.rosid.rosid 2>&1 | Out-Null } finally { $ErrorActionPreference = $prevPref }
             Invoke-Checked $adbBin @('-s', $script:emuSerial, 'install', '-r', '-g', $apk) | Out-Null
         }
         Invoke-Step 'Cold start launch and screenshot' {
             $serial = $script:emuSerial
-            & $adbBin -s $serial shell am force-stop app.rosid.rosid 2>$null | Out-Null
+            $prevPref = $ErrorActionPreference
+            $ErrorActionPreference = 'Continue'
+            try {
+                & $adbBin -s $serial shell input keyevent KEYCODE_WAKEUP 2>&1 | Out-Null
+                & $adbBin -s $serial shell wm dismiss-keyguard 2>&1 | Out-Null
+                & $adbBin -s $serial shell am force-stop app.rosid.rosid 2>&1 | Out-Null
+            } finally {
+                $ErrorActionPreference = $prevPref
+            }
             Start-Sleep -Seconds 1
             $launchOut = Invoke-Checked $adbBin @('-s', $serial, 'shell', 'am', 'start', '-W', '-n', 'app.rosid.rosid/.MainActivity')
             $totalTimeLine = $launchOut | Select-String -Pattern 'TotalTime:\s*(\d+)' | Select-Object -First 1
+            if ($null -eq $totalTimeLine) {
+                $totalTimeLine = $launchOut | Select-String -Pattern 'WaitTime:\s*(\d+)' | Select-Object -First 1
+            }
             if ($null -ne $totalTimeLine) {
                 $ms = [int]$totalTimeLine.Matches[0].Groups[1].Value
                 $metrics['Cold start (ms)'] = $ms
             }
-            Start-Sleep -Seconds 3
+            Start-Sleep -Seconds 8
             if (-not [string]::IsNullOrWhiteSpace($Evidence)) {
                 $screenDir = Join-Path $projectDir "evidence\$Evidence\screens"
                 New-Item -ItemType Directory -Force -Path $screenDir | Out-Null
                 $shotPath = Join-Path $screenDir 'launch-home.png'
                 $tmpRemote = '/sdcard/rosid_launch.png'
-                & $adbBin -s $serial shell screencap -p $tmpRemote
-                & $adbBin -s $serial pull $tmpRemote $shotPath | Out-Null
-                & $adbBin -s $serial shell rm -f $tmpRemote
+                Invoke-Checked $adbBin @('-s', $serial, 'shell', 'screencap', '-p', $tmpRemote) | Out-Null
+                Invoke-Checked $adbBin @('-s', $serial, 'pull', $tmpRemote, $shotPath) | Out-Null
+                Invoke-Checked $adbBin @('-s', $serial, 'shell', 'rm', '-f', $tmpRemote) | Out-Null
                 Write-Log "Saved screenshot: $shotPath"
             }
         }

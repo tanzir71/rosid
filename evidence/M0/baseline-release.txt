@@ -1,0 +1,3 @@
+﻿Universal release APK bytes: 143191426 (136.56 MB)
+FakeCaptureSource hits in release symbols: 0
+Merged release manifest offline audit: passed
