@@ -368,7 +368,7 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen>
   void _showNativeOperationError(Object error, int token) {
     if (!_isCurrentNativeOperation(token)) return;
     ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(error.toString())));
+        .showSnackBar(SnackBar(content: Text(context.l10n.captureFailed)));
   }
 
   Future<void> _toggleFlash() async {
@@ -394,12 +394,12 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen>
       await WidgetsBinding.instance.endOfFrame;
       if (!mounted) return;
       Navigator.of(context).pop();
-    } on Object catch (error) {
+    } on Object {
       if (!mounted) return;
       setState(() => _isClosing = false);
       if (ref.read(captureSessionProvider).errorMessage == null) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(error.toString())));
+            .showSnackBar(SnackBar(content: Text(context.l10n.deleteFailed)));
       }
     }
   }
@@ -414,7 +414,7 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen>
       if (next.errorMessage != null &&
           next.errorMessage != previous?.errorMessage) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(next.errorMessage!)));
+            .showSnackBar(SnackBar(content: Text(context.l10n.captureFailed)));
       }
     });
 
@@ -586,9 +586,9 @@ class _LanguagePicker extends ConsumerWidget {
             value: CaptureLanguageHint.banglaEnglish,
             child: Text(context.l10n.mixedBanglaEnglish),
           ),
-          const DropdownMenuItem(
+          DropdownMenuItem(
             value: CaptureLanguageHint.english,
-            child: Text('English'),
+            child: Text(context.l10n.english),
           ),
         ],
         onChanged: enabled

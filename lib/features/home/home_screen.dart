@@ -1,130 +1,301 @@
-import 'dart:io';
-
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:rosid/core/extensions/l10n_extension.dart';
 import 'package:rosid/core/settings/app_settings.dart';
 import 'package:rosid/core/theme/app_theme.dart';
+import 'package:rosid/core/theme/rosid_icons.dart';
+import 'package:rosid/core/theme/tokens.g.dart';
+import 'package:rosid/core/utils/bangla_digits.dart';
 import 'package:rosid/core/utils/money.dart';
-import 'package:rosid/data/repositories/dashboard_repository.dart';
+import 'package:rosid/core/widgets/rosid_controls.dart';
+import 'package:rosid/core/widgets/rosid_navigation.dart';
+import 'package:rosid/core/widgets/rosid_paper_thumbnail.dart';
+import 'package:rosid/data/database/app_database.dart';
+import 'package:rosid/data/database/database_provider.dart';
 import 'package:rosid/data/repositories/history_repository.dart';
 
+/// Home screen (`design/screens/home.png`, `home-bn.png`, `home-dark.png`).
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final expenseEnabled = ref.watch(expenseTrackingEnabledProvider);
+    final c = RosidColors.of(context);
+    final l10n = context.l10n;
+    final locale = Localizations.localeOf(context);
+    final settings = ref.watch(appSettingsProvider);
+    final recentPapers = ref.watch(_homePapersProvider);
+    final activeBundles = ref.watch(_homeBundlesProvider);
+
+    final shortcuts = _orderedShortcuts(settings.purposes, l10n);
+
     return Scaffold(
-      appBar: AppBar(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(context.l10n.appName),
-            Text(
-              context.l10n.offlineTagline,
-              style: Theme.of(context).textTheme.labelSmall,
-            ),
-          ],
-        ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16),
-            child: Tooltip(
-              message: context.l10n.offline,
-              child: const Icon(Icons.shield_outlined, color: AppTheme.leaf),
-            ),
+      backgroundColor: c.bgCanvas,
+      appBar: RosidTopBar(
+        title: l10n.appWordmarkBn,
+        isWordmark: true,
+        trailing: [
+          RosidPill(
+            label: l10n.offline,
+            tone: RosidTone.good,
+            icon: RosidIcons.shield,
+          ),
+          IconButton(
+            key: const ValueKey('home-settings-button'),
+            tooltip: l10n.settings,
+            onPressed: () => context.push('/settings'),
+            icon: RosidIcon(RosidIcons.settings, size: 22, color: c.inkPrimary),
           ),
         ],
       ),
-      body: expenseEnabled ? const _DashboardHome() : const _DocumentsHome(),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.push('/capture'),
-        icon: const Icon(Icons.document_scanner_outlined),
-        label: Text(context.l10n.scan),
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 112),
+        children: [
+          Text(
+            l10n.whatAreYouScanning,
+            style: RosidTextTokens.uiTitle.copyWith(color: c.inkPrimary),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              for (var i = 0; i < shortcuts.length; i++) ...[
+                if (i > 0) const SizedBox(width: 10),
+                Expanded(child: _ScanShortcutTile(shortcut: shortcuts[i])),
+              ],
+            ],
+          ),
+          const SizedBox(height: 24),
+          recentPapers.when(
+            loading: () => const Padding(
+              padding: EdgeInsets.symmetric(vertical: 24),
+              child: Center(child: CircularProgressIndicator()),
+            ),
+            error: (_, _) => Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: Text(
+                l10n.loadFailed,
+                style: RosidTextTokens.uiBody.copyWith(color: c.inkSecondary),
+              ),
+            ),
+            data: (entries) {
+              final resumeEntry = _pickResumeEntry(entries);
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (resumeEntry != null) ...[
+                    Text(
+                      l10n.pickUpWhereYouLeftOff,
+                      style: RosidTextTokens.uiHeading.copyWith(
+                        color: c.inkPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    _ResumeCard(entry: resumeEntry, locale: locale),
+                    const SizedBox(height: 24),
+                  ],
+                  _SectionHeader(
+                    title: l10n.bundles,
+                    actionLabel: l10n.seeAll,
+                    onAction: () => context.go('/bundles'),
+                  ),
+                  const SizedBox(height: 10),
+                  activeBundles.when(
+                    loading: () => const SizedBox.shrink(),
+                    error: (_, _) => const SizedBox.shrink(),
+                    data: (bundles) {
+                      if (bundles.isEmpty) {
+                        return _EmptyBundlesCard(
+                          onTap: () => context.go('/bundles'),
+                        );
+                      }
+                      final first = bundles.first;
+                      return _BundleSummaryCard(
+                        summary: first,
+                        locale: locale,
+                        onTap: () =>
+                            context.push('/bundles/${first.bundle.id}'),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 24),
+                  _SectionHeader(
+                    title: l10n.recent,
+                    actionLabel: l10n.library,
+                    onAction: () => context.go('/library'),
+                  ),
+                  const SizedBox(height: 6),
+                  if (entries.isEmpty)
+                    _EmptyPapersCard(
+                      onScan: () => context.push('/scan?mode=document'),
+                    )
+                  else
+                    for (final entry in entries.take(5)) ...[
+                      RosidPaperRow(
+                        title: entry.title,
+                        subtitle: _paperSubtitle(context, entry, locale),
+                        kind: _paperKindFor(entry),
+                        trailingTop: entry.isReceipt && entry.receipt != null
+                            ? localizeDigits(
+                                formatMoney(
+                                  entry.receipt!.total,
+                                  entry.receipt!.currency,
+                                ),
+                                locale,
+                              )
+                            : localizeDigits(l10n.pagesCount(1), locale),
+                        pillLabel: entry.scan.checkCount > 0
+                            ? localizeDigits(
+                                l10n.wordsToCheckCount(entry.scan.checkCount),
+                                locale,
+                              )
+                            : null,
+                        pillTone: RosidTone.warn,
+                        onTap: () => context.push('/paper/${entry.scan.id}'),
+                      ),
+                      Divider(color: c.lineSubtle, height: 1),
+                    ],
+                ],
+              );
+            },
+          ),
+        ],
       ),
     );
   }
+
+  HistoryEntry? _pickResumeEntry(List<HistoryEntry> entries) {
+    for (final entry in entries) {
+      if (entry.scan.checkCount > 0) return entry;
+    }
+    return entries.isEmpty ? null : entries.first;
+  }
+
+  List<_ScanShortcut> _orderedShortcuts(
+    Set<RosidPurpose> purposes,
+    dynamic l10n,
+  ) {
+    final doc = _ScanShortcut(
+      label: l10n.document as String,
+      route: '/scan?mode=document',
+      paperKind: RosidPaperKind.letter,
+    );
+    final idCard = _ScanShortcut(
+      label: l10n.idCard as String,
+      route: '/scan?mode=id',
+      paperKind: RosidPaperKind.id,
+    );
+    final receipt = _ScanShortcut(
+      label: l10n.receipt as String,
+      route: '/scan?mode=receipt',
+      paperKind: RosidPaperKind.receipt,
+    );
+    final translate = _ScanShortcut(
+      label: l10n.translate as String,
+      route: '/scan?mode=translate',
+      isTranslate: true,
+    );
+    if (purposes.contains(RosidPurpose.receipts) &&
+        !purposes.contains(RosidPurpose.visa) &&
+        !purposes.contains(RosidPurpose.land)) {
+      return [receipt, doc, idCard, translate];
+    }
+    return [doc, idCard, receipt, translate];
+  }
+
+  RosidPaperKind _paperKindFor(HistoryEntry entry) {
+    if (entry.isReceipt) return RosidPaperKind.receipt;
+    return switch (entry.scan.kind) {
+      'land' => RosidPaperKind.land,
+      'certificate' => RosidPaperKind.certificate,
+      'id' => RosidPaperKind.id,
+      'notes' => RosidPaperKind.notes,
+      _ => RosidPaperKind.letter,
+    };
+  }
+
+  String _paperSubtitle(
+    BuildContext context,
+    HistoryEntry entry,
+    Locale locale,
+  ) {
+    final l10n = context.l10n;
+    final kindLabel = entry.isReceipt
+        ? l10n.receipt
+        : switch (entry.scan.kind) {
+            'land' => l10n.landRecord,
+            'certificate' => l10n.certificate,
+            'id' => l10n.idCard,
+            _ => l10n.document,
+          };
+    final now = DateTime.now();
+    final created = entry.date;
+    final isToday =
+        created.year == now.year &&
+        created.month == now.month &&
+        created.day == now.day;
+    final dateText = isToday
+        ? l10n.today
+        : localizeDigits(
+            DateFormat.MMMd(locale.toLanguageTag()).format(created),
+            locale,
+          );
+    return '$kindLabel, $dateText';
+  }
 }
 
-class _DashboardHome extends ConsumerWidget {
-  const _DashboardHome();
+class _ScanShortcut {
+  const _ScanShortcut({
+    required this.label,
+    required this.route,
+    this.paperKind,
+    this.isTranslate = false,
+  });
+
+  final String label;
+  final String route;
+  final RosidPaperKind? paperKind;
+  final bool isTranslate;
+}
+
+class _ScanShortcutTile extends StatelessWidget {
+  const _ScanShortcutTile({required this.shortcut});
+
+  final _ScanShortcut shortcut;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final summary = ref.watch(dashboardSummaryProvider);
-    return summary.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, stack) => Center(child: Text(context.l10n.loadFailed)),
-      data: (value) => RefreshIndicator(
-        onRefresh: () => ref.refresh(dashboardSummaryProvider.future),
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+  Widget build(BuildContext context) {
+    final c = RosidColors.of(context);
+    return InkWell(
+      onTap: () => context.push(shortcut.route),
+      borderRadius: BorderRadius.circular(RosidSizeTokens.radiusControl),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Card(
-              color: AppTheme.ink,
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      context.l10n.thisMonth,
-                      style: const TextStyle(color: Colors.white70),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      formatMoney(value.total, value.currency),
-                      style: Theme.of(context).textTheme.headlineLarge
-                          ?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700,
-                          ),
-                    ),
-                  ],
-                ),
+            SizedBox(
+              height: 76,
+              child: Center(
+                child: shortcut.isTranslate
+                    ? const _TranslateTileVisual()
+                    : RosidPaperThumbnail(
+                        kind: shortcut.paperKind!,
+                        width: 56,
+                        height: 72,
+                      ),
               ),
             ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    context.l10n.spendByCategory,
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                ),
-                TextButton.icon(
-                  onPressed: () => context.push('/export'),
-                  icon: const Icon(Icons.ios_share),
-                  label: Text(context.l10n.export),
-                ),
-              ],
-            ),
-            if (value.byCategory.isEmpty)
-              Text(context.l10n.noReceipts)
-            else
-              for (final entry in value.byCategory.entries)
-                _CategoryBar(
-                  name: entry.key,
-                  amount: entry.value,
-                  currency: value.currency,
-                  maximum: value.byCategory.values.reduce(
-                    (current, next) => current > next ? current : next,
-                  ),
-                ),
-            const SizedBox(height: 20),
-            Text(
-              context.l10n.recentReceipts,
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
             const SizedBox(height: 8),
-            if (value.recent.isEmpty)
-              Text(context.l10n.noReceipts)
-            else
-              for (final entry in value.recent) _RecentTile(entry: entry),
+            Text(
+              shortcut.label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: RosidTextTokens.uiLabel.copyWith(color: c.inkPrimary),
+            ),
           ],
         ),
       ),
@@ -132,36 +303,134 @@ class _DashboardHome extends ConsumerWidget {
   }
 }
 
-class _CategoryBar extends StatelessWidget {
-  const _CategoryBar({
-    required this.name,
-    required this.amount,
-    required this.currency,
-    required this.maximum,
-  });
-
-  final String name;
-  final double amount;
-  final String currency;
-  final double maximum;
+class _TranslateTileVisual extends StatelessWidget {
+  const _TranslateTileVisual();
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 7),
+    final c = RosidColors.of(context);
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 34,
+          height: 46,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: c.paperSheet,
+            borderRadius: BorderRadius.circular(RosidSizeTokens.radiusPaper),
+            border: Border.all(color: c.paperLine),
+            boxShadow: RosidShadowTokens.elevPaper,
+          ),
+          child: Text(
+            context.l10n.scriptGlyphBn,
+            style: RosidTextTokens.docTitle.copyWith(color: c.paperInk),
+          ),
+        ),
+        const SizedBox(width: 4),
+        Container(
+          width: 34,
+          height: 46,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: c.paperSheet,
+            borderRadius: BorderRadius.circular(RosidSizeTokens.radiusPaper),
+            border: Border.all(color: c.accentBase, width: 1.5),
+            boxShadow: RosidShadowTokens.elevPaper,
+          ),
+          child: Text(
+            context.l10n.scriptGlyphEn,
+            style: RosidTextTokens.docTitle.copyWith(color: c.accentBase),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ResumeCard extends StatelessWidget {
+  const _ResumeCard({required this.entry, required this.locale});
+
+  final HistoryEntry entry;
+  final Locale locale;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = RosidColors.of(context);
+    final l10n = context.l10n;
+    final kind = entry.isReceipt
+        ? RosidPaperKind.receipt
+        : entry.scan.kind == 'land'
+        ? RosidPaperKind.land
+        : RosidPaperKind.letter;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: c.bgSheet,
+        borderRadius: BorderRadius.circular(RosidSizeTokens.radiusControl),
+        border: Border.all(color: c.lineSubtle),
+      ),
       child: Column(
         children: [
           Row(
             children: [
-              Expanded(child: Text(name)),
-              Text(formatMoney(amount, currency)),
+              RosidPaperThumbnail(kind: kind, width: 44, height: 56),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      entry.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: RosidTextTokens.uiHeading.copyWith(
+                        color: c.inkPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '${entry.isReceipt ? l10n.receipt : l10n.document}, ${l10n.scannedToday}',
+                      style: RosidTextTokens.uiCaption.copyWith(
+                        color: c.inkSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (entry.scan.checkCount > 0)
+                RosidPill(
+                  label: localizeDigits(
+                    l10n.wordsToCheckCount(entry.scan.checkCount),
+                    locale,
+                  ),
+                  tone: RosidTone.warn,
+                ),
             ],
           ),
-          const SizedBox(height: 4),
-          LinearProgressIndicator(
-            value: maximum <= 0 ? 0 : amount / maximum,
-            minHeight: 8,
-            borderRadius: BorderRadius.circular(8),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Expanded(
+                child: RosidButton(
+                  label: l10n.checkWords,
+                  kind: RosidButtonKind.tonal,
+                  onPressed: () =>
+                      context.push('/paper/${entry.scan.id}/check'),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: RosidButton(
+                  label: l10n.translate,
+                  kind: RosidButtonKind.outline,
+                  icon: RosidIcons.translate,
+                  onPressed: () =>
+                      context.push('/paper/${entry.scan.id}?tab=english'),
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -169,195 +438,274 @@ class _CategoryBar extends StatelessWidget {
   }
 }
 
-class _RecentTile extends StatelessWidget {
-  const _RecentTile({required this.entry});
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader({
+    required this.title,
+    required this.actionLabel,
+    required this.onAction,
+  });
 
-  final HistoryEntry entry;
+  final String title;
+  final String actionLabel;
+  final VoidCallback onAction;
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: ListTile(
-        onTap: () => context.push('/detail/${entry.scan.id}'),
-        leading: const CircleAvatar(child: Icon(Icons.receipt_long)),
-        title: Text(entry.title),
-        subtitle: Text(
-          DateFormat.yMMMd(Localizations.localeOf(context).toLanguageTag())
-              .format(entry.receipt!.dateOfPurchase),
+    final c = RosidColors.of(context);
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            title,
+            style: RosidTextTokens.uiHeading.copyWith(color: c.inkPrimary),
+          ),
         ),
-        trailing: Text(
-          formatMoney(entry.receipt!.total, entry.receipt!.currency),
+        TextButton(
+          onPressed: onAction,
+          style: TextButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            minimumSize: const Size(48, 40),
+          ),
+          child: Text(
+            actionLabel,
+            style: RosidTextTokens.uiLabel.copyWith(color: c.accentBase),
+          ),
         ),
-      ),
+      ],
     );
   }
 }
 
-class _DocumentsHome extends ConsumerWidget {
-  const _DocumentsHome();
+class _EmptyBundlesCard extends StatelessWidget {
+  const _EmptyBundlesCard({required this.onTap});
 
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final documents = ref.watch(homeDocumentsProvider);
-    return documents.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, stack) => Center(child: Text(context.l10n.loadFailed)),
-      data: (entries) {
-        final pinned = entries
-            .where((entry) => entry.document?.pinned ?? false)
-            .toList();
-        final recent = entries
-            .where((entry) => !(entry.document?.pinned ?? false))
-            .toList();
-        return CustomScrollView(
-          slivers: [
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 14),
-                child: TextField(
-                  readOnly: true,
-                  onTap: () => context.go('/history'),
-                  decoration: InputDecoration(
-                    hintText: context.l10n.search,
-                    prefixIcon: const Icon(Icons.search),
-                  ),
-                ),
-              ),
-            ),
-            if (entries.isEmpty)
-              SliverFillRemaining(
-                hasScrollBody: false,
-                child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(32),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.description_outlined, size: 72),
-                        const SizedBox(height: 16),
-                        Text(
-                          context.l10n.noDocuments,
-                          style: Theme.of(context).textTheme.titleLarge,
-                        ),
-                        Text(
-                          context.l10n.scanFirstDocument,
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              )
-            else ...[
-              if (pinned.isNotEmpty) ...[
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Text(
-                      context.l10n.pinnedDocuments,
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                  ),
-                ),
-                SliverToBoxAdapter(
-                  child: SizedBox(
-                    height: 220,
-                    child: ListView.separated(
-                      padding: const EdgeInsets.fromLTRB(12, 8, 12, 16),
-                      scrollDirection: Axis.horizontal,
-                      itemCount: pinned.length,
-                      separatorBuilder: (context, index) =>
-                          const SizedBox(width: 10),
-                      itemBuilder: (context, index) => SizedBox(
-                        width: 160,
-                        child: _DocumentCard(entry: pinned[index]),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-              if (recent.isNotEmpty) ...[
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Text(
-                      context.l10n.recentDocuments,
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                  ),
-                ),
-                SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(12, 8, 12, 100),
-                  sliver: SliverGrid.builder(
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          childAspectRatio: 0.78,
-                          mainAxisSpacing: 10,
-                          crossAxisSpacing: 10,
-                        ),
-                    itemCount: recent.length,
-                    itemBuilder: (context, index) =>
-                        _DocumentCard(entry: recent[index]),
-                  ),
-                ),
-              ],
-            ],
-          ],
-        );
-      },
-    );
-  }
-}
-
-class _DocumentCard extends StatelessWidget {
-  const _DocumentCard({required this.entry});
-
-  final HistoryEntry entry;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: () => context.push('/detail/${entry.scan.id}'),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    final c = RosidColors.of(context);
+    final l10n = context.l10n;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(RosidSizeTokens.radiusControl),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: c.bgSheet,
+          borderRadius: BorderRadius.circular(RosidSizeTokens.radiusControl),
+          border: Border.all(color: c.lineSubtle),
+        ),
+        child: Row(
           children: [
+            RosidIcon(RosidIcons.bundle, size: 22, color: c.accentBase),
+            const SizedBox(width: 12),
             Expanded(
-              child: Stack(
-                fit: StackFit.expand,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Image.file(
-                    File(entry.scan.thumbPath ?? entry.scan.imagePath),
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stack) =>
-                        const ColoredBox(color: AppTheme.mint),
-                  ),
-                  if (entry.document?.pinned ?? false)
-                    const Positioned(
-                      right: 8,
-                      top: 8,
-                      child: CircleAvatar(
-                        radius: 15,
-                        child: Icon(Icons.push_pin, size: 16),
-                      ),
+                  Text(
+                    l10n.startFromChecklist,
+                    style: RosidTextTokens.uiBodyStrong.copyWith(
+                      color: c.inkPrimary,
                     ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    l10n.startBundlePrompt,
+                    style: RosidTextTokens.uiCaption.copyWith(
+                      color: c.inkSecondary,
+                    ),
+                  ),
                 ],
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Text(
-                entry.title,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
-            ),
+            RosidIcon(RosidIcons.chevronRight, size: 18, color: c.inkTertiary),
           ],
         ),
       ),
     );
   }
 }
+
+class _BundleSummaryCard extends StatelessWidget {
+  const _BundleSummaryCard({
+    required this.summary,
+    required this.locale,
+    required this.onTap,
+  });
+
+  final _BundleSummary summary;
+  final Locale locale;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = RosidColors.of(context);
+    final l10n = context.l10n;
+    final total = summary.totalCount;
+    final ready = summary.readyCount;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(RosidSizeTokens.radiusControl),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: c.bgSheet,
+          borderRadius: BorderRadius.circular(RosidSizeTokens.radiusControl),
+          border: Border.all(color: c.lineSubtle),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              summary.bundle.title,
+              style: RosidTextTokens.uiHeading.copyWith(color: c.inkPrimary),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              localizeDigits(l10n.bundleProgress(ready, total), locale),
+              style: RosidTextTokens.uiCaption.copyWith(color: c.inkSecondary),
+            ),
+            if (total > 0) ...[
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  for (var i = 0; i < total.clamp(0, 12); i++) ...[
+                    if (i > 0) const SizedBox(width: 4),
+                    Expanded(
+                      child: Container(
+                        height: 6,
+                        decoration: BoxDecoration(
+                          color: i < ready ? c.goodBase : c.bgSunken,
+                          borderRadius: BorderRadius.circular(3),
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ],
+            if (summary.nextMissingTitle != null) ...[
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  RosidIcon(RosidIcons.alert, size: 16, color: c.warnBase),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      summary.nextMissingTitle!,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: RosidTextTokens.uiCaption.copyWith(
+                        color: c.inkPrimary,
+                      ),
+                    ),
+                  ),
+                  RosidIcon(
+                    RosidIcons.chevronRight,
+                    size: 16,
+                    color: c.inkTertiary,
+                  ),
+                ],
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _EmptyPapersCard extends StatelessWidget {
+  const _EmptyPapersCard({required this.onScan});
+
+  final VoidCallback onScan;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = RosidColors.of(context);
+    final l10n = context.l10n;
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: c.bgSheet,
+        borderRadius: BorderRadius.circular(RosidSizeTokens.radiusControl),
+        border: Border.all(color: c.lineSubtle),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.noPapersYet,
+            style: RosidTextTokens.uiHeading.copyWith(color: c.inkPrimary),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            l10n.scanFirstPaperPrompt,
+            style: RosidTextTokens.uiCaption.copyWith(color: c.inkSecondary),
+          ),
+          const SizedBox(height: 14),
+          RosidButton(
+            label: l10n.scan,
+            kind: RosidButtonKind.tonal,
+            icon: RosidIcons.scan,
+            onPressed: onScan,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BundleSummary {
+  const _BundleSummary({
+    required this.bundle,
+    required this.readyCount,
+    required this.totalCount,
+    this.nextMissingTitle,
+  });
+
+  final Bundle bundle;
+  final int readyCount;
+  final int totalCount;
+  final String? nextMissingTitle;
+}
+
+final _homePapersProvider = FutureProvider<List<HistoryEntry>>((ref) async {
+  final expenseEnabled = ref.watch(expenseTrackingEnabledProvider);
+  final repo = ref.watch(historyRepositoryProvider);
+  return repo.list(
+    HistoryQuery(
+      type: expenseEnabled ? HistoryTypeFilter.all : HistoryTypeFilter.document,
+    ),
+  );
+});
+
+final _homeBundlesProvider = FutureProvider<List<_BundleSummary>>((ref) async {
+  final db = ref.watch(databaseProvider);
+  final rows = await db.select(db.bundles).get();
+  final result = <_BundleSummary>[];
+  for (final bundle in rows) {
+    final items = await (db.select(
+      db.bundleItems,
+    )..where((row) => row.bundleId.equals(bundle.id))).get();
+    final ready = items.where((i) => i.linkedScanId != null).length;
+    String? nextMissing;
+    for (final item in items) {
+      if (item.linkedScanId == null) {
+        nextMissing = item.title;
+        break;
+      }
+    }
+    result.add(
+      _BundleSummary(
+        bundle: bundle,
+        readyCount: ready,
+        totalCount: items.length,
+        nextMissingTitle: nextMissing,
+      ),
+    );
+  }
+  return result;
+});

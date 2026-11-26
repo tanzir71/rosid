@@ -286,6 +286,18 @@ try {
                 Write-Log "Saved screenshot: $shotPath"
             }
         }
+        $flowTests = @(Get-ChildItem -Path (Join-Path $projectDir 'integration_test') -Filter 'flow_*_test.dart' -ErrorAction SilentlyContinue | Sort-Object Name)
+        if ($flowTests.Count -gt 0) {
+            Invoke-Step "Integration tests ($($flowTests.Count) flow file(s))" {
+                $serial = $script:emuSerial
+                foreach ($tf in $flowTests) {
+                    $rel = "integration_test/$($tf.Name)"
+                    Write-Log "Running integration test: $rel"
+                    Invoke-Checked $flutterBin @('--no-version-check', 'test', $rel, '-d', $serial, '--dart-define=ROSID_FAKE_CAMERA=true') | Out-Null
+                }
+                $metrics['Integration flows'] = "$($flowTests.Count) file(s) passed"
+            }
+        }
     }
 
     # Release level

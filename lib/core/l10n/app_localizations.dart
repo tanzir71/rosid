@@ -104,17 +104,203 @@ abstract class AppLocalizations {
   /// **'Rosid'**
   String get appName;
 
+  /// No description provided for @appWordmarkBn.
+  ///
+  /// In en, this message translates to:
+  /// **'রসিদ'**
+  String get appWordmarkBn;
+
   /// No description provided for @offlineTagline.
   ///
   /// In en, this message translates to:
   /// **'Private scanning, entirely on your device'**
   String get offlineTagline;
 
+  /// No description provided for @worksOfflineStamp.
+  ///
+  /// In en, this message translates to:
+  /// **'WORKS OFFLINE'**
+  String get worksOfflineStamp;
+
+  /// No description provided for @welcomeHeadlineBn.
+  ///
+  /// In en, this message translates to:
+  /// **'যেকোনো কাগজ স্ক্যান করুন, পড়ুন, ইংরেজিতে নিন'**
+  String get welcomeHeadlineBn;
+
+  /// No description provided for @welcomeSublineEn.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan any Bangla paper. Read it, fix it, and get it in English.'**
+  String get welcomeSublineEn;
+
+  /// No description provided for @welcomeBanglaSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'অ্যাপ বাংলায় ব্যবহার করুন'**
+  String get welcomeBanglaSubtitle;
+
+  /// No description provided for @welcomeEnglishSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the app in English'**
+  String get welcomeEnglishSubtitle;
+
+  /// No description provided for @welcomePrivacyLine.
+  ///
+  /// In en, this message translates to:
+  /// **'No account. No internet. Your papers stay on this phone.'**
+  String get welcomePrivacyLine;
+
+  /// No description provided for @welcomePurposeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What do you need Rosid for?'**
+  String get welcomePurposeTitle;
+
+  /// No description provided for @welcomePurposeHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick any. This only sets your home shortcuts, and you can change it later.'**
+  String get welcomePurposeHelp;
+
+  /// No description provided for @purposeVisaTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Visa and abroad paperwork'**
+  String get purposeVisaTitle;
+
+  /// No description provided for @purposeVisaSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Translate papers to English and bundle them for an application'**
+  String get purposeVisaSub;
+
+  /// No description provided for @purposeLandTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Land and property papers'**
+  String get purposeLandTitle;
+
+  /// No description provided for @purposeLandSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Deeds, khatian, mutation and land tax receipts'**
+  String get purposeLandSub;
+
+  /// No description provided for @purposeReceiptsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipts and spending'**
+  String get purposeReceiptsTitle;
+
+  /// No description provided for @purposeReceiptsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep receipts and see what you spend each month'**
+  String get purposeReceiptsSub;
+
+  /// No description provided for @purposeStudyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Study notes and handouts'**
+  String get purposeStudyTitle;
+
+  /// No description provided for @purposeStudySub.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn pages into text you can edit'**
+  String get purposeStudySub;
+
+  /// No description provided for @purposeOfficeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Office and shop paperwork'**
+  String get purposeOfficeTitle;
+
+  /// No description provided for @purposeOfficeSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Invoices, licences and letters'**
+  String get purposeOfficeSub;
+
+  /// No description provided for @purposeFamilyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Family records'**
+  String get purposeFamilyTitle;
+
+  /// No description provided for @purposeFamilySub.
+  ///
+  /// In en, this message translates to:
+  /// **'IDs, certificates, prescriptions and bills'**
+  String get purposeFamilySub;
+
+  /// No description provided for @welcomeCameraTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow the camera to scan'**
+  String get welcomeCameraTitle;
+
+  /// No description provided for @welcomeCameraBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Rosid uses the camera only while you scan. Pictures are kept inside the app, not in your gallery.'**
+  String get welcomeCameraBody;
+
+  /// No description provided for @welcomeAssuranceOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Rosid has no internet permission, so it cannot upload anything.'**
+  String get welcomeAssuranceOffline;
+
+  /// No description provided for @welcomeAssuranceLock.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock the app with your fingerprint or a PIN.'**
+  String get welcomeAssuranceLock;
+
+  /// No description provided for @welcomeAssuranceBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Back up to a file you keep, such as a memory card or pen drive.'**
+  String get welcomeAssuranceBackup;
+
+  /// No description provided for @allowCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow camera'**
+  String get allowCamera;
+
+  /// No description provided for @notNowImportPhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now, import photos instead'**
+  String get notNowImportPhotos;
+
   /// No description provided for @home.
   ///
   /// In en, this message translates to:
   /// **'Home'**
   String get home;
+
+  /// No description provided for @library.
+  ///
+  /// In en, this message translates to:
+  /// **'Library'**
+  String get library;
+
+  /// No description provided for @bundles.
+  ///
+  /// In en, this message translates to:
+  /// **'Bundles'**
+  String get bundles;
+
+  /// No description provided for @expenses.
+  ///
+  /// In en, this message translates to:
+  /// **'Expenses'**
+  String get expenses;
 
   /// No description provided for @history.
   ///
@@ -134,10 +320,94 @@ abstract class AppLocalizations {
   /// **'Scan'**
   String get scan;
 
+  /// No description provided for @whatAreYouScanning.
+  ///
+  /// In en, this message translates to:
+  /// **'What are you scanning?'**
+  String get whatAreYouScanning;
+
+  /// No description provided for @idCard.
+  ///
+  /// In en, this message translates to:
+  /// **'ID card'**
+  String get idCard;
+
+  /// No description provided for @translate.
+  ///
+  /// In en, this message translates to:
+  /// **'Translate'**
+  String get translate;
+
+  /// No description provided for @pickUpWhereYouLeftOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick up where you left off'**
+  String get pickUpWhereYouLeftOff;
+
+  /// No description provided for @checkWords.
+  ///
+  /// In en, this message translates to:
+  /// **'Check words'**
+  String get checkWords;
+
+  /// No description provided for @wordsToCheckCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 word to check} other{{count} words to check}}'**
+  String wordsToCheckCount(int count);
+
+  /// No description provided for @seeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'See all'**
+  String get seeAll;
+
+  /// No description provided for @recent.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent'**
+  String get recent;
+
+  /// No description provided for @noPapersYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No papers yet'**
+  String get noPapersYet;
+
+  /// No description provided for @scanFirstPaperPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan a document, ID card or receipt to keep it on this phone.'**
+  String get scanFirstPaperPrompt;
+
+  /// No description provided for @noBundlesYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No bundles yet'**
+  String get noBundlesYet;
+
+  /// No description provided for @startBundlePrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Collect papers against a checklist for a visa, land record or bank loan.'**
+  String get startBundlePrompt;
+
+  /// No description provided for @startFromChecklist.
+  ///
+  /// In en, this message translates to:
+  /// **'Start from a checklist'**
+  String get startFromChecklist;
+
+  /// No description provided for @bundleProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{ready} of {total} papers ready'**
+  String bundleProgress(int ready, int total);
+
   /// No description provided for @search.
   ///
   /// In en, this message translates to:
-  /// **'Search documents and receipts'**
+  /// **'Search inside your papers'**
   String get search;
 
   /// No description provided for @documents.
@@ -145,6 +415,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Documents'**
   String get documents;
+
+  /// No description provided for @ids.
+  ///
+  /// In en, this message translates to:
+  /// **'IDs'**
+  String get ids;
+
+  /// No description provided for @receipts.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipts'**
+  String get receipts;
+
+  /// No description provided for @land.
+  ///
+  /// In en, this message translates to:
+  /// **'Land'**
+  String get land;
 
   /// No description provided for @recentDocuments.
   ///
@@ -176,6 +464,12 @@ abstract class AppLocalizations {
   /// **'This month'**
   String get thisMonth;
 
+  /// No description provided for @spentThisMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Spent this month'**
+  String get spentThisMonth;
+
   /// No description provided for @recentReceipts.
   ///
   /// In en, this message translates to:
@@ -188,16 +482,22 @@ abstract class AppLocalizations {
   /// **'No receipts yet'**
   String get noReceipts;
 
+  /// No description provided for @noReceiptsThisMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'No receipts this month. Scan a receipt to see your spending by category.'**
+  String get noReceiptsThisMonth;
+
   /// No description provided for @expenseTracking.
   ///
   /// In en, this message translates to:
-  /// **'Expense tracking'**
+  /// **'Track spending from receipts'**
   String get expenseTracking;
 
   /// No description provided for @expenseTrackingDescription.
   ///
   /// In en, this message translates to:
-  /// **'Show receipt scanning, dashboard, categories, and CSV export.'**
+  /// **'Show receipt scanning, month view, categories, and CSV export.'**
   String get expenseTrackingDescription;
 
   /// No description provided for @receipt.
@@ -212,6 +512,18 @@ abstract class AppLocalizations {
   /// **'Document'**
   String get document;
 
+  /// No description provided for @landRecord.
+  ///
+  /// In en, this message translates to:
+  /// **'Land record'**
+  String get landRecord;
+
+  /// No description provided for @certificate.
+  ///
+  /// In en, this message translates to:
+  /// **'Certificate'**
+  String get certificate;
+
   /// No description provided for @capture.
   ///
   /// In en, this message translates to:
@@ -223,6 +535,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Gallery'**
   String get gallery;
+
+  /// No description provided for @importPhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'Import'**
+  String get importPhotos;
 
   /// No description provided for @flash.
   ///
@@ -245,7 +563,7 @@ abstract class AppLocalizations {
   /// No description provided for @cropEnhance.
   ///
   /// In en, this message translates to:
-  /// **'Crop & enhance'**
+  /// **'Adjust page'**
   String get cropEnhance;
 
   /// No description provided for @original.
@@ -257,8 +575,20 @@ abstract class AppLocalizations {
   /// No description provided for @enhanced.
   ///
   /// In en, this message translates to:
-  /// **'Enhanced'**
+  /// **'Auto'**
   String get enhanced;
+
+  /// No description provided for @grey.
+  ///
+  /// In en, this message translates to:
+  /// **'Grey'**
+  String get grey;
+
+  /// No description provided for @blackAndWhite.
+  ///
+  /// In en, this message translates to:
+  /// **'Black and white'**
+  String get blackAndWhite;
 
   /// No description provided for @rotate.
   ///
@@ -275,7 +605,7 @@ abstract class AppLocalizations {
   /// No description provided for @reviewReceipt.
   ///
   /// In en, this message translates to:
-  /// **'Review receipt'**
+  /// **'Check receipt'**
   String get reviewReceipt;
 
   /// No description provided for @reviewDocument.
@@ -287,13 +617,13 @@ abstract class AppLocalizations {
   /// No description provided for @merchant.
   ///
   /// In en, this message translates to:
-  /// **'Merchant'**
+  /// **'Shop'**
   String get merchant;
 
   /// No description provided for @purchaseDate.
   ///
   /// In en, this message translates to:
-  /// **'Purchase date'**
+  /// **'Date'**
   String get purchaseDate;
 
   /// No description provided for @total.
@@ -305,13 +635,13 @@ abstract class AppLocalizations {
   /// No description provided for @tax.
   ///
   /// In en, this message translates to:
-  /// **'Tax'**
+  /// **'VAT'**
   String get tax;
 
   /// No description provided for @paymentMethod.
   ///
   /// In en, this message translates to:
-  /// **'Payment method'**
+  /// **'Paid with'**
   String get paymentMethod;
 
   /// No description provided for @category.
@@ -323,7 +653,7 @@ abstract class AppLocalizations {
   /// No description provided for @lineItems.
   ///
   /// In en, this message translates to:
-  /// **'Line items'**
+  /// **'Items'**
   String get lineItems;
 
   /// No description provided for @notes.
@@ -343,6 +673,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Text'**
   String get body;
+
+  /// No description provided for @englishTab.
+  ///
+  /// In en, this message translates to:
+  /// **'English'**
+  String get englishTab;
+
+  /// No description provided for @scanTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan'**
+  String get scanTab;
 
   /// No description provided for @tags.
   ///
@@ -365,7 +707,7 @@ abstract class AppLocalizations {
   /// No description provided for @verifyHandwriting.
   ///
   /// In en, this message translates to:
-  /// **'Handwriting detected — please verify the text.'**
+  /// **'Part of this page is handwritten. Check uncertain words against the photo.'**
   String get verifyHandwriting;
 
   /// No description provided for @save.
@@ -407,13 +749,13 @@ abstract class AppLocalizations {
   /// No description provided for @exportCsv.
   ///
   /// In en, this message translates to:
-  /// **'Export expenses as CSV'**
+  /// **'Export CSV'**
   String get exportCsv;
 
   /// No description provided for @exportPdf.
   ///
   /// In en, this message translates to:
-  /// **'Share document as PDF'**
+  /// **'Export PDF'**
   String get exportPdf;
 
   /// No description provided for @filter.
@@ -431,8 +773,116 @@ abstract class AppLocalizations {
   /// No description provided for @language.
   ///
   /// In en, this message translates to:
-  /// **'Language'**
+  /// **'App language'**
   String get language;
+
+  /// No description provided for @languageAndReading.
+  ///
+  /// In en, this message translates to:
+  /// **'Language and reading'**
+  String get languageAndReading;
+
+  /// No description provided for @whatYouUseRosidFor.
+  ///
+  /// In en, this message translates to:
+  /// **'What you use Rosid for'**
+  String get whatYouUseRosidFor;
+
+  /// No description provided for @names.
+  ///
+  /// In en, this message translates to:
+  /// **'Names'**
+  String get names;
+
+  /// No description provided for @namesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No saved names yet'**
+  String get namesEmpty;
+
+  /// No description provided for @wordChoices.
+  ///
+  /// In en, this message translates to:
+  /// **'Word choices'**
+  String get wordChoices;
+
+  /// No description provided for @wordChoicesSub.
+  ///
+  /// In en, this message translates to:
+  /// **'How legal and land terms appear in English'**
+  String get wordChoicesSub;
+
+  /// No description provided for @safety.
+  ///
+  /// In en, this message translates to:
+  /// **'Safety'**
+  String get safety;
+
+  /// No description provided for @appLock.
+  ///
+  /// In en, this message translates to:
+  /// **'App lock'**
+  String get appLock;
+
+  /// No description provided for @appLockSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Fingerprint or PIN each time you open Rosid'**
+  String get appLockSub;
+
+  /// No description provided for @backUpAndMove.
+  ///
+  /// In en, this message translates to:
+  /// **'Back up and move'**
+  String get backUpAndMove;
+
+  /// No description provided for @backUpNeverSub.
+  ///
+  /// In en, this message translates to:
+  /// **'No backup yet. Keep a locked copy you control.'**
+  String get backUpNeverSub;
+
+  /// No description provided for @worksOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Works offline'**
+  String get worksOffline;
+
+  /// No description provided for @worksOfflineSub.
+  ///
+  /// In en, this message translates to:
+  /// **'No internet permission. Check under Android settings, Apps, Rosid'**
+  String get worksOfflineSub;
+
+  /// No description provided for @currency.
+  ///
+  /// In en, this message translates to:
+  /// **'Currency'**
+  String get currency;
+
+  /// No description provided for @currencyTaka.
+  ///
+  /// In en, this message translates to:
+  /// **'৳ Bangladeshi taka'**
+  String get currencyTaka;
+
+  /// No description provided for @thisPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'This phone'**
+  String get thisPhone;
+
+  /// No description provided for @storage.
+  ///
+  /// In en, this message translates to:
+  /// **'Storage'**
+  String get storage;
+
+  /// No description provided for @storageOnDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'Stored privately on this phone'**
+  String get storageOnDevice;
 
   /// No description provided for @english.
   ///
@@ -449,7 +899,7 @@ abstract class AppLocalizations {
   /// No description provided for @defaultCurrency.
   ///
   /// In en, this message translates to:
-  /// **'Default currency'**
+  /// **'Currency'**
   String get defaultCurrency;
 
   /// No description provided for @categories.
@@ -461,13 +911,13 @@ abstract class AppLocalizations {
   /// No description provided for @deleteAllData.
   ///
   /// In en, this message translates to:
-  /// **'Delete all data'**
+  /// **'Delete everything'**
   String get deleteAllData;
 
   /// No description provided for @deleteAllDataDescription.
   ///
   /// In en, this message translates to:
-  /// **'Permanently removes every scan and image from this device.'**
+  /// **'Permanently removes every paper, image and bundle from this phone.'**
   String get deleteAllDataDescription;
 
   /// No description provided for @cancel.
@@ -479,19 +929,19 @@ abstract class AppLocalizations {
   /// No description provided for @confirmDelete.
   ///
   /// In en, this message translates to:
-  /// **'Delete permanently'**
+  /// **'Delete everything'**
   String get confirmDelete;
 
   /// No description provided for @privacyTitle.
   ///
   /// In en, this message translates to:
-  /// **'100% offline'**
+  /// **'Works offline'**
   String get privacyTitle;
 
   /// No description provided for @privacyDescription.
   ///
   /// In en, this message translates to:
-  /// **'Your documents never leave your phone. Rosid has no account, analytics, or network access.'**
+  /// **'No internet permission. Your papers stay on this phone.'**
   String get privacyDescription;
 
   /// No description provided for @about.
@@ -521,19 +971,19 @@ abstract class AppLocalizations {
   /// No description provided for @cameraUnavailable.
   ///
   /// In en, this message translates to:
-  /// **'Camera is unavailable. You can import an image from the gallery.'**
+  /// **'Camera is unavailable. Import a photo from your phone instead.'**
   String get cameraUnavailable;
 
   /// No description provided for @cameraPermission.
   ///
   /// In en, this message translates to:
-  /// **'Camera access is needed to scan.'**
+  /// **'Camera access is needed to scan. You can also import photos.'**
   String get cameraPermission;
 
   /// No description provided for @processing.
   ///
   /// In en, this message translates to:
-  /// **'Processing on your device…'**
+  /// **'Reading your paper on this phone…'**
   String get processing;
 
   /// No description provided for @addPage.
@@ -563,7 +1013,7 @@ abstract class AppLocalizations {
   /// No description provided for @noResults.
   ///
   /// In en, this message translates to:
-  /// **'No matching scans'**
+  /// **'No matching papers'**
   String get noResults;
 
   /// No description provided for @currencyBdt.
@@ -605,49 +1055,49 @@ abstract class AppLocalizations {
   /// No description provided for @monthlySpend.
   ///
   /// In en, this message translates to:
-  /// **'Monthly spend'**
+  /// **'Spent this month'**
   String get monthlySpend;
 
   /// No description provided for @spendByCategory.
   ///
   /// In en, this message translates to:
-  /// **'Spend by category'**
+  /// **'Spending by category'**
   String get spendByCategory;
 
   /// No description provided for @untitledDocument.
   ///
   /// In en, this message translates to:
-  /// **'Untitled document'**
+  /// **'Untitled paper'**
   String get untitledDocument;
 
   /// No description provided for @documentTitleRequired.
   ///
   /// In en, this message translates to:
-  /// **'A document title is required.'**
+  /// **'Enter a title for this paper.'**
   String get documentTitleRequired;
 
   /// No description provided for @receiptFieldsRequired.
   ///
   /// In en, this message translates to:
-  /// **'Merchant, date, and total are required.'**
+  /// **'Enter the shop name, date and total.'**
   String get receiptFieldsRequired;
 
   /// No description provided for @validTotalAndTaxRequired.
   ///
   /// In en, this message translates to:
-  /// **'Enter valid non-negative total and tax amounts.'**
+  /// **'Enter valid non-negative total and VAT amounts.'**
   String get validTotalAndTaxRequired;
 
   /// No description provided for @validTaxRequired.
   ///
   /// In en, this message translates to:
-  /// **'Enter a valid tax amount.'**
+  /// **'Enter a valid VAT amount.'**
   String get validTaxRequired;
 
   /// No description provided for @validLineItemRequired.
   ///
   /// In en, this message translates to:
-  /// **'Each line item needs a valid name, quantity, and amount.'**
+  /// **'Each item needs a name, quantity and amount.'**
   String get validLineItemRequired;
 
   /// No description provided for @quantity.
@@ -665,32 +1115,164 @@ abstract class AppLocalizations {
   /// No description provided for @lowOcrConfidence.
   ///
   /// In en, this message translates to:
-  /// **'Low OCR confidence'**
+  /// **'Check this word'**
   String get lowOcrConfidence;
 
   /// No description provided for @loadFailed.
   ///
   /// In en, this message translates to:
-  /// **'Could not load your saved data. Please try again.'**
+  /// **'Could not open your saved papers. Try again.'**
   String get loadFailed;
 
   /// No description provided for @saveFailed.
   ///
   /// In en, this message translates to:
-  /// **'Could not save your changes. Please try again.'**
+  /// **'Could not save your changes. Check free storage and try again.'**
   String get saveFailed;
 
   /// No description provided for @processingFailed.
   ///
   /// In en, this message translates to:
-  /// **'Could not process this scan. Please try again.'**
+  /// **'Could not read this page. Try a clearer photo or adjust the corners.'**
   String get processingFailed;
+
+  /// No description provided for @captureFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not take or import the photo. Try again.'**
+  String get captureFailed;
+
+  /// No description provided for @exportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not create the file. Check free storage and try again.'**
+  String get exportFailed;
+
+  /// No description provided for @deleteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not delete the data. Close other screens and try again.'**
+  String get deleteFailed;
 
   /// No description provided for @offline.
   ///
   /// In en, this message translates to:
   /// **'Offline'**
   String get offline;
+
+  /// No description provided for @scannedToday.
+  ///
+  /// In en, this message translates to:
+  /// **'scanned today'**
+  String get scannedToday;
+
+  /// No description provided for @today.
+  ///
+  /// In en, this message translates to:
+  /// **'today'**
+  String get today;
+
+  /// No description provided for @themeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
+  String get themeLabel;
+
+  /// No description provided for @themeSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow phone'**
+  String get themeSystem;
+
+  /// No description provided for @themeLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get themeLight;
+
+  /// No description provided for @themeDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get themeDark;
+
+  /// No description provided for @englishDraftPending.
+  ///
+  /// In en, this message translates to:
+  /// **'English draft will appear here once generated for this paper.'**
+  String get englishDraftPending;
+
+  /// No description provided for @bundleChecklistComing.
+  ///
+  /// In en, this message translates to:
+  /// **'Add papers from your library or scan new ones into this bundle.'**
+  String get bundleChecklistComing;
+
+  /// No description provided for @backupPageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your papers live only on this phone'**
+  String get backupPageTitle;
+
+  /// No description provided for @backupPageBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Because Rosid never goes online, your papers are not copied to any server. Make a password-locked backup file whenever you want to keep a copy or move phones.'**
+  String get backupPageBody;
+
+  /// No description provided for @makeBackupFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Make a backup file'**
+  String get makeBackupFile;
+
+  /// No description provided for @restoreBackupFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Bring papers from a backup file'**
+  String get restoreBackupFile;
+
+  /// No description provided for @checkWordsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No words need checking on this paper.'**
+  String get checkWordsEmpty;
+
+  /// No description provided for @readingOnPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading your paper'**
+  String get readingOnPhone;
+
+  /// No description provided for @happensOnPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'This happens on your phone. Nothing is uploaded.'**
+  String get happensOnPhone;
+
+  /// No description provided for @coverDetailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cover a detail'**
+  String get coverDetailTitle;
+
+  /// No description provided for @coverDetailHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag over anything you want to hide.'**
+  String get coverDetailHint;
+
+  /// No description provided for @scriptGlyphBn.
+  ///
+  /// In en, this message translates to:
+  /// **'অ'**
+  String get scriptGlyphBn;
+
+  /// No description provided for @scriptGlyphEn.
+  ///
+  /// In en, this message translates to:
+  /// **'A'**
+  String get scriptGlyphEn;
 }
 
 class _AppLocalizationsDelegate
