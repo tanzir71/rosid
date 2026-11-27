@@ -16,6 +16,7 @@ $allowedPermissions = [System.Collections.Generic.HashSet[string]]::new(
 )
 [void]$allowedPermissions.Add('android.permission.CAMERA')
 [void]$allowedPermissions.Add('android.permission.READ_MEDIA_IMAGES')
+[void]$allowedPermissions.Add('android.permission.USE_BIOMETRIC')
 [void]$allowedPermissions.Add('app.rosid.rosid.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION')
 
 function Read-XmlDocument {

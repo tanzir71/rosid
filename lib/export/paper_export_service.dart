@@ -72,6 +72,14 @@ class PlatformFileService {
       return false;
     }
   }
+
+  Future<String?> pickFile() async {
+    try {
+      return await _channel.invokeMethod<String>('pickFile');
+    } on Object {
+      return null;
+    }
+  }
 }
 
 final platformFileServiceProvider = Provider<PlatformFileService>(

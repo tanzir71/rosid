@@ -40,6 +40,7 @@ class AppSettings {
     this.termDefaultForm = 'both',
     this.themeMode = ThemeMode.system,
     this.lastBackupAt,
+    this.lastBackupPaperCount = 0,
   });
 
   final String languageCode;
@@ -52,6 +53,7 @@ class AppSettings {
   final String termDefaultForm;
   final ThemeMode themeMode;
   final DateTime? lastBackupAt;
+  final int lastBackupPaperCount;
 
   Locale get locale => Locale(languageCode);
 
@@ -66,6 +68,7 @@ class AppSettings {
     String? termDefaultForm,
     ThemeMode? themeMode,
     DateTime? lastBackupAt,
+    int? lastBackupPaperCount,
     bool clearLastBackup = false,
   }) {
     return AppSettings(
@@ -81,6 +84,9 @@ class AppSettings {
       termDefaultForm: termDefaultForm ?? this.termDefaultForm,
       themeMode: themeMode ?? this.themeMode,
       lastBackupAt: clearLastBackup ? null : lastBackupAt ?? this.lastBackupAt,
+      lastBackupPaperCount: clearLastBackup
+          ? 0
+          : lastBackupPaperCount ?? this.lastBackupPaperCount,
     );
   }
 }
@@ -107,6 +113,7 @@ class AppSettingsController extends Notifier<AppSettings> {
   static const _termDefaultKey = 'term_default_form';
   static const _themeModeKey = 'theme_mode';
   static const _lastBackupKey = 'last_backup_at';
+  static const _lastBackupCountKey = 'last_backup_paper_count';
 
   SharedPreferences get _preferences => ref.read(sharedPreferencesProvider);
 
@@ -135,6 +142,7 @@ class AppSettingsController extends Notifier<AppSettings> {
       lastBackupAt: lastBackupMs == null
           ? null
           : DateTime.fromMillisecondsSinceEpoch(lastBackupMs),
+      lastBackupPaperCount: _preferences.getInt(_lastBackupCountKey) ?? 0,
     );
   }
 
@@ -197,9 +205,19 @@ class AppSettingsController extends Notifier<AppSettings> {
     await _preferences.setString(_themeModeKey, mode.name);
   }
 
-  Future<void> recordBackup(DateTime timestamp) async {
-    state = state.copyWith(lastBackupAt: timestamp);
+  Future<void> recordBackup(DateTime timestamp, {int paperCount = 0}) async {
+    state = state.copyWith(
+      lastBackupAt: timestamp,
+      lastBackupPaperCount: paperCount,
+    );
     await _preferences.setInt(_lastBackupKey, timestamp.millisecondsSinceEpoch);
+    await _preferences.setInt(_lastBackupCountKey, paperCount);
+  }
+
+  Future<void> clearBackupHistory() async {
+    state = state.copyWith(clearLastBackup: true);
+    await _preferences.remove(_lastBackupKey);
+    await _preferences.remove(_lastBackupCountKey);
   }
 }
 

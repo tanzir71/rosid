@@ -133,6 +133,9 @@ class _PaperScreenState extends ConsumerState<PaperScreen> {
                   if (action == 'kind') _showKindPicker(context, paper);
                   if (action == 'edit') _showFullTextEditor(context, paper);
                   if (action == 'renew') _pickRenewByDate(context, paper);
+                  if (action == 'receipt') {
+                    context.push('/paper/${paper.scan.id}/receipt');
+                  }
                 },
                 itemBuilder: (_) => [
                   PopupMenuItem(
@@ -144,6 +147,11 @@ class _PaperScreenState extends ConsumerState<PaperScreen> {
                     value: 'renew',
                     child: Text(l10n.setRenewByDate),
                   ),
+                  if (paper.paperKind == PaperKind.receipt)
+                    PopupMenuItem(
+                      value: 'receipt',
+                      child: Text(l10n.checkReceiptTitle),
+                    ),
                 ],
               ),
             ],

@@ -485,7 +485,7 @@ abstract class AppLocalizations {
   /// No description provided for @noReceiptsThisMonth.
   ///
   /// In en, this message translates to:
-  /// **'No receipts this month. Scan a receipt to see your spending by category.'**
+  /// **'No receipts this month'**
   String get noReceiptsThisMonth;
 
   /// No description provided for @expenseTracking.
@@ -2311,6 +2311,384 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Watermark every page'**
   String get watermarkEveryPage;
+
+  /// No description provided for @lessThanMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} less than {month}'**
+  String lessThanMonth(String amount, String month);
+
+  /// No description provided for @moreThanMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} more than {month}'**
+  String moreThanMonth(String amount, String month);
+
+  /// No description provided for @sameAsMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Same as {month}'**
+  String sameAsMonth(String month);
+
+  /// No description provided for @receiptsThisMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipts this month'**
+  String get receiptsThisMonth;
+
+  /// No description provided for @exportCsvAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Export CSV'**
+  String get exportCsvAction;
+
+  /// No description provided for @noReceiptsThisMonthSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan a receipt to track monthly spending.'**
+  String get noReceiptsThisMonthSub;
+
+  /// No description provided for @checkReceiptTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Check receipt'**
+  String get checkReceiptTitle;
+
+  /// No description provided for @itemsAddUpToTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 item adds up to the total} other{{count} items add up to the total}}'**
+  String itemsAddUpToTotal(int count);
+
+  /// No description provided for @itemsDoNotAddUp.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 item adds up to {sum}, not the total} other{{count} items add up to {sum}, not the total}}'**
+  String itemsDoNotAddUp(int count, String sum);
+
+  /// No description provided for @tapFieldToSeeSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a field to see where it was read on the receipt.'**
+  String get tapFieldToSeeSource;
+
+  /// No description provided for @shopLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Shop'**
+  String get shopLabel;
+
+  /// No description provided for @dateFieldLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get dateFieldLabel;
+
+  /// No description provided for @vatLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'VAT'**
+  String get vatLabel;
+
+  /// No description provided for @paidWithLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid with'**
+  String get paidWithLabel;
+
+  /// No description provided for @paidCash.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash'**
+  String get paidCash;
+
+  /// No description provided for @paidCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Card'**
+  String get paidCard;
+
+  /// No description provided for @paidBkash.
+  ///
+  /// In en, this message translates to:
+  /// **'bKash'**
+  String get paidBkash;
+
+  /// No description provided for @paidNagad.
+  ///
+  /// In en, this message translates to:
+  /// **'Nagad'**
+  String get paidNagad;
+
+  /// No description provided for @paidRocket.
+  ///
+  /// In en, this message translates to:
+  /// **'Rocket'**
+  String get paidRocket;
+
+  /// No description provided for @itemsCountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 item} other{{count} items}}'**
+  String itemsCountLabel(int count);
+
+  /// No description provided for @andMoreItems.
+  ///
+  /// In en, this message translates to:
+  /// **'{preview} and {count} more'**
+  String andMoreItems(String preview, int count);
+
+  /// No description provided for @saveReceiptAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Save receipt'**
+  String get saveReceiptAction;
+
+  /// No description provided for @csvExported.
+  ///
+  /// In en, this message translates to:
+  /// **'CSV exported: {fileName}'**
+  String csvExported(String fileName);
+
+  /// No description provided for @categoriesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Categories'**
+  String get categoriesLabel;
+
+  /// No description provided for @categoriesSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit receipt categories'**
+  String get categoriesSub;
+
+  /// No description provided for @addCategoryAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Add category'**
+  String get addCategoryAction;
+
+  /// No description provided for @categoryNameEnHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Category name (English)'**
+  String get categoryNameEnHint;
+
+  /// No description provided for @categoryNameBnHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Category name (Bangla)'**
+  String get categoryNameBnHint;
+
+  /// No description provided for @backupHeroTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your papers live only on this phone'**
+  String get backupHeroTitle;
+
+  /// No description provided for @backupHeroBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A backup is one locked file with all your papers, their text and your settings. Keep it on a memory card, a pen drive or another phone.'**
+  String get backupHeroBody;
+
+  /// No description provided for @lastBackupLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Last backup'**
+  String get lastBackupLabel;
+
+  /// No description provided for @lastBackupNever.
+  ///
+  /// In en, this message translates to:
+  /// **'Never'**
+  String get lastBackupNever;
+
+  /// No description provided for @lastBackupSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{date}, {count, plural, =1{1 paper} other{{count} papers}}'**
+  String lastBackupSummary(String date, int count);
+
+  /// No description provided for @papersNotBackedUp.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 paper is not backed up yet} other{{count} papers are not backed up yet}}'**
+  String papersNotBackedUp(int count);
+
+  /// No description provided for @allPapersBackedUp.
+  ///
+  /// In en, this message translates to:
+  /// **'All papers are backed up'**
+  String get allPapersBackedUp;
+
+  /// No description provided for @lastBackupShortSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Last backup {date}. {count} papers not backed up'**
+  String lastBackupShortSub(String date, int count);
+
+  /// No description provided for @remindMeEveryMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Remind me every month'**
+  String get remindMeEveryMonth;
+
+  /// No description provided for @backupPasswordWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'You choose a password for the file. Without it nobody can open the backup, and Rosid cannot recover it for you.'**
+  String get backupPasswordWarning;
+
+  /// No description provided for @bringFromBackupFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Bring papers from a backup file'**
+  String get bringFromBackupFile;
+
+  /// No description provided for @backupReminderBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Time for a monthly backup. Your papers live only on this phone.'**
+  String get backupReminderBanner;
+
+  /// No description provided for @chooseBackupPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a backup password'**
+  String get chooseBackupPassword;
+
+  /// No description provided for @enterBackupPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter backup password'**
+  String get enterBackupPassword;
+
+  /// No description provided for @passwordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get passwordLabel;
+
+  /// No description provided for @confirmPasswordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm password'**
+  String get confirmPasswordLabel;
+
+  /// No description provided for @passwordTooShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Use at least 4 characters'**
+  String get passwordTooShort;
+
+  /// No description provided for @passwordsDoNotMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords do not match'**
+  String get passwordsDoNotMatch;
+
+  /// No description provided for @backupCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup saved'**
+  String get backupCreated;
+
+  /// No description provided for @backupRestored.
+  ///
+  /// In en, this message translates to:
+  /// **'Papers restored from backup'**
+  String get backupRestored;
+
+  /// No description provided for @backupWrongPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrong password. Your current papers were not changed.'**
+  String get backupWrongPassword;
+
+  /// No description provided for @backupDamagedFile.
+  ///
+  /// In en, this message translates to:
+  /// **'This backup file is damaged or not from Rosid. Your current papers were not changed.'**
+  String get backupDamagedFile;
+
+  /// No description provided for @backupFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not complete backup'**
+  String get backupFailed;
+
+  /// No description provided for @appLockTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock Rosid'**
+  String get appLockTitle;
+
+  /// No description provided for @appLockEnterPin.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your PIN'**
+  String get appLockEnterPin;
+
+  /// No description provided for @appLockWrongPin.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrong PIN. Try again.'**
+  String get appLockWrongPin;
+
+  /// No description provided for @appLockUseFingerprint.
+  ///
+  /// In en, this message translates to:
+  /// **'Use fingerprint'**
+  String get appLockUseFingerprint;
+
+  /// No description provided for @appLockSetPinTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set a PIN'**
+  String get appLockSetPinTitle;
+
+  /// No description provided for @appLockConfirmPinTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm your PIN'**
+  String get appLockConfirmPinTitle;
+
+  /// No description provided for @appLockPinMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'PINs did not match. Try again.'**
+  String get appLockPinMismatch;
+
+  /// No description provided for @appLockPinHint.
+  ///
+  /// In en, this message translates to:
+  /// **'4 to 6 digits'**
+  String get appLockPinHint;
+
+  /// No description provided for @appLockChangePin.
+  ///
+  /// In en, this message translates to:
+  /// **'Change PIN'**
+  String get appLockChangePin;
+
+  /// No description provided for @appLockEnabledSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Locked with fingerprint or PIN'**
+  String get appLockEnabledSub;
+
+  /// No description provided for @storageUsedMb.
+  ///
+  /// In en, this message translates to:
+  /// **'{size} on this phone'**
+  String storageUsedMb(String size);
+
+  /// No description provided for @namesPeoplePlacesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{people, plural, =1{1 person} other{{people} people}}, {places, plural, =1{1 place} other{{places} places}}'**
+  String namesPeoplePlacesCount(int people, int places);
 }
 
 class _AppLocalizationsDelegate

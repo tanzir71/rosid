@@ -23,4 +23,4 @@ Rosid bundles the following openly licensed fonts, models, and libraries inside 
 
 - **Flutter & Dart SDK, `material_ui`, `cupertino_ui`** — BSD-3-Clause.
 - **Drift / sqlite3** — MIT / Public Domain.
-- **Riverpod, go_router, flutter_svg, pdf, csv, share_plus, image, camera, image_picker** — MIT / BSD-3-Clause / Apache-2.0 (see `pubspec.lock` and each package's `LICENSE`).
+- **Riverpod, go_router, flutter_svg, pdf, archive, cryptography, local_auth, csv, share_plus, image, camera, image_picker** — MIT / BSD-3-Clause / Apache-2.0 (see `pubspec.lock` and each package's `LICENSE`).

@@ -2,12 +2,13 @@ package app.rosid.rosid
 
 import android.content.Intent
 import android.speech.tts.TextToSpeech
-import io.flutter.embedding.android.FlutterActivity
+import android.view.WindowManager
+import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import java.util.Locale
 
-class MainActivity : FlutterActivity() {
+class MainActivity : FlutterFragmentActivity() {
     private var tts: TextToSpeech? = null
     private var ttsReady = false
     private var translator: OfflineBergamotTranslator? = null
@@ -99,6 +100,27 @@ class MainActivity : FlutterActivity() {
                     "openFolder" -> {
                         val uri = call.argument<String>("uri") ?: ""
                         bridge.openFolder(uri, result)
+                    }
+                    "pickFile" -> {
+                        bridge.pickFile(result)
+                    }
+                    else -> result.notImplemented()
+                }
+            }
+
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "app.rosid.rosid/security")
+            .setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "setSecure" -> {
+                        val enabled = call.argument<Boolean>("enabled") ?: false
+                        runOnUiThread {
+                            if (enabled) {
+                                window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
+                            } else {
+                                window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
+                            }
+                        }
+                        result.success(true)
                     }
                     else -> result.notImplemented()
                 }

@@ -1,9 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:rosid/core/extensions/l10n_extension.dart';
 import 'package:rosid/core/settings/app_settings.dart';
-import 'package:rosid/core/theme/rosid_icons.dart';
 import 'package:rosid/core/widgets/rosid_navigation.dart';
 import 'package:rosid/data/repositories/history_repository.dart';
 import 'package:rosid/features/bundles/bundle_checklist_screen.dart';
@@ -17,6 +15,8 @@ import 'package:rosid/features/capture/scan_controller.dart';
 import 'package:rosid/features/crop/crop_enhance_screen.dart';
 import 'package:rosid/features/detail/detail_edit_screen.dart';
 import 'package:rosid/features/detail/detail_screen.dart';
+import 'package:rosid/features/expenses/check_receipt_screen.dart';
+import 'package:rosid/features/expenses/expenses_screen.dart';
 import 'package:rosid/features/export/cover_detail_screen.dart';
 import 'package:rosid/features/export/export_id_card_screen.dart';
 import 'package:rosid/features/export/export_preview_screen.dart';
@@ -29,10 +29,10 @@ import 'package:rosid/features/paper/check_words_screen.dart';
 import 'package:rosid/features/paper/paper_screen.dart';
 import 'package:rosid/features/review/document_review_screen.dart';
 import 'package:rosid/features/review/receipt_review_screen.dart';
+import 'package:rosid/features/safety/backup_screen.dart';
+import 'package:rosid/features/settings/categories_screen.dart';
 import 'package:rosid/features/settings/settings_screen.dart';
 import 'package:rosid/features/shared/app_shell.dart';
-import 'package:rosid/features/shell_views/v2_shell_screens.dart'
-    show ExpensesScreen, V2RouteShellScreen;
 import 'package:rosid/features/translation/name_book_screen.dart';
 import 'package:rosid/features/welcome/welcome_screens.dart';
 
@@ -207,7 +207,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/paper/:id/receipt',
-        builder: (context, state) => const ReceiptReviewScreen(),
+        builder: (context, state) =>
+            CheckReceiptScreen(scanId: state.pathParameters['id']!),
       ),
 
       // 05 Name book
@@ -240,11 +241,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/settings/backup',
-        builder: (context, state) => V2RouteShellScreen(
-          title: context.l10n.backUpAndMove,
-          body: context.l10n.backupPageBody,
-          icon: RosidIcons.backup,
-        ),
+        builder: (context, state) => const BackupScreen(),
+      ),
+      GoRoute(
+        path: '/settings/categories',
+        builder: (context, state) => const CategoriesScreen(),
       ),
 
       // Legacy v1 review/detail routes kept functional while M2–M8 replace them

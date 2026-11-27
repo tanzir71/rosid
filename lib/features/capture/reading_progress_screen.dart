@@ -1,21 +1,26 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:drift/drift.dart' show Value;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:rosid/core/extensions/l10n_extension.dart';
+import 'package:rosid/core/settings/app_settings.dart';
 import 'package:rosid/core/theme/app_theme.dart';
 import 'package:rosid/core/theme/rosid_icons.dart';
 import 'package:rosid/core/theme/tokens.g.dart';
 import 'package:rosid/core/utils/bangla_digits.dart';
 import 'package:rosid/core/widgets/rosid_controls.dart';
 import 'package:rosid/core/widgets/rosid_navigation.dart';
+import 'package:rosid/data/database/app_database.dart';
 import 'package:rosid/data/database/database_provider.dart';
 import 'package:rosid/data/repositories/record_repository.dart';
 import 'package:rosid/features/capture/scan_controller.dart';
+import 'package:rosid/features/expenses/expenses_repository.dart';
 import 'package:rosid/ocr/pipeline/reading_interfaces.dart';
 import 'package:rosid/ocr/pipeline/rosid_reading_pipeline.dart';
+import 'package:rosid/parsing/receipt_parser.dart';
 
 enum ReadingStepState { pending, active, done }
 
@@ -171,18 +176,77 @@ class _ReadingProgressScreenState extends ConsumerState<ReadingProgressScreen> {
             .split('\n')
             .map((l) => l.trim())
             .firstWhere((l) => l.isNotEmpty, orElse: () => '');
-        await ref
-            .read(recordRepositoryProvider)
-            .saveDocument(
-              scanId: scanId,
-              title: firstLine.isEmpty
-                  ? fallbackTitle
-                  : (firstLine.length > 60
-                        ? firstLine.substring(0, 60)
-                        : firstLine),
-              body: combinedText,
-              tags: const [],
-            );
+
+        final scanMode = ref.read(v2ScanProvider).mode;
+        final expensesOn = ref.read(expenseTrackingEnabledProvider);
+        final isReceiptScan = scanMode == V2ScanMode.receipt;
+
+        if (isReceiptScan) {
+          final parsed = const ReceiptParser().parse(combinedText);
+          await ref
+              .read(recordRepositoryProvider)
+              .saveReceipt(
+                scanId: scanId,
+                merchant: parsed.merchant.value,
+                date: parsed.date.value,
+                total: parsed.total.value ?? 0,
+                currency: 'BDT',
+                categoryId: parsed.categoryId.value ?? 'cat_other',
+                items: parsed.lineItems,
+                fieldConfidence: {
+                  'merchant': parsed.merchant.confidence,
+                  'date': parsed.date.confidence,
+                  'total': parsed.total.confidence,
+                },
+                tax: parsed.tax.value,
+                paymentMethod: parsed.paymentMethod.value,
+              );
+          await (db.update(db.scans)..where((s) => s.id.equals(scanId))).write(
+            const ScansCompanion(
+              type: Value('receipt'),
+              kind: Value('receipt'),
+            ),
+          );
+          ref
+            ..read(selectedExpenseMonthProvider.notifier)
+                .select(parsed.date.value)
+            ..invalidate(monthlyExpensesProvider);
+        } else {
+          await ref
+              .read(recordRepositoryProvider)
+              .saveDocument(
+                scanId: scanId,
+                title: firstLine.isEmpty
+                    ? fallbackTitle
+                    : (firstLine.length > 60
+                          ? firstLine.substring(0, 60)
+                          : firstLine),
+                body: combinedText,
+                tags: const [],
+              );
+        }
+
+        if (!mounted || _cancelToken.isCancelled) return;
+        setState(() {
+          _snapshot = ReadingProgressSnapshot(
+            cleanStep: ReadingStepState.done,
+            scriptStep: ReadingStepState.done,
+            readStep: ReadingStepState.done,
+            detailsStep: ReadingStepState.done,
+            currentLine: _snapshot.totalLines,
+            totalLines: _snapshot.totalLines,
+            hasHandwriting: _snapshot.hasHandwriting,
+            scanBarFraction: 0.92,
+          );
+        });
+        await Future<void>.delayed(const Duration(milliseconds: 100));
+        if (!mounted || _cancelToken.isCancelled) return;
+        if (isReceiptScan && expensesOn) {
+          context.go('/paper/$scanId/receipt');
+        } else {
+          context.go('/paper/$scanId');
+        }
+        return;
       }
 
       if (!mounted || _cancelToken.isCancelled) return;

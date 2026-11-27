@@ -225,8 +225,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noReceipts => 'No receipts yet';
 
   @override
-  String get noReceiptsThisMonth =>
-      'No receipts this month. Scan a receipt to see your spending by category.';
+  String get noReceiptsThisMonth => 'No receipts this month';
 
   @override
   String get expenseTracking => 'Track spending from receipts';
@@ -1256,4 +1255,268 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get watermarkEveryPage => 'Watermark every page';
+
+  @override
+  String lessThanMonth(String amount, String month) {
+    return '$amount less than $month';
+  }
+
+  @override
+  String moreThanMonth(String amount, String month) {
+    return '$amount more than $month';
+  }
+
+  @override
+  String sameAsMonth(String month) {
+    return 'Same as $month';
+  }
+
+  @override
+  String get receiptsThisMonth => 'Receipts this month';
+
+  @override
+  String get exportCsvAction => 'Export CSV';
+
+  @override
+  String get noReceiptsThisMonthSub =>
+      'Scan a receipt to track monthly spending.';
+
+  @override
+  String get checkReceiptTitle => 'Check receipt';
+
+  @override
+  String itemsAddUpToTotal(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items add up to the total',
+      one: '1 item adds up to the total',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String itemsDoNotAddUp(int count, String sum) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items add up to $sum, not the total',
+      one: '1 item adds up to $sum, not the total',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get tapFieldToSeeSource =>
+      'Tap a field to see where it was read on the receipt.';
+
+  @override
+  String get shopLabel => 'Shop';
+
+  @override
+  String get dateFieldLabel => 'Date';
+
+  @override
+  String get vatLabel => 'VAT';
+
+  @override
+  String get paidWithLabel => 'Paid with';
+
+  @override
+  String get paidCash => 'Cash';
+
+  @override
+  String get paidCard => 'Card';
+
+  @override
+  String get paidBkash => 'bKash';
+
+  @override
+  String get paidNagad => 'Nagad';
+
+  @override
+  String get paidRocket => 'Rocket';
+
+  @override
+  String itemsCountLabel(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items',
+      one: '1 item',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String andMoreItems(String preview, int count) {
+    return '$preview and $count more';
+  }
+
+  @override
+  String get saveReceiptAction => 'Save receipt';
+
+  @override
+  String csvExported(String fileName) {
+    return 'CSV exported: $fileName';
+  }
+
+  @override
+  String get categoriesLabel => 'Categories';
+
+  @override
+  String get categoriesSub => 'Edit receipt categories';
+
+  @override
+  String get addCategoryAction => 'Add category';
+
+  @override
+  String get categoryNameEnHint => 'Category name (English)';
+
+  @override
+  String get categoryNameBnHint => 'Category name (Bangla)';
+
+  @override
+  String get backupHeroTitle => 'Your papers live only on this phone';
+
+  @override
+  String get backupHeroBody =>
+      'A backup is one locked file with all your papers, their text and your settings. Keep it on a memory card, a pen drive or another phone.';
+
+  @override
+  String get lastBackupLabel => 'Last backup';
+
+  @override
+  String get lastBackupNever => 'Never';
+
+  @override
+  String lastBackupSummary(String date, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count papers',
+      one: '1 paper',
+    );
+    return '$date, $_temp0';
+  }
+
+  @override
+  String papersNotBackedUp(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count papers are not backed up yet',
+      one: '1 paper is not backed up yet',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get allPapersBackedUp => 'All papers are backed up';
+
+  @override
+  String lastBackupShortSub(String date, int count) {
+    return 'Last backup $date. $count papers not backed up';
+  }
+
+  @override
+  String get remindMeEveryMonth => 'Remind me every month';
+
+  @override
+  String get backupPasswordWarning =>
+      'You choose a password for the file. Without it nobody can open the backup, and Rosid cannot recover it for you.';
+
+  @override
+  String get bringFromBackupFile => 'Bring papers from a backup file';
+
+  @override
+  String get backupReminderBanner =>
+      'Time for a monthly backup. Your papers live only on this phone.';
+
+  @override
+  String get chooseBackupPassword => 'Choose a backup password';
+
+  @override
+  String get enterBackupPassword => 'Enter backup password';
+
+  @override
+  String get passwordLabel => 'Password';
+
+  @override
+  String get confirmPasswordLabel => 'Confirm password';
+
+  @override
+  String get passwordTooShort => 'Use at least 4 characters';
+
+  @override
+  String get passwordsDoNotMatch => 'Passwords do not match';
+
+  @override
+  String get backupCreated => 'Backup saved';
+
+  @override
+  String get backupRestored => 'Papers restored from backup';
+
+  @override
+  String get backupWrongPassword =>
+      'Wrong password. Your current papers were not changed.';
+
+  @override
+  String get backupDamagedFile =>
+      'This backup file is damaged or not from Rosid. Your current papers were not changed.';
+
+  @override
+  String get backupFailed => 'Could not complete backup';
+
+  @override
+  String get appLockTitle => 'Unlock Rosid';
+
+  @override
+  String get appLockEnterPin => 'Enter your PIN';
+
+  @override
+  String get appLockWrongPin => 'Wrong PIN. Try again.';
+
+  @override
+  String get appLockUseFingerprint => 'Use fingerprint';
+
+  @override
+  String get appLockSetPinTitle => 'Set a PIN';
+
+  @override
+  String get appLockConfirmPinTitle => 'Confirm your PIN';
+
+  @override
+  String get appLockPinMismatch => 'PINs did not match. Try again.';
+
+  @override
+  String get appLockPinHint => '4 to 6 digits';
+
+  @override
+  String get appLockChangePin => 'Change PIN';
+
+  @override
+  String get appLockEnabledSub => 'Locked with fingerprint or PIN';
+
+  @override
+  String storageUsedMb(String size) {
+    return '$size on this phone';
+  }
+
+  @override
+  String namesPeoplePlacesCount(int people, int places) {
+    String _temp0 = intl.Intl.pluralLogic(
+      people,
+      locale: localeName,
+      other: '$people people',
+      one: '1 person',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      places,
+      locale: localeName,
+      other: '$places places',
+      one: '1 place',
+    );
+    return '$_temp0, $_temp1';
+  }
 }

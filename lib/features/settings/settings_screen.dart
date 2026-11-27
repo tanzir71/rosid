@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:rosid/core/app_metadata.dart';
 import 'package:rosid/core/extensions/l10n_extension.dart';
@@ -7,13 +8,21 @@ import 'package:rosid/core/settings/app_settings.dart';
 import 'package:rosid/core/theme/app_theme.dart';
 import 'package:rosid/core/theme/rosid_icons.dart';
 import 'package:rosid/core/theme/tokens.g.dart';
+import 'package:rosid/core/utils/bangla_digits.dart';
 import 'package:rosid/core/widgets/rosid_inputs.dart';
 import 'package:rosid/core/widgets/rosid_navigation.dart';
 import 'package:rosid/data/files/private_file_store.dart';
+import 'package:rosid/data/repositories/bundle_repository.dart';
 import 'package:rosid/data/repositories/dashboard_repository.dart';
 import 'package:rosid/data/repositories/settings_repository.dart';
+import 'package:rosid/features/expenses/expenses_repository.dart';
 import 'package:rosid/features/history/history_state.dart';
+import 'package:rosid/features/library/library_screen.dart';
+import 'package:rosid/features/safety/backup_screen.dart';
+import 'package:rosid/features/safety/lock_screen.dart';
 import 'package:rosid/features/translation/term_help_sheet.dart';
+import 'package:rosid/safety/app_lock_service.dart';
+import 'package:rosid/safety/backup_service.dart';
 import 'package:rosid/translation/translation_repository.dart';
 
 /// Settings screen (`design/screens/settings.png`).
@@ -26,6 +35,26 @@ class SettingsScreen extends ConsumerStatefulWidget {
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   bool _deleteAllBusy = false;
+
+  Future<void> _toggleAppLock(bool enable) async {
+    final lockController = ref.read(appLockControllerProvider.notifier);
+    if (!enable) {
+      await lockController.disable();
+      return;
+    }
+    final pin = await showPinSetupSheet(context);
+    if (pin == null || !mounted) return;
+    await lockController.enableWithPin(pin);
+  }
+
+  Future<void> _changePin() async {
+    final pin = await showPinSetupSheet(context);
+    if (pin == null || !mounted) return;
+    await ref.read(appLockControllerProvider.notifier).changePin(pin);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(context.l10n.saved)));
+  }
 
   Future<void> _deleteAll() async {
     if (_deleteAllBusy) return;
@@ -43,6 +72,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             child: Text(l10n.cancel),
           ),
           FilledButton(
+            key: const ValueKey('settings-delete-confirm'),
             onPressed: () => Navigator.pop(context, true),
             child: Text(l10n.confirmDelete),
           ),
@@ -54,11 +84,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     try {
       await settingsRepository.deleteAllData();
       await fileStore.deleteAllAppData();
+      await ref.read(appSettingsProvider.notifier).clearBackupHistory();
       if (!mounted) return;
       ref
         ..invalidate(historyResultsProvider)
         ..invalidate(dashboardSummaryProvider)
-        ..invalidate(homeDocumentsProvider);
+        ..invalidate(homeDocumentsProvider)
+        ..invalidate(libraryPapersProvider)
+        ..invalidate(allBundlesProvider)
+        ..invalidate(monthlyExpensesProvider)
+        ..invalidate(totalPaperCountProvider)
+        ..invalidate(namesBookProvider)
+        ..invalidate(storageUsedBytesProvider);
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(l10n.saved)));
     } on Object {
@@ -90,11 +127,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
                 const SizedBox(height: 12),
                 for (final option in [
-                  (ThemeMode.system, l10n.themeSystem),
-                  (ThemeMode.light, l10n.themeLight),
-                  (ThemeMode.dark, l10n.themeDark),
+                  (ThemeMode.system, l10n.themeSystem, 'system'),
+                  (ThemeMode.light, l10n.themeLight, 'light'),
+                  (ThemeMode.dark, l10n.themeDark, 'dark'),
                 ])
                   ListTile(
+                    key: ValueKey('theme-option-${option.$3}'),
                     contentPadding: EdgeInsets.zero,
                     leading: RosidRadio(selected: current == option.$1),
                     title: Text(option.$2),
@@ -129,9 +167,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Widget build(BuildContext context) {
     final c = RosidColors.of(context);
     final l10n = context.l10n;
+    final locale = Localizations.localeOf(context);
     final settings = ref.watch(appSettingsProvider);
+    final lockState = ref.watch(appLockControllerProvider);
     final controller = ref.read(appSettingsProvider.notifier);
     final appMetadata = ref.watch(appMetadataProvider);
+    final totalPapers = ref.watch(totalPaperCountProvider).asData?.value ?? 0;
+    final storageBytes = ref.watch(storageUsedBytesProvider).asData?.value;
 
     final isBangla = settings.languageCode == 'bn';
     final themeLabel = switch (settings.themeMode) {
@@ -139,6 +181,29 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       ThemeMode.light => l10n.themeLight,
       ThemeMode.dark => l10n.themeDark,
     };
+
+    final notBackedUp = settings.lastBackupAt == null
+        ? totalPapers
+        : (totalPapers - settings.lastBackupPaperCount).clamp(0, totalPapers);
+    final backupSubtitle = settings.lastBackupAt == null
+        ? l10n.backUpNeverSub
+        : localizeDigits(
+            l10n.lastBackupShortSub(
+              DateFormat(
+                'd MMM',
+                locale.toLanguageTag(),
+              ).format(settings.lastBackupAt!),
+              notBackedUp,
+            ),
+            locale,
+          );
+
+    final storageSubtitle = storageBytes == null
+        ? l10n.storageOnDevice
+        : localizeDigits(
+            l10n.storageUsedMb(formatStorageSize(storageBytes)),
+            locale,
+          );
 
     return PopScope(
       canPop: !_deleteAllBusy,
@@ -178,9 +243,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               subtitle: ref
                   .watch(namesBookProvider)
                   .when(
-                    data: (list) => list.isEmpty
-                        ? l10n.namesEmpty
-                        : '${list.length} ${l10n.names.toLowerCase()}',
+                    data: (list) {
+                      if (list.isEmpty) return l10n.namesEmpty;
+                      final people = list
+                          .where((n) => n.category != 'place')
+                          .length;
+                      final places = list
+                          .where((n) => n.category == 'place')
+                          .length;
+                      return localizeDigits(
+                        l10n.namesPeoplePlacesCount(people, places),
+                        locale,
+                      );
+                    },
                     loading: () => l10n.namesEmpty,
                     error: (_, _) => l10n.namesEmpty,
                   ),
@@ -193,6 +268,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               onTap: () => showTermsPickerSheet(context, ref),
             ),
             _SettingsRow(
+              key: const ValueKey('settings-theme-row'),
               icon: RosidIcons.filter,
               title: l10n.themeLabel,
               subtitle: themeLabel,
@@ -203,17 +279,29 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             _SettingsRow(
               icon: RosidIcons.lock,
               title: l10n.appLock,
-              subtitle: l10n.appLockSub,
+              subtitle: lockState.enabled
+                  ? l10n.appLockEnabledSub
+                  : l10n.appLockSub,
               trailing: RosidToggle(
-                value: settings.appLockEnabled,
+                key: const ValueKey('settings-applock-toggle'),
+                value: lockState.enabled,
                 semanticLabel: l10n.appLock,
-                onChanged: controller.setAppLockEnabled,
+                onChanged: _toggleAppLock,
               ),
             ),
+            if (lockState.enabled)
+              _SettingsRow(
+                key: const ValueKey('settings-change-pin'),
+                icon: RosidIcons.lock,
+                title: l10n.appLockChangePin,
+                subtitle: l10n.appLockPinHint,
+                onTap: _changePin,
+              ),
             _SettingsRow(
+              key: const ValueKey('settings-backup-row'),
               icon: RosidIcons.backup,
               title: l10n.backUpAndMove,
-              subtitle: l10n.backUpNeverSub,
+              subtitle: backupSubtitle,
               onTap: () => context.push('/settings/backup'),
             ),
             _SettingsRow(
@@ -244,12 +332,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               title: l10n.currency,
               subtitle: l10n.currencyTaka,
             ),
+            if (settings.expenseTrackingEnabled)
+              _SettingsRow(
+                key: const ValueKey('settings-categories-row'),
+                icon: RosidIcons.tag,
+                title: l10n.categoriesLabel,
+                subtitle: l10n.categoriesSub,
+                onTap: () => context.push('/settings/categories'),
+              ),
             const SizedBox(height: 16),
             _GroupHeader(label: l10n.thisPhone),
             _SettingsRow(
               icon: RosidIcons.file,
               title: l10n.storage,
-              subtitle: l10n.storageOnDevice,
+              subtitle: storageSubtitle,
             ),
             _SettingsRow(
               icon: RosidIcons.info,
@@ -261,6 +357,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ),
             ),
             _SettingsRow(
+              key: const ValueKey('settings-delete-all'),
               icon: RosidIcons.trash,
               title: l10n.deleteAllData,
               subtitle: l10n.deleteAllDataDescription,
@@ -303,6 +400,7 @@ class _SettingsRow extends StatelessWidget {
     this.trailing,
     this.onTap,
     this.destructive = false,
+    super.key,
   });
 
   final RosidIcons icon;

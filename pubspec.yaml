@@ -61,6 +61,8 @@ dependencies:
   unorm_dart: ^0.3.2
   flutter_svg: ^2.5.1
   flutter_onnxruntime: ^1.9.1
+  cryptography: ^2.9.0
+  local_auth: ^3.0.2
 
 dev_dependencies:
   flutter_test:

@@ -25,10 +25,12 @@ import java.io.FileOutputStream
 class PlatformFileBridge(private val activity: Activity) {
     companion object {
         const val REQ_CREATE_DOCUMENT = 9412
+        const val REQ_OPEN_DOCUMENT = 9413
     }
 
     private var pendingSourcePath: String? = null
     private var pendingResult: MethodChannel.Result? = null
+    private var pendingPickResult: MethodChannel.Result? = null
 
     fun saveFile(
         sourcePath: String,
@@ -58,7 +60,45 @@ class PlatformFileBridge(private val activity: Activity) {
         }
     }
 
+    fun pickFile(result: MethodChannel.Result) {
+        pendingPickResult = result
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = "*/*"
+        }
+        try {
+            activity.startActivityForResult(intent, REQ_OPEN_DOCUMENT)
+        } catch (e: Exception) {
+            pendingPickResult = null
+            result.error("SAF_UNAVAILABLE", e.message, null)
+        }
+    }
+
     fun handleActivityResult(requestCode: Int, resultCode: Int, data: Intent?): Boolean {
+        if (requestCode == REQ_OPEN_DOCUMENT) {
+            val cb = pendingPickResult
+            pendingPickResult = null
+            if (cb == null) return true
+            if (resultCode != Activity.RESULT_OK || data?.data == null) {
+                cb.success(null)
+                return true
+            }
+            val uri: Uri = data.data!!
+            try {
+                val displayName = queryDisplayName(uri) ?: "backup.rosidbackup"
+                val safeName = displayName.replace(Regex("[^A-Za-z0-9._-]"), "_")
+                val target = File(activity.cacheDir, "rosid_pick_${System.currentTimeMillis()}_$safeName")
+                activity.contentResolver.openInputStream(uri)?.use { input ->
+                    FileOutputStream(target).use { out ->
+                        input.copyTo(out)
+                    }
+                } ?: throw IllegalStateException("Could not open selected file")
+                cb.success(target.absolutePath)
+            } catch (e: Exception) {
+                cb.error("PICK_FAILED", e.message, null)
+            }
+            return true
+        }
         if (requestCode != REQ_CREATE_DOCUMENT) return false
         val cb = pendingResult
         val srcPath = pendingSourcePath

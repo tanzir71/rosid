@@ -139,6 +139,8 @@ function Ensure-EmulatorRunning {
         '-no-window',
         '-no-audio',
         '-no-boot-anim',
+        '-no-snapshot-load',
+        '-no-snapshot-save',
         '-camera-back', 'none',
         '-camera-front', 'none',
         '-gpu', 'host'

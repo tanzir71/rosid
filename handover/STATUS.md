@@ -2,7 +2,7 @@
 
 The implementing agent keeps this file true. Update it in the same push as the work.
 
-Last updated: 2026-11-27 (M7 completed and verified to Level B)
+Last updated: 2026-11-27 (M8 completed and verified to Level B)
 
 ## Milestones
 
@@ -16,15 +16,15 @@ Last updated: 2026-11-27 (M7 completed and verified to Level B)
 | M5 | English draft | done | B | `evidence/M5/summary.md` |
 | M6 | Export | done | B | `evidence/M6/summary.md` |
 | M7 | Library and bundles | done | B | `evidence/M7/summary.md` |
-| M8 | Expenses, settings, safety | in progress | | |
-| M9 | Landing page and release | not started | | |
+| M8 | Expenses, settings, safety | done | B | `evidence/M8/summary.md` |
+| M9 | Landing page and release | in progress | | |
 
 State is one of: not started, in progress, done, done with gaps.
 "Verified to" is A, B or Release, as defined in `03-verification.md`.
 
 ## In progress
 
-Starting M8: Expenses, settings and safety.
+Starting M9: Landing page and release (Rosid 2.0.0).
 
 ## Measured numbers
 
@@ -61,6 +61,7 @@ Record every choice the handover left to you: which Bangla recogniser won, which
 | 2026-11-27 | M4 Listen (read aloud) & Check Words alternatives | Implemented Listen via a zero-dependency, zero-permission Android `TextToSpeech` MethodChannel (`app.rosid.rosid/tts`) that checks `isLanguageAvailable(Locale("bn", "BD"))` and hides Listen automatically when no offline Bangla voice is installed. Built Check Words alternatives from remembered `corrections` (first priority), `names`, and a curated Bangla/English document vocabulary with edit-distance <= 2 (per M4 fallback). |
 | 2026-11-27 | M5 translation engine: shipped Integration A (hidden Android `WebView` + Mozilla Firefox Translations `bn-en` v1.0 + Bergamot WASM v3.0, MPL-2.0) | Stored the 4 Mozilla binary files deterministically gzipped (`mtime=0`, level 9, 16.28 MB total) in `assets/models/translation/` and served them strictly offline via `OfflineBergamotTranslator.kt` `shouldInterceptRequest` (`https://rosid.local/translation/*` with on-the-fly `GZIPInputStream`, HTTP 403 for all other origins, zero extra pub packages, zero `INTERNET` permission). Passed M5 40-line gate on `rosid_test` (51/51 = 100% preservation of numbers/dates/names, 65 ms median page time, chrF 81.32), Flow 4 E2E passed up to export, and split arm64 release APK is 108.5 MB (<= 110 MB) with `CAMERA` permission only. |
 | 2026-11-27 | M6 Export: native Android SAF + PrintManager bridge (`PlatformFileBridge.kt`), pure-Dart `archive: ^4.0.9` `.docx` writer, PDF password hidden | Skipped `printing` package because its `pubspec.yaml` depends on `http`; implemented native Android `PrintManager` (`PrintDocumentAdapter`) and Storage Access Framework (`ACTION_CREATE_DOCUMENT`) directly in `PlatformFileBridge.kt` with zero permissions and zero APK size overhead. Hid PDF password protection per M6 step 12 because `pdf: ^3.13.0` lacks standard PDF encryption and no verified permissive pure-Dart PDF encryption package is available. LibreOffice headless `.docx -> PDF` conversion was not run (`soffice` not installed on host); `.docx` structure, XML, Bangla `w:cs="Nirmala UI"` + `w:bidi="bn-BD"`, and DRAFT header verified programmatically in unit tests and Flow 5 on `rosid_test`. |
+| 2026-11-27 | M8 Safety & Expenses: added `cryptography: ^2.9.0` (pure-Dart Argon2id + AES-256-GCM) and `local_auth: ^3.0.2` (on-device biometric sensor, zero network permissions); switched `MainActivity` to `FlutterFragmentActivity` | Added `android.permission.USE_BIOMETRIC` to offline audit allowlist (local hardware sensor only, zero network permissions). Implemented `FLAG_SECURE` via `app.rosid.rosid/security` enabled ONLY while locked, and SAF file picking (`ACTION_OPEN_DOCUMENT`) via `PlatformFileBridge.kt` with zero storage permissions. Switched `tool/verify.ps1` emulator boot to `-no-snapshot-load -no-snapshot-save` for deterministic cold boots. |
 
 ## Not done, needs a person
 
@@ -82,3 +83,4 @@ Things that exist and may work but that you could not check on your machine (for
 | Live hardware camera YUV image stream format on physical phones | Headless emulator camera tested via `FakeCaptureSource` fixture stream; live hardware Y-plane stride behaviour depends on device HAL |
 | Real Bangla TTS voice for Listen (read aloud) | Headless emulator ships without an offline `bn-BD` voice pack; Listen hides automatically when unavailable |
 | System file picker (SAF), share sheet targets, and physical printing | Integration tests verify the exported temp file written by Rosid up to the system handoff; the external Android DocumentsUI picker, third-party share apps, and real printer hardware were not exercised |
+| Real fingerprint/biometric sensor hardware | Headless emulator has no physical fingerprint sensor; PIN path verified end to end (Flow 9) and biometric path verified via a fake authenticator in widget tests |

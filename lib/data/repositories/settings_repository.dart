@@ -47,6 +47,13 @@ class SettingsRepository {
     final scans = await database.select(database.scans).get();
     final pages = await database.select(database.scanPages).get();
     await database.transaction(() async {
+      await database.delete(database.bundleItems).go();
+      await database.delete(database.bundles).go();
+      await database.delete(database.translations).go();
+      await database.delete(database.details).go();
+      await database.delete(database.textLines).go();
+      await database.delete(database.names).go();
+      await database.delete(database.corrections).go();
       await database.delete(database.scans).go();
       await (database.delete(
         database.categories,

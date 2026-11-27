@@ -95,6 +95,62 @@ class HomeScreen extends ConsumerWidget {
                     _ResumeCard(entry: resumeEntry, locale: locale),
                     const SizedBox(height: 24),
                   ],
+                  if (settings.backupReminderEnabled &&
+                      entries.isNotEmpty &&
+                      ((settings.lastBackupAt != null &&
+                              DateTime.now()
+                                      .difference(settings.lastBackupAt!)
+                                      .inDays >=
+                                  30) ||
+                          (settings.lastBackupAt == null &&
+                              DateTime.now()
+                                      .difference(entries.last.scan.createdAt)
+                                      .inDays >=
+                                  30))) ...[
+                    InkWell(
+                      key: const ValueKey('home-backup-reminder'),
+                      onTap: () => context.push('/settings/backup'),
+                      borderRadius: BorderRadius.circular(
+                        RosidSizeTokens.radiusControl,
+                      ),
+                      child: Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: c.warnSoft,
+                          borderRadius: BorderRadius.circular(
+                            RosidSizeTokens.radiusControl,
+                          ),
+                          border: Border.all(
+                            color: c.warnBase.withValues(alpha: 0.35),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            RosidIcon(
+                              RosidIcons.backup,
+                              size: 20,
+                              color: c.warnBase,
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                l10n.backupReminderBanner,
+                                style: RosidTextTokens.uiCaption.copyWith(
+                                  color: c.inkPrimary,
+                                ),
+                              ),
+                            ),
+                            RosidIcon(
+                              RosidIcons.chevronRight,
+                              size: 16,
+                              color: c.inkSecondary,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                  ],
                   _SectionHeader(
                     title: l10n.bundles,
                     actionLabel: l10n.seeAll,

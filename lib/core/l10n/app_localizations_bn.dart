@@ -224,8 +224,7 @@ class AppLocalizationsBn extends AppLocalizations {
   String get noReceipts => 'এখনও কোনো রসিদ নেই';
 
   @override
-  String get noReceiptsThisMonth =>
-      'এই মাসে কোনো রসিদ নেই। বিভাগ অনুযায়ী খরচ দেখতে রসিদ স্ক্যান করুন।';
+  String get noReceiptsThisMonth => 'এই মাসে কোনো রসিদ নেই';
 
   @override
   String get expenseTracking => 'রসিদ থেকে খরচের হিসাব';
@@ -1249,4 +1248,268 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get watermarkEveryPage => 'প্রতিটি পাতায় জলছাপ';
+
+  @override
+  String lessThanMonth(String amount, String month) {
+    return '$month-এর চেয়ে $amount কম';
+  }
+
+  @override
+  String moreThanMonth(String amount, String month) {
+    return '$month-এর চেয়ে $amount বেশি';
+  }
+
+  @override
+  String sameAsMonth(String month) {
+    return '$month-এর সমান';
+  }
+
+  @override
+  String get receiptsThisMonth => 'এই মাসের রসিদ';
+
+  @override
+  String get exportCsvAction => 'CSV এক্সপোর্ট';
+
+  @override
+  String get noReceiptsThisMonthSub =>
+      'মাসিক খরচ হিসাব করতে একটি রসিদ স্ক্যান করুন।';
+
+  @override
+  String get checkReceiptTitle => 'রসিদ যাচাই';
+
+  @override
+  String itemsAddUpToTotal(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countটি আইটেমের যোগফল মোটের সমান',
+      one: '১টি আইটেমের যোগফল মোটের সমান',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String itemsDoNotAddUp(int count, String sum) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countটি আইটেমের যোগফল $sum, মোটের সমান নয়',
+      one: '১টি আইটেমের যোগফল $sum, মোটের সমান নয়',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get tapFieldToSeeSource =>
+      'রসিদের কোথায় এটি পড়া হয়েছে দেখতে যেকোনো ঘরে ট্যাপ করুন।';
+
+  @override
+  String get shopLabel => 'দোকান';
+
+  @override
+  String get dateFieldLabel => 'তারিখ';
+
+  @override
+  String get vatLabel => 'ভ্যাট';
+
+  @override
+  String get paidWithLabel => 'পরিশোধের মাধ্যম';
+
+  @override
+  String get paidCash => 'নগদ';
+
+  @override
+  String get paidCard => 'কার্ড';
+
+  @override
+  String get paidBkash => 'বিকাশ';
+
+  @override
+  String get paidNagad => 'নগদ (Nagad)';
+
+  @override
+  String get paidRocket => 'রকেট';
+
+  @override
+  String itemsCountLabel(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countটি আইটেম',
+      one: '১টি আইটেম',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String andMoreItems(String preview, int count) {
+    return '$preview এবং আরও $countটি';
+  }
+
+  @override
+  String get saveReceiptAction => 'রসিদ সংরক্ষণ করুন';
+
+  @override
+  String csvExported(String fileName) {
+    return 'CSV এক্সপোর্ট হয়েছে: $fileName';
+  }
+
+  @override
+  String get categoriesLabel => 'বিভাগসমূহ';
+
+  @override
+  String get categoriesSub => 'রসিদের বিভাগ সম্পাদনা করুন';
+
+  @override
+  String get addCategoryAction => 'নতুন বিভাগ যোগ করুন';
+
+  @override
+  String get categoryNameEnHint => 'বিভাগের নাম (ইংরেজি)';
+
+  @override
+  String get categoryNameBnHint => 'বিভাগের নাম (বাংলা)';
+
+  @override
+  String get backupHeroTitle => 'আপনার কাগজপত্র শুধু এই ফোনেই আছে';
+
+  @override
+  String get backupHeroBody =>
+      'ব্যাকআপ হলো একটি তালাবদ্ধ ফাইল যাতে আপনার সব কাগজ, লেখা ও সেটিংস থাকে। এটি মেমোরি কার্ড, পেনড্রাইভ বা অন্য ফোনে রাখুন।';
+
+  @override
+  String get lastBackupLabel => 'শেষ ব্যাকআপ';
+
+  @override
+  String get lastBackupNever => 'কখনো না';
+
+  @override
+  String lastBackupSummary(String date, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countটি কাগজ',
+      one: '১টি কাগজ',
+    );
+    return '$date, $_temp0';
+  }
+
+  @override
+  String papersNotBackedUp(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countটি কাগজ এখনো ব্যাকআপ হয়নি',
+      one: '১টি কাগজ এখনো ব্যাকআপ হয়নি',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get allPapersBackedUp => 'সব কাগজ ব্যাকআপ করা আছে';
+
+  @override
+  String lastBackupShortSub(String date, int count) {
+    return 'শেষ ব্যাকআপ $date। $countটি কাগজ ব্যাকআপ হয়নি';
+  }
+
+  @override
+  String get remindMeEveryMonth => 'প্রতি মাসে মনে করিয়ে দিন';
+
+  @override
+  String get backupPasswordWarning =>
+      'ফাইলের জন্য আপনি একটি পাসওয়ার্ড ঠিক করবেন। এটি ছাড়া কেউ ব্যাকআপ খুলতে পারবে না, আর রসিদও তা উদ্ধার করতে পারবে না।';
+
+  @override
+  String get bringFromBackupFile => 'ব্যাকআপ ফাইল থেকে কাগজ আনুন';
+
+  @override
+  String get backupReminderBanner =>
+      'মাসিক ব্যাকআপ নেওয়ার সময় হয়েছে। আপনার কাগজপত্র শুধু এই ফোনেই আছে।';
+
+  @override
+  String get chooseBackupPassword => 'ব্যাকআপের পাসওয়ার্ড ঠিক করুন';
+
+  @override
+  String get enterBackupPassword => 'ব্যাকআপের পাসওয়ার্ড দিন';
+
+  @override
+  String get passwordLabel => 'পাসওয়ার্ড';
+
+  @override
+  String get confirmPasswordLabel => 'পাসওয়ার্ড নিশ্চিত করুন';
+
+  @override
+  String get passwordTooShort => 'অন্তত ৪ অক্ষরের পাসওয়ার্ড দিন';
+
+  @override
+  String get passwordsDoNotMatch => 'পাসওয়ার্ড দুটি মেলেনি';
+
+  @override
+  String get backupCreated => 'ব্যাকআপ সংরক্ষণ হয়েছে';
+
+  @override
+  String get backupRestored => 'ব্যাকআপ থেকে কাগজপত্র ফিরে এসেছে';
+
+  @override
+  String get backupWrongPassword =>
+      'ভুল পাসওয়ার্ড। আপনার বর্তমান কাগজপত্র বদলায়নি।';
+
+  @override
+  String get backupDamagedFile =>
+      'ব্যাকআপ ফাইলটি ক্ষতিগ্রস্ত বা রসিদের নয়। আপনার বর্তমান কাগজপত্র বদলায়নি।';
+
+  @override
+  String get backupFailed => 'ব্যাকআপ সম্পন্ন করা যায়নি';
+
+  @override
+  String get appLockTitle => 'রসিদ আনলক করুন';
+
+  @override
+  String get appLockEnterPin => 'আপনার পিন দিন';
+
+  @override
+  String get appLockWrongPin => 'ভুল পিন। আবার চেষ্টা করুন।';
+
+  @override
+  String get appLockUseFingerprint => 'ফিঙ্গারপ্রিন্ট ব্যবহার করুন';
+
+  @override
+  String get appLockSetPinTitle => 'একটি পিন ঠিক করুন';
+
+  @override
+  String get appLockConfirmPinTitle => 'পিন নিশ্চিত করুন';
+
+  @override
+  String get appLockPinMismatch => 'পিন দুটি মেলেনি। আবার চেষ্টা করুন।';
+
+  @override
+  String get appLockPinHint => '৪ থেকে ৬ অঙ্ক';
+
+  @override
+  String get appLockChangePin => 'পিন বদলান';
+
+  @override
+  String get appLockEnabledSub => 'ফিঙ্গারপ্রিন্ট বা পিন দিয়ে তালাবদ্ধ';
+
+  @override
+  String storageUsedMb(String size) {
+    return 'এই ফোনে $size';
+  }
+
+  @override
+  String namesPeoplePlacesCount(int people, int places) {
+    String _temp0 = intl.Intl.pluralLogic(
+      people,
+      locale: localeName,
+      other: '$people জন ব্যক্তি',
+      one: '১ জন ব্যক্তি',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      places,
+      locale: localeName,
+      other: '$placesটি স্থান',
+      one: '১টি স্থান',
+    );
+    return '$_temp0, $_temp1';
+  }
 }
