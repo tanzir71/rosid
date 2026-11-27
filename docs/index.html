@@ -1,143 +1,289 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="bn">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>রসিদ · Rosid — Offline Bangla &amp; English paper scanner</title>
-  <meta name="description" content="রসিদ একটি ফ্রি অফলাইন অ্যান্ড্রয়েড অ্যাপ। সংস্করণ ২ তৈরি হচ্ছে।">
-  <style>
-    :root {
-      --bg-canvas: #F2F4EE;
-      --bg-sheet: #FFFFFF;
-      --ink-primary: #1A1B2E;
-      --ink-secondary: #55586A;
-      --ink-tertiary: #8A8D9C;
-      --line-subtle: #DCE0D3;
-      --accent-base: #4333B0;
-      --accent-soft: #E7E3FA;
-      --accent-ink: #32258C;
-      --good-base: #1B7A50;
-      --good-soft: #DDF1E4;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      background: var(--bg-canvas);
-      color: var(--ink-primary);
-      font-family: system-ui, -apple-system, "Segoe UI", "Noto Sans Bengali", sans-serif;
-      line-height: 1.6;
-      padding: 32px 20px;
-    }
-    main {
-      max-width: 680px;
-      margin: 0 auto;
-    }
-    .wordmark {
-      display: flex;
-      align-items: baseline;
-      gap: 10px;
-      margin-bottom: 24px;
-    }
-    .wordmark strong {
-      font-size: 28px;
-      font-weight: 600;
-    }
-    .wordmark span {
-      font-size: 20px;
-      color: var(--ink-secondary);
-      font-weight: 600;
-    }
-    .pill {
-      display: inline-block;
-      background: var(--good-soft);
-      color: var(--good-base);
-      font-size: 13px;
-      font-weight: 600;
-      padding: 4px 12px;
-      border-radius: 999px;
-      margin-bottom: 16px;
-    }
-    .card {
-      background: var(--bg-sheet);
-      border: 1px solid var(--line-subtle);
-      border-radius: 4px;
-      padding: 28px 24px;
-      box-shadow: 0 1px 2px rgba(26, 27, 46, 0.10), 0 4px 10px rgba(26, 27, 46, 0.06);
-      margin-bottom: 20px;
-    }
-    h1 {
-      font-size: 26px;
-      line-height: 1.35;
-      margin: 0 0 12px;
-      font-weight: 600;
-    }
-    p {
-      margin: 0 0 14px;
-      color: var(--ink-secondary);
-      font-size: 16px;
-    }
-    .actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-top: 20px;
-    }
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 48px;
-      padding: 0 22px;
-      border-radius: 12px;
-      font-size: 15px;
-      font-weight: 600;
-      text-decoration: none;
-    }
-    .btn-primary {
-      background: var(--accent-base);
-      color: #FFFFFF;
-    }
-    .btn-outline {
-      border: 1px solid var(--line-subtle);
-      color: var(--ink-primary);
-      background: var(--bg-sheet);
-    }
-    .meta {
-      margin-top: 20px;
-      font-size: 13px;
-      color: var(--ink-tertiary);
-    }
-    a { color: var(--accent-ink); }
-    hr {
-      border: 0;
-      border-top: 1px solid var(--line-subtle);
-      margin: 24px 0;
-    }
-  </style>
+  <title>রসিদ: বাংলা কাগজ স্ক্যান, পড়া ও অনুবাদ, অফলাইনে</title>
+  <meta name="description" content="একটি ফ্রি অ্যান্ড্রয়েড অ্যাপ, যেকোনো বাংলা বা ইংরেজি কাগজ স্ক্যান করে পড়ে, ইংরেজি খসড়া বানায়। ইন্টারনেট ছাড়াই চলে।">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="alternate" hreflang="bn" href="https://tanzir71.github.io/rosid/">
+  <link rel="alternate" hreflang="en" href="https://tanzir71.github.io/rosid/en/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="রসিদ: বাংলা কাগজ স্ক্যান, পড়া ও অনুবাদ, অফলাইনে">
+  <meta property="og:description" content="একটি ফ্রি অ্যান্ড্রয়েড অ্যাপ, যেকোনো বাংলা বা ইংরেজি কাগজ স্ক্যান করে পড়ে, ইংরেজি খসড়া বানায়। ইন্টারনেট ছাড়াই চলে।">
+  <meta property="og:image" content="https://tanzir71.github.io/rosid/og-bn.png">
+  <meta property="og:url" content="https://tanzir71.github.io/rosid/">
+  <link rel="stylesheet" href="assets/site.css">
 </head>
 <body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="wordmark" href="./" aria-label="রসিদ Rosid">
+        <span class="wordmark-bn">রসিদ</span>
+        <span class="wordmark-en" lang="en">Rosid</span>
+      </a>
+      <div class="header-right">
+        <nav class="header-nav" aria-label="মূল নেভিগেশন">
+          <a href="#how">কীভাবে কাজ করে</a>
+          <a href="#privacy">গোপনীয়তা</a>
+          <a href="#install">ইনস্টল</a>
+        </nav>
+        <div class="lang-switch" aria-label="ভাষা">
+          <a class="lang-pill active" href="./" aria-current="page">বাংলা</a>
+          <a class="lang-pill" href="en/" lang="en">English</a>
+        </div>
+        <a class="btn btn-primary btn-sm header-cta" data-release-link="arm64" href="https://github.com/tanzir71/rosid/releases/download/v2.0.0/rosid-arm64-v8a.apk">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span>ডাউনলোড</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
   <main>
-    <div class="wordmark">
-      <strong>রসিদ</strong>
-      <span lang="en">Rosid</span>
-    </div>
-    <div class="card">
-      <div class="pill">ইন্টারনেট ছাড়াই চলে · Works offline</div>
-      <h1>সংস্করণ ২ আসছে</h1>
-      <p>রসিদ একটি ফ্রি অ্যান্ড্রয়েড অ্যাপ। যেকোনো বাংলা বা ইংরেজি কাগজ স্ক্যান করে পড়ে, ইংরেজি খসড়া বানায় এবং এক ফাইলে গুছিয়ে এক্সপোর্ট করে। ইন্টারনেট ছাড়াই চলে, আপনার কাগজ ফোনের বাইরে যায় না।</p>
-      <p>সংস্করণ ২.০ এখন তৈরি হচ্ছে। এর মধ্যে সংস্করণ ১.০.০ ডাউনলোড করা যাবে।</p>
-      <hr>
-      <div lang="en">
-        <h1>Version 2 is on its way</h1>
-        <p>Rosid is a free Android app that scans any Bangla or English paper, reads it, makes an English draft, and packs papers into one file. It works completely offline with no internet permission.</p>
-        <p>Version 2.0 is currently being built. Version 1.0.0 is available now on GitHub Releases.</p>
+    <section class="section section-canvas hero-section">
+      <div class="container hero-grid">
+        <div>
+          <h1>যেকোনো বাংলা কাগজ স্ক্যান করুন, পড়ুন, ইংরেজিতে নিন।</h1>
+          <p class="lead">রসিদ একটি ফ্রি অ্যান্ড্রয়েড অ্যাপ। ইন্টারনেট ছাড়াই চলে, আপনার কাগজ ফোনের বাইরে যায় না।</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" data-release-link="arm64" href="https://github.com/tanzir71/rosid/releases/download/v2.0.0/rosid-arm64-v8a.apk">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              <span>অ্যান্ড্রয়েডের জন্য ডাউনলোড</span>
+            </a>
+            <a class="btn btn-ghost" href="#install">কীভাবে ইনস্টল করবেন</a>
+          </div>
+          <p class="older-phones">পুরোনো ৩২-বিট ফোন? <a data-release-link="arm32" href="https://github.com/tanzir71/rosid/releases/download/v2.0.0/rosid-armeabi-v7a.apk">অন্য ফাইলটি নিন।</a></p>
+          <ul class="trust-row">
+            <li>
+              <svg class="icon-sm trust-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>অ্যাকাউন্ট লাগে না</span>
+            </li>
+            <li>
+              <svg class="icon-sm trust-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>ইন্টারনেট অনুমতি নেই</span>
+            </li>
+            <li>
+              <svg class="icon-sm trust-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>বিজ্ঞাপন নেই</span>
+            </li>
+          </ul>
+          <p class="version-line"><!-- release:version_line_bn -->সংস্করণ ২.০.০, অ্যান্ড্রয়েড ৮ বা নতুন<!-- /release --></p>
+        </div>
+
+        <div class="paper-pair-wrap">
+          <div class="paper-pair" role="img" aria-label="একটি বাংলা খতিয়ান ও তার ইংরেজি খসড়া">
+            <div class="paper-sheet paper-bn">
+              <p class="paper-kicker">ভূমি রেকর্ড ও জরিপ অধিদপ্তর</p>
+              <p class="paper-title">খতিয়ান নং ১২৪৫</p>
+              <div class="paper-rule"></div>
+              <div class="paper-row"><span>জেলা: ঢাকা</span><span>উপজেলা: সাভার</span></div>
+              <div class="paper-row"><span>মৌজা: <mark class="hl">বিরুলিয়া</mark></span><span>জে.এল. নং: ৩৫</span></div>
+              <div class="paper-row-single">মালিকের নাম: মোঃ আব্দুর রহমান</div>
+              <div class="paper-row-single">পিতা: মৃত আব্দুল করিম</div>
+              <div class="paper-row"><span>দাগ নং: ৩০২</span><span>শ্রেণি: ভিটি</span></div>
+              <div class="paper-row-single">জমির পরিমাণ: ১২.৫০ শতাংশ</div>
+            </div>
+            <div class="paper-sheet paper-en" lang="en">
+              <p class="paper-kicker">Directorate of Land Records and Surveys</p>
+              <p class="paper-title">Khatian No. 1245</p>
+              <div class="paper-rule"></div>
+              <div class="paper-row"><span>District: Dhaka</span><span>Upazila: Savar</span></div>
+              <div class="paper-row"><span>Mouza: Birulia</span><span>J.L. No. 35</span></div>
+              <div class="paper-row-single">Owner: MD ABDUR RAHMAN</div>
+              <div class="paper-row-single">Father: Late Abdul Karim</div>
+              <div class="paper-row"><span>Plot (Dag) No. 302</span><span>Class: Homestead</span></div>
+              <div class="paper-row-single">Area: 12.50 decimals</div>
+              <span class="draft-stamp" lang="bn"><span class="draft-stamp-inner">খসড়া</span></span>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="actions">
-        <a class="btn btn-primary" href="https://github.com/tanzir71/rosid/releases/tag/v1.0.0">সংস্করণ ১.০.০ ডাউনলোড · Download v1.0.0</a>
-        <a class="btn btn-outline" href="https://github.com/tanzir71/rosid">সোর্স কোড · Source code</a>
+    </section>
+
+    <section id="how" class="section section-sheet">
+      <div class="container">
+        <h2>কাগজ থেকে তৈরি ফাইল</h2>
+        <div class="steps-track">
+          <article class="step-card">
+            <div class="phone-frame">
+              <img src="assets/screens/step-1-scan-bn.webp" alt="কাগজের কিনারা খুঁজে স্ক্যান করার ক্যামেরা পর্দা" width="412" height="915" loading="lazy">
+            </div>
+            <div class="step-head">
+              <span class="step-num">১</span>
+              <h3>স্ক্যান করুন</h3>
+            </div>
+            <p class="small">ক্যামেরা নিজেই কাগজের কিনারা খুঁজে ছবি তোলে।</p>
+          </article>
+          <article class="step-card">
+            <div class="phone-frame">
+              <img src="assets/screens/step-2-check-bn.webp" alt="অনিশ্চিত শব্দ মিলিয়ে ঠিক করার পর্দা" width="412" height="915" loading="lazy">
+            </div>
+            <div class="step-head">
+              <span class="step-num">২</span>
+              <h3>মিলিয়ে নিন</h3>
+            </div>
+            <p class="small">যে শব্দে রসিদের সন্দেহ, সেগুলো ছবির সঙ্গে মিলিয়ে ঠিক করুন।</p>
+          </article>
+          <article class="step-card">
+            <div class="phone-frame">
+              <img src="assets/screens/step-3-draft-bn.webp" alt="বাংলা কাগজের ইংরেজি খসড়া অনুবাদের পর্দা" width="412" height="915" loading="lazy">
+            </div>
+            <div class="step-head">
+              <span class="step-num">৩</span>
+              <h3>ইংরেজি খসড়া নিন</h3>
+            </div>
+            <p class="small">নামের বানান পাসপোর্টের মতো থাকে। জমির মাপ ও বাংলা তারিখ বদলে যায়।</p>
+          </article>
+          <article class="step-card">
+            <div class="phone-frame">
+              <img src="assets/screens/step-4-bundle-bn.webp" alt="চেকলিস্ট ধরে কাগজ গুছিয়ে এক পিডিএফে এক্সপোর্ট করার পর্দা" width="412" height="915" loading="lazy">
+            </div>
+            <div class="step-head">
+              <span class="step-num">৪</span>
+              <h3>ফাইল গুছিয়ে নিন</h3>
+            </div>
+            <p class="small">চেকলিস্ট ধরে কাগজ জমান, তারপর এক পিডিএফে এক্সপোর্ট করুন।</p>
+          </article>
+        </div>
       </div>
-      <p class="meta">Android 8 or newer · No internet permission · No account · No ads</p>
-    </div>
+    </section>
+
+    <section class="section section-canvas">
+      <div class="container papers-layout">
+        <div>
+          <h2>আপনার হাতের কাগজগুলোর জন্যই</h2>
+          <p class="lead">পুরোনো দলিল, নতুন সনদ, দোকানের রসিদ। কাগজে থাকলে, বাংলা বা ইংরেজিতে হলে, রসিদ সেটি রাখতে, পড়তে আর খুঁজে দিতে পারে।</p>
+        </div>
+        <div class="papers-grid">
+          <figure class="paper-card">
+            <img src="assets/papers/deeds-and-khatian.svg" alt="" width="76" height="88">
+            <figcaption>দলিল ও খতিয়ান</figcaption>
+          </figure>
+          <figure class="paper-card">
+            <img src="assets/papers/certificates.svg" alt="" width="76" height="88">
+            <figcaption>সনদ</figcaption>
+          </figure>
+          <figure class="paper-card">
+            <img src="assets/papers/id-cards.svg" alt="" width="88" height="62">
+            <figcaption>পরিচয়পত্র, দুই পিঠ এক পাতায়</figcaption>
+          </figure>
+          <figure class="paper-card">
+            <img src="assets/papers/receipts-and-bills.svg" alt="" width="56" height="88">
+            <figcaption>রসিদ ও বিল</figcaption>
+          </figure>
+          <figure class="paper-card">
+            <img src="assets/papers/licences-and-letters.svg" alt="" width="76" height="88">
+            <figcaption>লাইসেন্স ও চিঠি</figcaption>
+          </figure>
+          <figure class="paper-card">
+            <img src="assets/papers/notes-and-handouts.svg" alt="" width="76" height="88">
+            <figcaption>নোট ও হ্যান্ডআউট</figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-sheet">
+      <div class="container">
+        <h2>যা রসিদ দাবি করে না</h2>
+        <div class="honest-grid">
+          <div class="honest-item">
+            <h3>খসড়া মানে সত্যায়িত অনুবাদ নয়</h3>
+            <p>দূতাবাস ও অফিস সাধারণত অনুবাদক বা নোটারির সই করা অনুবাদ চায়। রসিদ তাঁদের জন্য একটি পরিষ্কার খসড়া আর সই করার পাতা তৈরি করে দেয়।</p>
+          </div>
+          <div class="honest-item">
+            <h3>হাতের লেখা পড়া কঠিন</h3>
+            <p>ছাপা বাংলা ভালো পড়া যায়। হাতের লেখায় যেখানে সন্দেহ, রসিদ সেটি দাগিয়ে দেয়, আপনি ছবির সঙ্গে মিলিয়ে ঠিক করে নেন।</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="privacy" class="section section-canvas">
+      <div class="container privacy-grid">
+        <div>
+          <h2>গোপন থাকে, নিজেই যাচাই করুন</h2>
+          <p class="lead">রসিদের ইন্টারনেট ব্যবহারের অনুমতিই নেই। তাই চাইলেও কোনো কাগজ আপলোড করতে পারে না।</p>
+          <p class="privacy-check">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+            <span>নিজে দেখে নিন: অ্যান্ড্রয়েড সেটিংস, অ্যাপস, রসিদ, পারমিশন।</span>
+          </p>
+        </div>
+        <div class="release-slip" aria-label="রিলিজ তথ্য">
+          <div class="slip-row">
+            <span class="slip-label">সংস্করণ</span>
+            <span class="slip-value">রসিদ <!-- release:version_bn -->২.০.০<!-- /release --></span>
+          </div>
+          <div class="slip-row">
+            <span class="slip-label">ফাইল</span>
+            <span class="slip-value slip-mono" lang="en"><!-- release:apk_name -->rosid-arm64-v8a.apk<!-- /release --></span>
+          </div>
+          <div class="slip-row">
+            <span class="slip-label">ফাইলের <span lang="en">SHA-256</span></span>
+            <span class="slip-value slip-mono" lang="en"><!-- release:apk_sha256 -->4af5a9f041ebdf521013777030adffdcc9c5ea38ba65ed4c8d79daa9e77bd3b4<!-- /release --></span>
+          </div>
+          <div class="slip-row">
+            <span class="slip-label">সাইনিং সার্টিফিকেটের <span lang="en">SHA-256</span></span>
+            <span class="slip-value slip-mono" lang="en"><!-- release:cert_sha256 -->1B:83:A5:29:55:86:4B:A1:C9:8D:1B:52:36:C2:96:72:57:B3:63:41:3F:40:74:BA:C7:35:68:95:FB:9D:FE:47<!-- /release --></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="install" class="section section-sheet">
+      <div class="container">
+        <h2>তিন ধাপে ইনস্টল</h2>
+        <ol class="install-steps">
+          <li class="install-step">
+            <span class="step-num">১</span>
+            <div>
+              <h3>ফাইলটি ডাউনলোড করুন</h3>
+              <p>এই পাতার ডাউনলোড বোতামে চাপ দিন।</p>
+            </div>
+          </li>
+          <li class="install-step">
+            <span class="step-num">২</span>
+            <div>
+              <h3>ইনস্টলের অনুমতি দিন</h3>
+              <p>অ্যান্ড্রয়েড একবারই জিজ্ঞেস করে, ব্রাউজার অ্যাপ ইনস্টল করতে পারবে কি না।</p>
+            </div>
+          </li>
+          <li class="install-step">
+            <span class="step-num">৩</span>
+            <div>
+              <h3>রসিদ খুলুন</h3>
+              <p>ভাষা বেছে নিন, তারপর প্রথম কাগজটি স্ক্যান করুন।</p>
+            </div>
+          </li>
+        </ol>
+        <p class="install-v1-note">সংস্করণ ১ ইনস্টল করা থাকলে আগে সেটি আনইনস্টল করুন। এই সংস্করণের সই আলাদা।</p>
+        <p class="small muted">রসিদ অনলাইনে যায় না, তাই নিজে আপডেট হয় না। নতুন সংস্করণ এই পাতাতেই পাবেন।</p>
+      </div>
+    </section>
+
+    <section class="section section-inverse">
+      <div class="container closing-inner">
+        <h2>প্রথম কাগজটি স্ক্যান করুন</h2>
+        <a class="btn btn-tonal" data-release-link="arm64" href="https://github.com/tanzir71/rosid/releases/download/v2.0.0/rosid-arm64-v8a.apk">অ্যান্ড্রয়েডের জন্য ডাউনলোড</a>
+        <p class="version-line"><!-- release:version_line_bn_closing -->সংস্করণ ২.০.০, অ্যান্ড্রয়েড ৮ বা নতুন<!-- /release --></p>
+      </div>
+    </section>
   </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <span class="wordmark">
+        <span class="wordmark-bn">রসিদ</span>
+        <span class="wordmark-en" lang="en">Rosid</span>
+      </span>
+      <div class="footer-links">
+        <a href="https://github.com/tanzir71/rosid">সোর্স কোড</a>
+        <a href="https://github.com/tanzir71/rosid/releases">সব সংস্করণ</a>
+        <a href="https://github.com/tanzir71/rosid/issues/new">সমস্যা জানান</a>
+      </div>
+    </div>
+  </footer>
 </body>
 </html>

@@ -324,44 +324,111 @@ try {
             & (Join-Path $PSScriptRoot 'audit_offline.ps1') -RequireMerged
             if ($LASTEXITCODE -ne 0) { throw "audit_offline.ps1 -RequireMerged failed" }
         }
-        Invoke-Step 'Release APK checks (size, permissions, 16KB alignment, signing)' {
+        Invoke-Step 'Release APK checks (size, permissions, DEX packages, 16KB alignment, signing)' {
             $arm64Apk = Join-Path $projectDir 'build\app\outputs\flutter-apk\app-arm64-v8a-release.apk'
+            $arm32Apk = Join-Path $projectDir 'build\app\outputs\flutter-apk\app-armeabi-v7a-release.apk'
             if (-not (Test-Path -LiteralPath $arm64Apk -PathType Leaf)) {
                 throw "Missing $arm64Apk"
             }
+            if (-not (Test-Path -LiteralPath $arm32Apk -PathType Leaf)) {
+                throw "Missing $arm32Apk"
+            }
             $sizeMb = [math]::Round((Get-Item $arm64Apk).Length / 1MB, 2)
+            $size32Mb = [math]::Round((Get-Item $arm32Apk).Length / 1MB, 2)
             $metrics['arm64 APK size (MB)'] = $sizeMb
+            $metrics['armeabi-v7a APK size (MB)'] = $size32Mb
             if ($sizeMb -gt 110) {
                 throw "arm64 APK exceeds 110 MB limit: $sizeMb MB"
             }
             $aapt2 = Find-LatestBuildTool 'aapt2'
             if ($null -ne $aapt2) {
-                $perms = & $aapt2 dump permissions $arm64Apk 2>&1
-                if ($perms -match 'INTERNET|ACCESS_NETWORK_STATE') {
-                    throw "Network permission found in release APK: $($perms -join '; ')"
+                foreach ($apkPath in @($arm64Apk, $arm32Apk)) {
+                    $perms = & $aapt2 dump permissions $apkPath 2>&1
+                    if ($perms -match 'INTERNET|ACCESS_NETWORK_STATE') {
+                        throw "Network permission found in release APK $apkPath`: $($perms -join '; ')"
+                    }
                 }
+                $badging64 = (& $aapt2 dump badging $arm64Apk 2>&1 | Select-String -Pattern "versionCode='(\d+)'.*?versionName='([^']+)'")
+                $badging32 = (& $aapt2 dump badging $arm32Apk 2>&1 | Select-String -Pattern "versionCode='(\d+)'.*?versionName='([^']+)'")
+                if ($null -ne $badging64 -and $null -ne $badging32) {
+                    $vc64 = [int]$badging64.Matches[0].Groups[1].Value
+                    $vc32 = [int]$badging32.Matches[0].Groups[1].Value
+                    $vn64 = $badging64.Matches[0].Groups[2].Value
+                    $metrics['Version codes'] = "v$vn64 (arm64=$vc64, armeabi-v7a=$vc32)"
+                    if ($vc32 -le 1 -or $vc64 -le $vc32) {
+                        throw "Invalid split version codes: arm64=$vc64, armeabi-v7a=$vc32"
+                    }
+                }
+            }
+            $apkanalyzer = Join-Path $sdkRoot 'cmdline-tools\latest\bin\apkanalyzer.bat'
+            if (Test-Path -LiteralPath $apkanalyzer -PathType Leaf) {
+                $pkgs = & $apkanalyzer dex packages $arm64Apk 2>&1
+                $banned = $pkgs | Select-String -Pattern 'com\.google\.firebase|com\.google\.android\.gms|com\.google\.mlkit|io\.sentry|com\.amplitude|com\.mixpanel|com\.google\.ads'
+                if ($null -ne $banned) {
+                    throw "Disallowed network/analytics/Play Services packages in DEX: $($banned -join '; ')"
+                }
+                $metrics['DEX packages audit'] = '0 Firebase/Play Services/analytics/ads classes'
             }
             $zipalign = Find-LatestBuildTool 'zipalign'
             if ($null -ne $zipalign) {
                 Invoke-Checked $zipalign @('-c', '-P', '16', '-v', '4', $arm64Apk) | Out-Null
+                Invoke-Checked $zipalign @('-c', '-P', '16', '-v', '4', $arm32Apk) | Out-Null
+            }
+            $readelf = Get-ChildItem (Join-Path $sdkRoot 'ndk') -Recurse -Filter 'llvm-readelf.exe' -ErrorAction SilentlyContinue | Select-Object -First 1
+            if ($null -ne $readelf) {
+                $soTemp = Join-Path $env:TEMP "rosid_so_check_$([guid]::NewGuid().ToString('N'))"
+                Add-Type -AssemblyName System.IO.Compression.FileSystem
+                $zip = [System.IO.Compression.ZipFile]::OpenRead($arm64Apk)
+                $soCount = 0
+                try {
+                    New-Item -ItemType Directory -Force -Path $soTemp | Out-Null
+                    foreach ($entry in $zip.Entries) {
+                        if ($entry.FullName -like 'lib/arm64-v8a/*.so') {
+                            $destSo = Join-Path $soTemp $entry.Name
+                            [System.IO.Compression.ZipFileExtensions]::ExtractToFile($entry, $destSo, $true)
+                            $ph = & $readelf.FullName -l $destSo 2>&1
+                            $loads = $ph | Select-String -Pattern '^\s*LOAD\s+'
+                            foreach ($l in $loads) {
+                                if ($l.Line -notmatch '0x4000\s*$' -and $l.Line -notmatch '0x10000\s*$') {
+                                    throw "ELF LOAD segment not 16 KB aligned in $($entry.FullName): $($l.Line)"
+                                }
+                            }
+                            $soCount++
+                        }
+                    }
+                } finally {
+                    $zip.Dispose()
+                    if (Test-Path $soTemp) { Remove-Item -Recurse -Force $soTemp }
+                }
+                $metrics['16 KB ELF LOAD check'] = "pass ($soCount arm64-v8a .so libs)"
             }
             $apksigner = Find-LatestBuildTool 'apksigner'
             if ($null -ne $apksigner) {
                 $sigOut = Invoke-Checked $apksigner @('verify', '--print-certs', $arm64Apk)
+                Invoke-Checked $apksigner @('verify', '--print-certs', $arm32Apk) | Out-Null
                 $shaLine = $sigOut | Select-String -Pattern 'SHA-256 digest:\s*([0-9a-fA-F]+)' | Select-Object -First 1
                 if ($null -ne $shaLine) {
                     $metrics['Signing cert SHA-256'] = $shaLine.Matches[0].Groups[1].Value
                 }
             }
         }
-        Invoke-Step 'Random-input monkey test (5000 events)' {
+        Invoke-Step 'Release cold start and random-input monkey test (5000 events)' {
             $serial = $script:emuSerial
-            # Install arm64 or x86_64/universal debug-free release? Emulator is x86_64, so build x86_64 release for monkey if needed.
             $x86Apk = Join-Path $projectDir 'build\app\outputs\flutter-apk\app-x86_64-release.apk'
             Invoke-Checked $flutterBin @('--no-version-check', 'build', 'apk', '--release', '--target-platform', 'android-x64', '--obfuscate', '--split-debug-info=build/symbols-x64', '--tree-shake-icons') | Out-Null
             $releaseApk = Join-Path $projectDir 'build\app\outputs\flutter-apk\app-release.apk'
             if (Test-Path -LiteralPath $x86Apk) { $releaseApk = $x86Apk }
+            $prevPref = $ErrorActionPreference
+            $ErrorActionPreference = 'Continue'
+            try { & $adbBin -s $serial uninstall app.rosid.rosid 2>&1 | Out-Null } finally { $ErrorActionPreference = $prevPref }
             Invoke-Checked $adbBin @('-s', $serial, 'install', '-r', '-g', $releaseApk) | Out-Null
+            Start-Sleep -Seconds 1
+            $relLaunch = Invoke-Checked $adbBin @('-s', $serial, 'shell', 'am', 'start', '-W', '-n', 'app.rosid.rosid/.MainActivity')
+            $relTimeLine = $relLaunch | Select-String -Pattern 'TotalTime:\s*(\d+)' | Select-Object -First 1
+            if ($null -ne $relTimeLine) {
+                $relMs = [int]$relTimeLine.Matches[0].Groups[1].Value
+                $metrics['Release cold start (ms)'] = $relMs
+            }
             $monkeyOut = Invoke-Checked $adbBin @('-s', $serial, 'shell', 'monkey', '-p', 'app.rosid.rosid', '-s', '20261126', '--throttle', '10', '--pct-syskeys', '0', '5000')
             if (($monkeyOut -join "`n") -match 'CRASH|ANR|Monkey aborted') {
                 throw 'Monkey test detected crash or ANR'

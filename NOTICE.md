@@ -6,12 +6,13 @@ Rosid bundles the following openly licensed fonts, models, and libraries inside 
 
 - **Anek Bangla** (Regular, Medium, SemiBold, Bold) — SIL Open Font License 1.1 (OFL-1.1). Source: Google Fonts (`google/fonts`, `ofl/anekbangla`). Subsetted for Bangla, Latin, digits, and punctuation.
 - **Tiro Bangla** (Regular) — SIL Open Font License 1.1 (OFL-1.1). Source: Google Fonts (`google/fonts`, `ofl/tirobangla`). Subsetted for Bangla, Latin, digits, and punctuation.
+- **JetBrains Mono** (Regular, landing page only) — SIL Open Font License 1.1 (OFL-1.1). Source: `JetBrains/JetBrainsMono`. Subsetted to ASCII for the static landing page.
 
 ## OCR & Language Data
 
 - **PaddleOCR PP-OCRv5 Mobile Detection & English Mobile Recognition (`ppocr_v5_mobile_det.onnx`, `ppocr_v5_en_mobile_rec.onnx`, `ppocr_v5_en_dict.txt`)** — Apache License 2.0. Source: PaddlePaddle on Hugging Face (`PaddlePaddle/PP-OCRv5_mobile_det_onnx`, `PaddlePaddle/en_PP-OCRv5_mobile_rec_onnx`). See `assets/models/README.md` for SHA-256 checksums.
 - **ONNX Runtime (`flutter_onnxruntime`)** — MIT License.
-- **Tesseract traineddata (`eng.traineddata`, `ben.traineddata`)** — Apache License 2.0. Source: `tesseract-ocr/tessdata_best`.
+- **Tesseract traineddata (`ben.traineddata` from `tesseract-ocr/tessdata_best`, `eng.traineddata` from `tesseract-ocr/tessdata_fast`)** — Apache License 2.0.
 - **Tesseract4Android** (`cz.adaptech.tesseract4android:tesseract4android:4.8.0`) — Apache License 2.0.
 
 ## On-Device Translation
